@@ -1,95 +1,216 @@
-import { create } from 'zustand';
-import { clearAuthTokenCookie, readAuthTokenCookie, setAuthTokenCookie } from '@/utils/auth-cookie';
+import { create } from "zustand";
+
+import {
+  clearAuthTokenCookie,
+  readAuthTokenCookie,
+  setAuthTokenCookie,
+} from "@/utils/auth-cookie";
 
 const useAuthStore = create((set) => ({
-// State
-user: null,
-token: null,
-isLoading: false,
-error: null,
+  // STATE
+  user: null,
+  token: null,
+  isLoading: false,
+  error: null,
 
-// Actions
-setUser: (user) => set({ user }),
-setToken: (token) => set({ token }),
-setLoading: (isLoading) => set({ isLoading }),
-setError: (error) => set({ error }),
+  // ACTIONS
+  setUser: (user) => set({ user }),
 
-// Determine backend API base URL
-_apiBase: (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_API_URL) || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000',
+  setToken: (token) =>
+    set({ token }),
 
-// Login action
-login: async (email, password) => {
-set({ isLoading: true, error: null });
-try {
-const apiBase = useAuthStore.getState()._apiBase;
-const res = await fetch(${apiBase}/api/auth/login, {
-method: 'POST',
-headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({ email, password }),
-});
-const data = await res.json();
-if (!res.ok) throw new Error(data.message || 'Login failed');
+  setLoading: (isLoading) =>
+    set({ isLoading }),
 
-set({ user: data.user, token: data.token, isLoading: false });  
-  localStorage.setItem('token', data.token);  
-  setAuthTokenCookie(data.token);  
-} catch (error) {  
-  set({ error: error.message, isLoading: false });  
-}
+  setError: (error) =>
+    set({ error }),
 
-},
+  // API BASE
+  _apiBase:
+    process.env
+      .NEXT_PUBLIC_API_URL ||
+    "http://localhost:5000",
 
-// Register action
-register: async (email, password, name) => {
-set({ isLoading: true, error: null });
-try {
-const apiBase = useAuthStore.getState()._apiBase;
-const res = await fetch(${apiBase}/api/auth/register, {
-method: 'POST',
-headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({ email, password, name }),
-});
-const data = await res.json();
-if (!res.ok) throw new Error(data.message || 'Registration failed');
+  // LOGIN
+  login: async (
+    email,
+    password
+  ) => {
+    set({
+      isLoading: true,
+      error: null,
+    });
 
-set({ user: data.user, token: data.token, isLoading: false });  
-  localStorage.setItem('token', data.token);  
-  setAuthTokenCookie(data.token);  
-} catch (error) {  
-  set({ error: error.message, isLoading: false });  
-}
+    try {
+      const apiBase =
+        useAuthStore.getState()
+          ._apiBase;
 
-},
+      const res = await fetch(
+        `${apiBase}/api/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        }
+      );
 
-// Logout action
-logout: () => {
-set({ user: null, token: null });
-localStorage.removeItem('token');
-clearAuthTokenCookie();
-},
+      const data =
+        await res.json();
 
-// Load from localStorage on app start
-hydrate: () => {
-const token = localStorage.getItem('token') || readAuthTokenCookie();
-if (token) set({ token });
-if (token) setAuthTokenCookie(token);
-},
+      if (!res.ok) {
+        throw new Error(
+          data.message ||
+            "Login failed"
+        );
+      }
+
+      set({
+        user: data.user,
+        token: data.token,
+        isLoading: false,
+      });
+
+      localStorage.setItem(
+        "token",
+        data.token
+      );
+
+      setAuthTokenCookie(
+        data.token
+      );
+    } catch (error) {
+      set({
+        error: error.message,
+        isLoading: false,
+      });
+    }
+  },
+
+  // REGISTER
+  register: async (
+    email,
+    password,
+    name
+  ) => {
+    set({
+      isLoading: true,
+      error: null,
+    });
+
+    try {
+      const apiBase =
+        useAuthStore.getState()
+          ._apiBase;
+
+      const res = await fetch(
+        `${apiBase}/api/auth/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+            name,
+          }),
+        }
+      );
+
+      const data =
+        await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data.message ||
+            "Registration failed"
+        );
+      }
+
+      set({
+        user: data.user,
+        token: data.token,
+        isLoading: false,
+      });
+
+      localStorage.setItem(
+        "token",
+        data.token
+      );
+
+      setAuthTokenCookie(
+        data.token
+      );
+    } catch (error) {
+      set({
+        error: error.message,
+        isLoading: false,
+      });
+    }
+  },
+
+  // LOGOUT
+  logout: () => {
+    set({
+      user: null,
+      token: null,
+    });
+
+    localStorage.removeItem(
+      "token"
+    );
+
+    clearAuthTokenCookie();
+  },
+
+  // HYDRATE
+  hydrate: () => {
+    const token =
+      localStorage.getItem(
+        "token"
+      ) ||
+      readAuthTokenCookie();
+
+    if (token) {
+      set({ token });
+
+      setAuthTokenCookie(
+        token
+      );
+    }
+  },
 }));
 
 export default useAuthStore;
 
 export function getClientAuthToken() {
-if (typeof window === "undefined") {
-return null;
-}
+  if (
+    typeof window ===
+    "undefined"
+  ) {
+    return null;
+  }
 
-return (
-useAuthStore.getState().token ||
-localStorage.getItem("token") ||
-readAuthTokenCookie()
-);
+  return (
+    useAuthStore.getState()
+      .token ||
+    localStorage.getItem(
+      "token"
+    ) ||
+    readAuthTokenCookie()
+  );
 }
 
 export function isClientAuthenticated() {
-return Boolean(getClientAuthToken());
+  return Boolean(
+    getClientAuthToken()
+  );
 }

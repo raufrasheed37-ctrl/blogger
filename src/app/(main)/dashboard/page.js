@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import useAuthStore from '@/store/authstore';
-import { authAPI, blogAPI } from '@/utils/api';
-import { useEffect } from 'react';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import useAuthStore from "@/store/authstore";
+import { authAPI, blogAPI } from "@/utils/api";
 
 function AvatarMark({ initial = "D" }) {
   return (
@@ -59,9 +59,11 @@ function DashboardPostCard({ post }) {
           <p className="text-xs uppercase tracking-[0.18em] text-white/40">
             {post.category}
           </p>
+
           <h3 className="mt-2 text-lg font-semibold text-white">
             {post.title}
           </h3>
+
           <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/60">
             {post.excerpt}
           </p>
@@ -76,38 +78,72 @@ function DashboardPostCard({ post }) {
 }
 
 export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState("Activity");
-  const [authorPosts, setAuthorPosts] = useState([]);
-  const [postsLoading, setPostsLoading] = useState(false);
+  const router = useRouter();
 
-  const user = useAuthStore((s) => s.user);
-  const hydrate = useAuthStore((s) => s.hydrate);
+  const [activeTab, setActiveTab] =
+    useState("Activity");
 
+  const [authorPosts, setAuthorPosts] =
+    useState([]);
+
+  const [postsLoading, setPostsLoading] =
+    useState(false);
+
+  const user = useAuthStore(
+    (s) => s.user
+  );
+
+  const hydrate = useAuthStore(
+    (s) => s.hydrate
+  );
+
+  // PROTECT DASHBOARD
   useEffect(() => {
-    // Ensure token is loaded from storage
     hydrate();
 
-    // If token exists but user not loaded, fetch current user
-    const token = useAuthStore.getState().token || localStorage.getItem('token');
-    if (token && !useAuthStore.getState().user) {
+    const token =
+      localStorage.getItem("token");
+
+    if (!token) {
+      router.push("/login");
+    }
+  }, [hydrate, router]);
+
+  // LOAD USER
+  useEffect(() => {
+    const token =
+      localStorage.getItem("token");
+
+    if (token && !user) {
       (async () => {
         try {
-          const data = await authAPI.getMe();
+          const data =
+            await authAPI.getMe();
+
           if (data?.user) {
-            // Convert id to _id for consistency with frontend store
-            const userObj = { ...data.user, _id: data.user.id || data.user._id };
-            useAuthStore.getState().setUser(userObj);
+            const userObj = {
+              ...data.user,
+              _id:
+                data.user.id ||
+                data.user._id,
+            };
+
+            useAuthStore
+              .getState()
+              .setUser(userObj);
           }
         } catch (err) {
-          // ignore — user will see defaults
-          console.debug('Failed to fetch current user', err?.message || err);
+          console.log(err);
         }
       })();
     }
-  }, [hydrate]);
+  }, [user]);
 
+  // LOAD USER POSTS
   useEffect(() => {
-    const authorId = user?._id || user?.id;
+    const authorId =
+      user?._id || user?.id;
+
     if (!authorId) {
       return;
     }
@@ -118,15 +154,23 @@ export default function DashboardPage() {
       setPostsLoading(true);
 
       try {
-        const response = await blogAPI.getByAuthor(authorId);
-        const livePosts = Array.isArray(response?.posts) ? response.posts : [];
+        const response =
+          await blogAPI.getByAuthor(
+            authorId
+          );
+
+        const livePosts =
+          Array.isArray(
+            response?.posts
+          )
+            ? response.posts
+            : [];
 
         if (!cancelled) {
           setAuthorPosts(livePosts);
         }
       } catch (error) {
         if (!cancelled) {
-          console.debug('Failed to load dashboard posts', error?.message || error);
           setAuthorPosts([]);
         }
       } finally {
@@ -141,192 +185,93 @@ export default function DashboardPage() {
     };
   }, [user?._id, user?.id]);
 
+  // PREVENT OLD USER FLASH
+  if (!user) {
+    return null;
+  }
+
   const tabs = [
-    { label: "Activity", count: null },
-    { label: "Posts", count: authorPosts.length },
-    { label: "Likes", count: null },
-    { label: "Reads", count: 0 },
+    {
+      label: "Activity",
+      count: null,
+    },
+    {
+      label: "Posts",
+      count:
+        authorPosts.length,
+    },
+    {
+      label: "Likes",
+      count: null,
+    },
+    {
+      label: "Reads",
+      count: 0,
+    },
   ];
 
-  const displayName = user?.name || 'User';
-  const username = user?.email ? `@${user.email.split('@')[0]}` : `@${(user?.name || 'user').toLowerCase().replace(/\s+/g, '')}`;
-  const initial = (user?.name?.[0] || 'U').toUpperCase();
+  const displayName =
+    user?.name || "User";
+
+  const username =
+    user?.email
+      ? `@${
+          user.email.split("@")[0]
+        }`
+      : `@${
+          (
+            user?.name ||
+            "user"
+          )
+            .toLowerCase()
+            .replace(/\s+/g, "")
+        }`;
+
+  const initial = (
+    user?.name?.[0] || "U"
+  ).toUpperCase();
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#0f1115] px-4 py-8 text-white sm:px-6 lg:px-8 lg:py-10">
-      
+
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,106,0,0.12),transparent_34%),radial-gradient(circle_at_80%_0%,rgba(255,255,255,0.06),transparent_30%),linear-gradient(to_bottom,rgba(255,255,255,0.02),transparent_36%)]" />
 
       <div className="relative mx-auto flex w-full max-w-5xl flex-col items-center">
+
         <section className="w-full rounded-4xl border border-white/8 bg-white/3 px-5 py-6 shadow-[0_20px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:px-8 sm:py-8">
+
           <div className="flex flex-col items-center gap-5 text-center">
+
             <AvatarMark initial={initial} />
 
             <div className="space-y-2">
+
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/4 px-3 py-1 text-xs font-medium text-white/80">
+
                 {displayName}
+
               </div>
-              <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{displayName}</h1>
-              <p className="text-sm text-white/60">{username}</p>
-              <p className="text-sm text-white/70">{user?.subscribers ?? 0} subscribers</p>
+
+              <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+
+                {displayName}
+
+              </h1>
+
+              <p className="text-sm text-white/60">
+
+                {username}
+
+              </p>
+
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              <Link
-                href="/blog/create"
-                className="inline-flex items-center gap-2 rounded-full bg-[#ff6a00] px-5 py-3 text-sm font-semibold text-black transition hover:brightness-110"
-              >
-                Create
-                <ChevronDownIcon />
-              </Link>
-
-              <Link href="/contact">
-                <button
-                  type="button"
-                  className="rounded-full border border-white/10 bg-white/4 px-5 py-3 text-sm font-medium text-white/90 transition hover:bg-white/7"
-                >
-                  Edit profile
-                </button>
-              </Link>
-
-              <button
-                type="button"
-                aria-label="More options"
-                className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/4 transition hover:bg-white/7"
-              >
-                <MoreIcon />
-              </button>
-            </div>
           </div>
+
         </section>
 
-        <nav className="mt-6 flex w-full items-center justify-center overflow-x-auto border-b border-white/10 pb-1 text-sm text-white/60">
-          <div className="flex min-w-max gap-2 sm:gap-6">
-            {tabs.map((tab) => {
-              const isActive = activeTab === tab.label;
-
-              return (
-                <button
-                  key={tab.label}
-                  type="button"
-                  onClick={() => setActiveTab(tab.label)}
-                  className={`relative rounded-t-xl px-3 py-3 font-medium transition sm:px-4 ${
-                    isActive ? "text-white" : "text-white/55 hover:text-white/80"
-                  }`}
-                >
-                  <span className="inline-flex items-center gap-1.5">
-                    {tab.label}
-                    {tab.count ? <span className="text-xs text-white/45">({tab.count})</span> : null}
-                  </span>
-                  <span
-                    className={`absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-[#ff6a00] transition-opacity ${
-                      isActive ? "opacity-100" : "opacity-0"
-                    }`}
-                  />
-                </button>
-              );
-            })}
-          </div>
-        </nav>
-
-        <section className="mt-6 w-full max-w-3xl rounded-4xl border border-white/8 bg-[#151922] px-4 py-4 shadow-[0_18px_60px_rgba(0,0,0,0.24)] sm:px-5 sm:py-5">
-          <div className="flex items-start gap-3">
-            <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-orange-400 to-amber-500 text-sm font-semibold text-black shadow-[0_10px_30px_rgba(255,106,0,0.25)]">
-              {initial}
-            </div>
-
-            <textarea
-              aria-label="What’s on your mind?"
-              placeholder="What’s on your mind?"
-              rows={3}
-              className="min-h-20 w-full resize-none rounded-2xl border border-white/8 bg-white/3 px-4 py-3 text-sm text-white/90 outline-none transition placeholder:text-white/35 focus:border-orange-400/50 focus:bg-white/5"
-            />
-          </div>
-        </section>
-
-        {activeTab === "Posts" ? (
-          <section className="mt-8 w-full max-w-3xl space-y-4 rounded-4xl border border-white/8 bg-[#141821] px-6 py-6 shadow-[0_18px_60px_rgba(0,0,0,0.24)] sm:px-8 sm:py-8">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <h2 className="text-xl font-semibold tracking-tight text-white sm:text-2xl">
-                  Your posts
-                </h2>
-                <p className="mt-1 text-sm text-white/55">
-                  Posts you&apos;ve published from the create page.
-                </p>
-              </div>
-
-              <Link
-                href="/blog/create"
-                className="inline-flex items-center rounded-full border border-white/12 bg-white/3 px-4 py-2 text-sm font-medium text-white/90 transition hover:border-orange-400/40 hover:bg-white/6"
-              >
-                New post
-              </Link>
-            </div>
-
-            {postsLoading ? (
-              <p className="py-10 text-center text-sm text-white/55">Loading your posts...</p>
-            ) : authorPosts.length > 0 ? (
-              <div className="space-y-4">
-                {authorPosts.map((post) => (
-                  <DashboardPostCard
-                    key={post._id || post.id || post.slug}
-                    post={{
-                      slug: post.slug || post._id,
-                      title: post.title,
-                      excerpt: post.excerpt || "",
-                      category: post.tags?.[0] || "General",
-                      published: post.published,
-                    }}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="flex h-20 w-20 items-center justify-center rounded-full border border-white/8 bg-white/3 shadow-[0_12px_40px_rgba(0,0,0,0.2)]">
-                  <PencilNoteIcon />
-                </div>
-
-                <h2 className="mt-6 text-xl font-semibold tracking-tight text-white sm:text-2xl">
-                  You haven&apos;t published anything yet.
-                </h2>
-
-                <p className="mt-2 text-sm leading-6 text-white/55 sm:text-base">
-                  Get started by creating a note.
-                </p>
-
-                <Link
-                  href="/blog/create"
-                  className="mt-8 inline-flex items-center rounded-full border border-white/12 bg-white/3 px-5 py-3 text-sm font-medium text-white/90 transition hover:border-orange-400/40 hover:bg-white/6"
-                >
-                  Create a note
-                </Link>
-              </div>
-            )}
-          </section>
-        ) : (
-          <section className="mt-8 flex w-full max-w-3xl flex-col items-center rounded-4xl border border-white/8 bg-[#141821] px-6 py-14 text-center shadow-[0_18px_60px_rgba(0,0,0,0.24)] sm:px-10 sm:py-16">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full border border-white/8 bg-white/3 shadow-[0_12px_40px_rgba(0,0,0,0.2)]">
-              <PencilNoteIcon />
-            </div>
-
-            <h2 className="mt-6 text-xl font-semibold tracking-tight text-white sm:text-2xl">
-              You haven&apos;t published anything yet.
-            </h2>
-
-            <p className="mt-2 text-sm leading-6 text-white/55 sm:text-base">
-              Get started by creating a note.
-            </p>
-
-            <Link
-              href="/blog/create"
-              className="mt-8 inline-flex items-center rounded-full border border-white/12 bg-white/3 px-5 py-3 text-sm font-medium text-white/90 transition hover:border-orange-400/40 hover:bg-white/6"
-            >
-              Create a note
-            </Link>
-          </section>
-        )}
       </div>
+
     </main>
   );
 }

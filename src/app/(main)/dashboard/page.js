@@ -51,7 +51,7 @@ d="M17.9 3.7a2.6 2.6 0 0 1 3.7 3.7L10.8 17.9a4 4 0 0 1-1.7 1.04l-3.76 1.25a.85.8
 function DashboardPostCard({ post }) {
 return (
 <Link
-href={/blog/${post.slug}}
+ href={`/blog/${post.slug}`}
 className="block rounded-3xl border border-white/10 bg-white/4 p-5 transition hover:border-orange-400/30 hover:bg-white/6"
 >
 <div className="flex items-start justify-between gap-4">
@@ -152,7 +152,15 @@ const tabs = [
 ];
 
 const displayName = user?.name || 'User';
-const username = user?.email ? @${user.email.split('@')[0]} : @${(user?.name || 'user').toLowerCase().replace(/\s+/g, '')};
+
+     const username =
+  user?.email
+    ? `@${user.email.split("@")[0]}`
+    : `@${(
+        user?.name || "user"
+      )
+        .toLowerCase()
+        .replace(/\s+/g, "")}`; 
 const initial = (user?.name?.[0] || 'U').toUpperCase();
 
 return (

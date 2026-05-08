@@ -67,26 +67,66 @@ const useAuthStore = create((set) => ({
   },
 
   // Load from localStorage on app start
-  hydrate: () => {
-    const token = localStorage.getItem('token') || readAuthTokenCookie();
-    if (token) set({ token });
-    if (token) setAuthTokenCookie(token);
-  },
-}));
+  hydrate: async () => {
+  const token =
+    localStorage.getItem("token") ||
+    readAuthTokenCookie();
 
-export default useAuthStore;
+  if (!token) {
+    set({
+      user: null,
+      token: null,
+    });
 
-export function getClientAuthToken() {
-  if (typeof window === "undefined") {
-    return null;
+    return;
   }
 
-  return (
-    useAuthStore.getState().token ||
-    localStorage.getItem("token") ||
-    readAuthTokenCookie()
-  );
-}
+  set({
+    token,
+  });
+
+  setAuthTokenCookie(token);
+
+  try {
+    const apiBase =
+      useAuthStore.getState()
+        ._apiBase;
+
+    const res = await fetch(
+      `${apiBase}/api/auth/me`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const user =
+      await res.json();
+
+    if (!res.ok) {
+      throw new Error(
+        "Invalid session"
+      );
+    }
+
+    set({
+      user,
+      token,
+    });
+  } catch (error) {
+    localStorage.removeItem(
+      "token"
+    );
+
+    clearAuthTokenCookie();
+
+    set({
+      user: null,
+      token: null,
+    });
+  }
+},
 
 export function isClientAuthenticated() {
   return Boolean(getClientAuthToken());

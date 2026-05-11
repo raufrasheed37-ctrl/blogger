@@ -366,7 +366,13 @@ export default function CreatePostPage() {
       const nextSlug = created?.slug || created?._id || created?.id;
 
       if (nextSlug) {
-        router.push(`/blog/${nextSlug}`);
+        // Redirect to success/published page with post data
+        const params = new URLSearchParams({
+          slug: nextSlug,
+          title: payloadTitle,
+          excerpt: payloadExcerpt,
+        });
+        router.push(`/blog/published?${params.toString()}`);
         return;
       }
 

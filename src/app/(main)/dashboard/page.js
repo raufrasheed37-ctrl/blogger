@@ -7,327 +7,338 @@ import useAuthStore from '@/store/authstore';
 import { authAPI, blogAPI } from '@/utils/api';
 import { useEffect } from 'react';
 
-function AvatarMark({ initial = "D" }) {
-  return (
-    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-linear-to-br from-orange-400 via-amber-500 to-rose-500 p-0.5 shadow-[0_18px_60px_rgba(255,106,0,0.25)]">
-      <div className="flex h-full w-full items-center justify-center rounded-full border border-white/10 bg-[#12161d] text-xl font-semibold text-white">
-        {initial}
-      </div>
-    </div>
-  );
-}
-
-function ChevronDownIcon() {
-  return (
-    <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4 text-black/80">
-      <path
-        fill="currentColor"
-        d="M5.2 7.2a1 1 0 0 1 1.4 0L10 10.6l3.4-3.4a1 1 0 1 1 1.4 1.4l-4.1 4.1a1 1 0 0 1-1.4 0L5.2 8.6a1 1 0 0 1 0-1.4Z"
-      />
-    </svg>
-  );
-}
-
-function MoreIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 text-white/70">
-      <circle cx="5" cy="12" r="1.7" fill="currentColor" />
-      <circle cx="12" cy="12" r="1.7" fill="currentColor" />
-      <circle cx="19" cy="12" r="1.7" fill="currentColor" />
-    </svg>
-  );
-}
-
-function PencilNoteIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-14 w-14 text-orange-400/90">
-      <path
-        fill="currentColor"
-        d="M17.9 3.7a2.6 2.6 0 0 1 3.7 3.7L10.8 17.9a4 4 0 0 1-1.7 1.04l-3.76 1.25a.85.85 0 0 1-1.08-1.08l1.25-3.76a4 4 0 0 1 1.04-1.7L17.9 3.7Zm1.3 1.2L7.9 16.2a2.4 2.4 0 0 0-.63 1.04l-.67 2.01 2.01-.67a2.4 2.4 0 0 0 1.04-.63L21.57 7.2a.9.9 0 0 0-1.27-1.27Z"
-      />
-    </svg>
-  );
-}
-
-function DashboardPostCard({ post }) {
-  return (
-    <Link
-      href={`/blog/${post.slug}`}
-      className="block rounded-3xl border border-white/10 bg-white/4 p-5 transition hover:border-orange-400/30 hover:bg-white/6"
-    >
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <p className="text-xs uppercase tracking-[0.18em] text-white/40">
-            {post.category}
-          </p>
-          <h3 className="mt-2 text-lg font-semibold text-white">
-            {post.title}
-          </h3>
-          <p className="mt-2 line-clamp-2 text-sm leading-6 text-white/60">
-            {post.excerpt}
-          </p>
-        </div>
-
-        <span className="shrink-0 rounded-full bg-white/6 px-3 py-1 text-xs text-white/60">
-          {post.published ? "Published" : "Draft"}
-        </span>
-      </div>
-    </Link>
-  );
-}
-
 export default function DashboardPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("Activity");
   const [authorPosts, setAuthorPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const user = useAuthStore((s) => s.user);
   const hydrate = useAuthStore((s) => s.hydrate);
+  const token = useAuthStore((s) => s.token);
+
+  const handleLogout = () => {
+    useAuthStore.getState().logout();
+    router.push("/login");
+  };
 
   useEffect(() => {
-    // Ensure token is loaded from storage
     hydrate();
 
-    // If token exists but user not loaded, fetch current user
-    const token = useAuthStore.getState().token || localStorage.getItem('token');
-    if (token && !useAuthStore.getState().user) {
+    const currentToken = useAuthStore.getState().token || localStorage.getItem('token');
+    if (currentToken && !useAuthStore.getState().user) {
       (async () => {
         try {
           const data = await authAPI.getMe();
           if (data?.user) {
-            // Convert id to _id for consistency with frontend store
             const userObj = { ...data.user, _id: data.user.id || data.user._id };
             useAuthStore.getState().setUser(userObj);
           }
         } catch (err) {
-          // ignore — user will see defaults
           console.debug('Failed to fetch current user', err?.message || err);
         }
       })();
     }
   }, [hydrate]);
 
-useEffect(() => {
-const authorId = user?._id || user?.id;
-if (!authorId) {
-return;
-}
+  useEffect(() => {
+    const authorId = user?._id || user?.id;
+    if (!authorId) {
+      return;
+    }
 
-let cancelled = false;  
+    let cancelled = false;
 
-(async () => {  
-  setPostsLoading(true);  
+    (async () => {
+      setPostsLoading(true);
 
-  try {  
-    const response = await blogAPI.getByAuthor(authorId);  
-    const livePosts = Array.isArray(response?.posts) ? response.posts : [];  
+      try {
+        const response = await blogAPI.getByAuthor(authorId);
+        const livePosts = Array.isArray(response?.posts) ? response.posts : [];
 
-    if (!cancelled) {  
-      setAuthorPosts(livePosts);  
-    }  
-  } catch (error) {  
-    if (!cancelled) {  
-      console.debug('Failed to load dashboard posts', error?.message || error);  
-      setAuthorPosts([]);  
-    }  
-  } finally {  
-    if (!cancelled) {  
-      setPostsLoading(false);  
-    }  
-  }  
-})();  
+        if (!cancelled) {
+          setAuthorPosts(livePosts);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.debug('Failed to load dashboard posts', error?.message || error);
+          setAuthorPosts([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setPostsLoading(false);
+        }
+      }
+    })();
 
     return () => {
       cancelled = true;
     };
   }, [user?._id, user?.id]);
 
+  const getDisplayName = (u) => {
+    const name = u?.name;
+    if (name && typeof name === 'string' && name.trim()) return name.trim();
+
+    const email = u?.email;
+    if (email && typeof email === 'string' && email.includes('@')) {
+      const local = email.split('@')[0] || 'user';
+      return local
+        .replace(/[._-]+/g, ' ')
+        .split(' ')
+        .filter(Boolean)
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
+    }
+
+    return 'User';
+  };
+
+  const getUsername = (u) => {
+    if (u?.email && typeof u.email === 'string') {
+      const local = u.email.split('@')[0] || 'user';
+      return `@${local}`.replace(/\s+/g, '');
+    }
+
+    const name = typeof u?.name === 'string' ? u.name : '';
+    const slug = name
+      .toLowerCase()
+      .replace(/\s+/g, '')
+      .replace(/[^a-z0-9@._-]/g, '') || 'user';
+    return `@${slug}`;
+  };
+
+  const displayName = user ? getDisplayName(user) : 'User';
+  const username = user ? getUsername(user) : '@user';
+  const initial = (displayName?.[0] || 'U').toUpperCase();
+
   const tabs = [
-    { label: "Activity", count: null },
-    { label: "Posts", count: authorPosts.length },
-    { label: "Likes", count: null },
-    { label: "Reads", count: 0 },
+    { label: "Activity", icon: "📊" },
+    { label: "Posts", icon: "✍️", count: authorPosts.length },
+    { label: "Likes", icon: "❤️" },
+    { label: "Reads", icon: "👁️" },
   ];
 
-  const displayName = user?.name || 'User';
-  const username = user?.email ? `@${user.email.split('@')[0]}` : `@${(user?.name || 'user').toLowerCase().replace(/\s+/g, '')}`;
-  const initial = (user?.name?.[0] || 'U').toUpperCase();
+  const stats = [
+    { label: "Total Reads", value: "0", icon: "📖" },
+    { label: "Subscribers", value: user?.subscribers ?? 0, icon: "👥" },
+    { label: "Posts", value: authorPosts.length, icon: "📝" },
+    { label: "Likes Received", value: "0", icon: "♥️" },
+  ];
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#0f1115] px-4 py-8 text-white sm:px-6 lg:px-8 lg:py-10">
-      
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,106,0,0.12),transparent_34%),radial-gradient(circle_at_80%_0%,rgba(255,255,255,0.06),transparent_30%),linear-gradient(to_bottom,rgba(255,255,255,0.02),transparent_36%)]" />
+    <div className="min-h-screen bg-[#0d0d14] text-[#f0eeff] overflow-hidden">
+      {/* Background glow effects */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-20 left-1/4 w-96 h-96 bg-[#7c6ff7]/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-[#7c6ff7]/5 rounded-full blur-3xl" />
+      </div>
 
-      <div className="relative mx-auto flex w-full max-w-5xl flex-col items-center">
-        <section className="w-full rounded-4xl border border-white/8 bg-white/3 px-5 py-6 shadow-[0_20px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:px-8 sm:py-8">
-          <div className="flex flex-col items-center gap-5 text-center">
-            <AvatarMark initial={initial} />
-
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/4 px-3 py-1 text-xs font-medium text-white/80">
-                {displayName}
-              </div>
-              <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{displayName}</h1>
-              <p className="text-sm text-white/60">{username}</p>
-              <p className="text-sm text-white/70">{user?.subscribers ?? 0} subscribers</p>
+      <div className="relative z-10 flex h-screen">
+        {/* Sidebar */}
+        <aside className={`fixed md:sticky top-0 left-0 h-screen w-64 bg-[#141420] border-r border-[#2a2740] p-6 flex flex-col transition-transform md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2 mb-12">
+            <div className="w-10 h-10 rounded-lg bg-linear-to-br from-[#7c6ff7] to-[#a89cf7] flex items-center justify-center text-xl font-bold">
+              ⚡
             </div>
+            <span className="text-2xl font-bold">Pulse<span className="text-[#7c6ff7]">.</span></span>
+          </Link>
 
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              <Link
-                href="/blog/create"
-                className="inline-flex items-center gap-2 rounded-full bg-[#ff6a00] px-5 py-3 text-sm font-semibold text-black transition hover:brightness-110"
-              >
-                Create
-                <ChevronDownIcon />
+          {/* Navigation */}
+          <nav className="flex-1 space-y-2 mb-8">
+            {[
+              { label: "Home", icon: "🏠", href: "/" },
+              { label: "Activity", icon: "📊", href: "/activity" },
+              { label: "Explore", icon: "🔍", href: "/explore" },
+              { label: "Profile", icon: "👤", href: "/dashboard", active: true },
+            ].map((item) => (
+              <Link key={item.label} href={item.href} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition ${item.active ? 'bg-[#7c6ff7]/20 border border-[#7c6ff7]/50 text-[#a89cf7]' : 'text-[#9490b8] hover:text-[#f0eeff] hover:bg-[#1c1c2e]'}`}>
+                <span className="text-lg">{item.icon}</span>
+                <span className="font-medium">{item.label}</span>
               </Link>
+            ))}
+          </nav>
 
-              <Link href="/contact">
-                <button
-                  type="button"
-                  className="rounded-full border border-white/10 bg-white/4 px-5 py-3 text-sm font-medium text-white/90 transition hover:bg-white/7"
-                >
-                  Edit profile
-                </button>
-              </Link>
+          {/* Bottom Actions */}
+          <div className="space-y-3">
+            <Link href="/blog/create" className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-linear-to-r from-[#7c6ff7] to-[#a89cf7] text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-[#7c6ff7]/30 transition">
+              <span>✨</span> Create
+            </Link>
+            <button onClick={handleLogout} className="w-full px-4 py-3 border border-[#2a2740] hover:border-[#7c6ff7]/50 text-[#9490b8] hover:text-[#f0eeff] rounded-xl font-medium transition hover:bg-[#1c1c2e]">
+              Logout
+            </button>
+          </div>
 
-              <button
-                type="button"
-                aria-label="More options"
-                className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/4 transition hover:bg-white/7"
-              >
-                <MoreIcon />
+          {/* Close button on mobile */}
+          <button onClick={() => setSidebarOpen(false)} className="md:hidden absolute top-6 right-6 text-[#9490b8] hover:text-[#f0eeff]">
+            ✕
+          </button>
+        </aside>
+
+        {/* Mobile overlay */}
+        {sidebarOpen && <div onClick={() => setSidebarOpen(false)} className="md:hidden fixed inset-0 bg-black/50 z-30" />}
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="max-w-6xl mx-auto p-6 md:p-8 space-y-8">
+            {/* Header with mobile menu toggle */}
+            <div className="flex items-center justify-between">
+              <button onClick={() => setSidebarOpen(true)} className="md:hidden text-[#7c6ff7]">
+                ☰
               </button>
-            </div>
-          </div>
-        </section>
-
-        <nav className="mt-6 flex w-full items-center justify-center overflow-x-auto border-b border-white/10 pb-1 text-sm text-white/60">
-          <div className="flex min-w-max gap-2 sm:gap-6">
-            {tabs.map((tab) => {
-              const isActive = activeTab === tab.label;
-
-              return (
-                <button
-                  key={tab.label}
-                  type="button"
-                  onClick={() => setActiveTab(tab.label)}
-                  className={`relative rounded-t-xl px-3 py-3 font-medium transition sm:px-4 ${
-                    isActive ? "text-white" : "text-white/55 hover:text-white/80"
-                  }`}
-                >
-                  <span className="inline-flex items-center gap-1.5">
-                    {tab.label}
-                    {tab.count ? <span className="text-xs text-white/45">({tab.count})</span> : null}
-                  </span>
-                  <span
-                    className={`absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-[#ff6a00] transition-opacity ${
-                      isActive ? "opacity-100" : "opacity-0"
-                    }`}
-                  />
-                </button>
-              );
-            })}
-          </div>
-        </nav>
-
-        <section className="mt-6 w-full max-w-3xl rounded-4xl border border-white/8 bg-[#151922] px-4 py-4 shadow-[0_18px_60px_rgba(0,0,0,0.24)] sm:px-5 sm:py-5">
-          <div className="flex items-start gap-3">
-            <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-orange-400 to-amber-500 text-sm font-semibold text-black shadow-[0_10px_30px_rgba(255,106,0,0.25)]">
-              {initial}
+              <h1 className="text-3xl font-bold">Dashboard</h1>
+              <div className="w-10 h-10" />
             </div>
 
-            <textarea
-              aria-label="What’s on your mind?"
-              placeholder="What’s on your mind?"
-              rows={3}
-              className="min-h-20 w-full resize-none rounded-2xl border border-white/8 bg-white/3 px-4 py-3 text-sm text-white/90 outline-none transition placeholder:text-white/35 focus:border-orange-400/50 focus:bg-white/5"
-            />
-          </div>
-        </section>
-
-        {activeTab === "Posts" ? (
-          <section className="mt-8 w-full max-w-3xl space-y-4 rounded-4xl border border-white/8 bg-[#141821] px-6 py-6 shadow-[0_18px_60px_rgba(0,0,0,0.24)] sm:px-8 sm:py-8">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <h2 className="text-xl font-semibold tracking-tight text-white sm:text-2xl">
-                  Your posts
-                </h2>
-                <p className="mt-1 text-sm text-white/55">
-                  Posts you&apos;ve published from the create page.
-                </p>
-              </div>
-
-              <Link
-                href="/blog/create"
-                className="inline-flex items-center rounded-full border border-white/12 bg-white/3 px-4 py-2 text-sm font-medium text-white/90 transition hover:border-orange-400/40 hover:bg-white/6"
-              >
-                New post
-              </Link>
-            </div>
-
-            {postsLoading ? (
-              <p className="py-10 text-center text-sm text-white/55">Loading your posts...</p>
-            ) : authorPosts.length > 0 ? (
-              <div className="space-y-4">
-                {authorPosts.map((post) => (
-                  <DashboardPostCard
-                    key={post._id || post.id || post.slug}
-                    post={{
-                      slug: post.slug || post._id,
-                      title: post.title,
-                      excerpt: post.excerpt || "",
-                      category: post.tags?.[0] || "General",
-                      published: post.published,
-                    }}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="flex h-20 w-20 items-center justify-center rounded-full border border-white/8 bg-white/3 shadow-[0_12px_40px_rgba(0,0,0,0.2)]">
-                  <PencilNoteIcon />
+            {/* Profile Banner */}
+            <section className="relative rounded-2xl bg-linear-to-br from-[#7c6ff7]/10 to-[#a89cf7]/5 border border-[#2a2740] p-8 overflow-hidden">
+              <div className="absolute top-0 right-0 w-96 h-96 bg-[#7c6ff7]/5 rounded-full blur-3xl -z-10" />
+              
+              <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
+                {/* Avatar */}
+                <div className="relative group">
+                  <div className="w-32 h-32 rounded-full bg-linear-to-br from-[#7c6ff7] to-[#a89cf7] p-1">
+                    <div className="w-full h-full rounded-full bg-[#0d0d14] flex items-center justify-center text-4xl font-bold text-[#7c6ff7] group-hover:text-[#a89cf7] transition">
+                      {initial}
+                    </div>
+                  </div>
                 </div>
 
-                <h2 className="mt-6 text-xl font-semibold tracking-tight text-white sm:text-2xl">
-                  You haven&apos;t published anything yet.
-                </h2>
+                {/* Profile Info */}
+                <div className="flex-1 text-center md:text-left">
+                  <p className="text-[#9490b8] text-sm font-semibold uppercase tracking-wider mb-2">Creator Profile</p>
+                  <h2 className="text-4xl font-bold mb-2">{displayName}</h2>
+                  <p className="text-[#a89cf7] text-lg mb-4">{username}</p>
+                  <p className="text-[#9490b8] mb-6">{user?.subscribers ?? 0} subscribers</p>
 
-                <p className="mt-2 text-sm leading-6 text-white/55 sm:text-base">
-                  Get started by creating a note.
-                </p>
-
-                <Link
-                  href="/blog/create"
-                  className="mt-8 inline-flex items-center rounded-full border border-white/12 bg-white/3 px-5 py-3 text-sm font-medium text-white/90 transition hover:border-orange-400/40 hover:bg-white/6"
-                >
-                  Create a note
-                </Link>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Link href="/blog/create" className="px-6 py-2 bg-linear-to-r from-[#7c6ff7] to-[#a89cf7] text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-[#7c6ff7]/30 transition">
+                      Create Post
+                    </Link>
+                    <Link href="/contact" className="px-6 py-2 border border-[#2a2740] text-[#9490b8] rounded-lg font-semibold hover:border-[#7c6ff7]/50 hover:text-[#f0eeff] hover:bg-[#1c1c2e] transition">
+                      Edit Profile
+                    </Link>
+                  </div>
+                </div>
               </div>
-            )}
-          </section>
-        ) : (
-          <section className="mt-8 flex w-full max-w-3xl flex-col items-center rounded-4xl border border-white/8 bg-[#141821] px-6 py-14 text-center shadow-[0_18px_60px_rgba(0,0,0,0.24)] sm:px-10 sm:py-16">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full border border-white/8 bg-white/3 shadow-[0_12px_40px_rgba(0,0,0,0.2)]">
-              <PencilNoteIcon />
+            </section>
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {stats.map((stat, idx) => (
+                <div key={idx} className="rounded-xl bg-[#141420] border border-[#2a2740] p-6 hover:border-[#7c6ff7]/50 transition group">
+                  <p className="text-[#9490b8] text-sm font-medium mb-2">{stat.label}</p>
+                  <p className="text-3xl font-bold text-[#f0eeff] group-hover:text-[#7c6ff7] transition">{stat.value}</p>
+                  <div className="text-3xl mt-3 opacity-50 group-hover:opacity-100 transition">{stat.icon}</div>
+                </div>
+              ))}
             </div>
 
-            <h2 className="mt-6 text-xl font-semibold tracking-tight text-white sm:text-2xl">
-              You haven&apos;t published anything yet.
-            </h2>
+            {/* Tabs */}
+            <div className="flex gap-1 border-b border-[#2a2740] overflow-x-auto">
+              {tabs.map((tab) => {
+                const isActive = activeTab === tab.label;
+                return (
+                  <button key={tab.label} onClick={() => setActiveTab(tab.label)} className={`relative px-4 py-3 font-medium text-sm transition whitespace-nowrap ${
+                    isActive 
+                      ? 'text-[#7c6ff7] border-b-2 border-[#7c6ff7]' 
+                      : 'text-[#9490b8] hover:text-[#f0eeff]'
+                  }`}>
+                    <span className="flex items-center gap-2">
+                      {tab.icon}
+                      {tab.label}
+                      {tab.count !== undefined && <span className="text-xs text-[#9490b8]">({tab.count})</span>}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
-            <p className="mt-2 text-sm leading-6 text-white/55 sm:text-base">
-              Get started by creating a note.
-            </p>
+            {/* Post Composer */}
+            {activeTab === "Activity" && (
+              <section className="rounded-xl bg-[#141420] border border-[#2a2740] p-6">
+                <div className="flex gap-4">
+                  <div className="w-12 h-12 rounded-full bg-linear-to-br from-[#7c6ff7] to-[#a89cf7] flex items-center justify-center font-bold text-white shrink-0">
+                    {initial}
+                  </div>
+                  <textarea
+                    placeholder="What's on your mind?"
+                    rows={4}
+                    className="flex-1 bg-[#1c1c2e] border border-[#2a2740] rounded-lg px-4 py-3 text-[#f0eeff] placeholder-[#9490b8] outline-none focus:border-[#7c6ff7] focus:ring-1 focus:ring-[#7c6ff7]/50 resize-none transition"
+                  />
+                </div>
+              </section>
+            )}
 
-            <Link
-              href="/blog/create"
-              className="mt-8 inline-flex items-center rounded-full border border-white/12 bg-white/3 px-5 py-3 text-sm font-medium text-white/90 transition hover:border-orange-400/40 hover:bg-white/6"
-            >
-              Create a note
-            </Link>
-          </section>
-        )}
+            {/* Posts Section */}
+            {activeTab === "Posts" && (
+              <section className="space-y-4">
+                {postsLoading ? (
+                  <div className="text-center py-12 text-[#9490b8]">Loading posts...</div>
+                ) : authorPosts.length > 0 ? (
+                  <div className="space-y-4">
+                    {authorPosts.map((post) => (
+                      <Link key={post._id || post.id || post.slug} href={`/blog/${post.slug}`} className="block rounded-xl bg-[#141420] border border-[#2a2740] p-6 hover:border-[#7c6ff7]/50 hover:bg-[#1c1c2e] transition group">
+                        <div className="flex items-start gap-4">
+                          {/* Icon */}
+                          <div className="w-16 h-16 rounded-lg bg-linear-to-br from-[#7c6ff7]/20 to-[#a89cf7]/20 border border-[#2a2740] flex items-center justify-center text-2xl shrink-0 group-hover:from-[#7c6ff7]/30 group-hover:to-[#a89cf7]/30 transition">
+                            📄
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="px-2 py-1 bg-[#7c6ff7]/20 border border-[#7c6ff7]/50 text-[#a89cf7] text-xs font-semibold rounded">
+                                {post.tags?.[0] || "General"}
+                              </span>
+                              <span className="text-xs text-[#9490b8]">{post.published ? "Published" : "Draft"}</span>
+                            </div>
+                            <h3 className="text-lg font-bold text-[#f0eeff] group-hover:text-[#7c6ff7] transition line-clamp-1">
+                              {post.title}
+                            </h3>
+                            <p className="text-[#9490b8] text-sm mt-1 line-clamp-2">
+                              {post.excerpt || "No description"}
+                            </p>
+                            <div className="flex items-center gap-4 mt-3 text-xs text-[#9490b8]">
+                              <span>📅 {new Date(post.createdAt).toLocaleDateString()}</span>
+                              <span>⏱️ 5 min read</span>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                            <button className="p-2 hover:bg-[#1c1c2e] rounded-lg text-[#9490b8] hover:text-[#f0eeff]">❤️</button>
+                            <button className="p-2 hover:bg-[#1c1c2e] rounded-lg text-[#9490b8] hover:text-[#f0eeff]">💬</button>
+                            <button className="p-2 hover:bg-[#1c1c2e] rounded-lg text-[#9490b8] hover:text-[#f0eeff]">↗️</button>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-xl bg-[#141420] border border-[#2a2740] p-12 text-center">
+                    <p className="text-4xl mb-4">✍️</p>
+                    <h3 className="text-xl font-bold text-[#f0eeff] mb-2">No posts yet</h3>
+                    <p className="text-[#9490b8] mb-6">Start creating your first post to see it here</p>
+                    <Link href="/blog/create" className="inline-block px-6 py-2 bg-linear-to-r from-[#7c6ff7] to-[#a89cf7] text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-[#7c6ff7]/30 transition">
+                      Create First Post
+                    </Link>
+                  </div>
+                )}
+              </section>
+            )}
+
+            {/* Likes & Reads placeholder */}
+            {(activeTab === "Likes" || activeTab === "Reads") && (
+              <div className="rounded-xl bg-[#141420] border border-[#2a2740] p-12 text-center">
+                <p className="text-4xl mb-4">{activeTab === "Likes" ? "❤️" : "👁️"}</p>
+                <h3 className="text-xl font-bold text-[#f0eeff] mb-2">Coming soon</h3>
+                <p className="text-[#9490b8]">{activeTab} tracking will appear here</p>
+              </div>
+            )}
+          </div>
+        </main>
       </div>
-    </main>
+    </div>
   );
 }

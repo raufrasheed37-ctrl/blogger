@@ -6,11 +6,14 @@ import useAuthStore from "@/store/authstore";
 import { getLoginRedirect } from "@/utils/auth";
 import { isClientAuthenticated } from "@/store/authstore";
 import CommentSection from "@/components/CommentSection";
+import Link from "next/link";
 
 export default function ExplorePage() {
   const pathname = usePathname();
   const router = useRouter();
   const token = useAuthStore((state) => state.token);
+  const user = useAuthStore((state) => state.user);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const categories = [
     "Explore",
@@ -24,6 +27,11 @@ export default function ExplorePage() {
   const tabs = ["Top", "Recent", "Posts"];
 
   const [posts, setPosts] = useState([]);
+
+  const handleLogout = () => {
+    useAuthStore.getState().logout();
+    router.push("/login");
+  };
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -85,25 +93,25 @@ export default function ExplorePage() {
       (actions.restacked ? 1 : 0);
 
     return (
-      <article className="border-b border-white/10 pb-10">
+      <article className="border-b border-[#2a2740] pb-10">
 
         {/* HEADER */}
         <div className="flex items-start justify-between">
 
           <div className="flex gap-4">
 
-            <div className="h-12 w-12 rounded-full bg-zinc-700" />
+            <div className="h-12 w-12 rounded-full bg-linear-to-br from-[#7c6ff7] to-[#a89cf7]" />
 
             <div>
-              <h3 className="text-lg font-semibold">
+              <h3 className="text-lg font-semibold text-[#f0eeff]">
                 {post.author?.name || "User"}
               </h3>
 
-              <p className="text-sm text-zinc-400">
+              <p className="text-sm text-[#9490b8]">
                 @{post.author?.name || "user"}
               </p>
 
-              <p className="text-sm text-zinc-400">
+              <p className="text-sm text-[#9490b8]">
                 {new Date(
                   post.createdAt
                 ).toLocaleDateString()}
@@ -119,8 +127,8 @@ export default function ExplorePage() {
             }
             className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
               actions.subscribed
-                ? "bg-zinc-800 text-zinc-100"
-                : "bg-orange-500 text-black hover:bg-orange-400"
+                ? "bg-[#7c6ff7]/20 text-[#a89cf7] border border-[#7c6ff7]/50"
+                : "bg-[#7c6ff7] text-white hover:bg-[#a89cf7]"
             }`}
           >
             {actions.subscribed
@@ -140,11 +148,11 @@ export default function ExplorePage() {
           }
         >
 
-          <h2 className="text-2xl font-bold text-white">
+          <h2 className="text-2xl font-bold text-[#f0eeff]">
             {post.title}
           </h2>
 
-          <p className="mt-4 text-lg leading-8 text-zinc-300">
+          <p className="mt-4 text-lg leading-8 text-[#9490b8]">
             {post.content}
           </p>
 
@@ -159,7 +167,7 @@ export default function ExplorePage() {
         </div>
 
         {/* ACTION BUTTONS */}
-        <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-zinc-400">
+        <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-[#9490b8]">
 
           {/* LIKE */}
           <button
@@ -169,8 +177,8 @@ export default function ExplorePage() {
             }
             className={`rounded-full border px-4 py-2 transition ${
               actions.liked
-                ? "border-orange-500/60 bg-orange-500/10 text-orange-400"
-                : "border-white/10 hover:border-orange-500/40 hover:text-orange-400"
+                ? "border-[#7c6ff7]/60 bg-[#7c6ff7]/10 text-[#a89cf7]"
+                : "border-[#2a2740] hover:border-[#7c6ff7]/40 hover:text-[#a89cf7]"
             }`}
           >
             ❤️ {likeCount} Likes
@@ -186,7 +194,7 @@ export default function ExplorePage() {
                 (prev) => !prev
               );
             }}
-            className="rounded-full border border-white/10 px-4 py-2 transition hover:border-orange-500/40 hover:text-orange-400"
+            className="rounded-full border border-[#2a2740] px-4 py-2 transition hover:border-[#7c6ff7]/40 hover:text-[#a89cf7]"
           >
             💬 {post.replyCount || 0} Replies
           </button>
@@ -199,8 +207,8 @@ export default function ExplorePage() {
             }
             className={`rounded-full border px-4 py-2 transition ${
               actions.restacked
-                ? "border-orange-500/60 bg-orange-500/10 text-orange-400"
-                : "border-white/10 hover:border-orange-500/40 hover:text-orange-400"
+                ? "border-[#7c6ff7]/60 bg-[#7c6ff7]/10 text-[#a89cf7]"
+                : "border-[#2a2740] hover:border-[#7c6ff7]/40 hover:text-[#a89cf7]"
             }`}
           >
             🔁 {restackCount} Restacks
@@ -221,74 +229,125 @@ export default function ExplorePage() {
   };
 
   return (
-    <div className="min-h-screen text-white">
-
-      <div className="mx-auto max-w-6xl px-6 py-6">
-
-        {/* Categories */}
-        <div className="flex gap-3 overflow-x-auto pb-4">
-
-          {categories.map((item, index) => (
-            <button
-              key={item}
-              className={`whitespace-nowrap rounded-xl px-5 py-2 text-sm font-medium ${
-                index === 0
-                  ? "bg-white text-black"
-                  : "bg-zinc-900 text-zinc-300"
-              }`}
-            >
-              {item}
-            </button>
-          ))}
-
-        </div>
-
-        {/* Tabs */}
-        <div className="mt-6 flex justify-center gap-16 border-b border-white/10 pb-4">
-
-          {tabs.map((tab, index) => (
-            <button
-              key={tab}
-              className={`text-sm font-semibold ${
-                index === 0
-                  ? "border-b-2 border-white pb-2 text-white"
-                  : "text-zinc-500"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-
-        </div>
-
-        {/* FEED */}
-        <div className="mt-8 space-y-8">
-
-          {posts.length === 0 && (
-            <div className="rounded-3xl border border-white/10 bg-[#151515] p-10 text-center">
-
-              <h2 className="text-xl font-semibold text-white">
-                No posts yet
-              </h2>
-
-              <p className="mt-3 text-zinc-400">
-                Be the first person to create a post.
-              </p>
-
-            </div>
-          )}
-
-          {posts.map((post) => (
-            <ExplorePostCard
-              key={post._id || post.id}
-              post={post}
-            />
-          ))}
-
-        </div>
-
+    <div className="min-h-screen bg-[#0d0d14] text-[#f0eeff] overflow-hidden">
+      {/* Background glow effects */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-20 left-1/4 w-96 h-96 bg-[#7c6ff7]/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-[#7c6ff7]/5 rounded-full blur-3xl" />
       </div>
 
+      <div className="relative z-10 flex h-screen">
+        {/* Sidebar */}
+        <aside className={`fixed md:sticky top-0 left-0 h-screen w-64 bg-[#141420] border-r border-[#2a2740] p-6 flex flex-col transition-transform md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2 mb-12">
+            <div className="w-10 h-10 rounded-lg bg-linear-to-br from-[#7c6ff7] to-[#a89cf7] flex items-center justify-center text-xl font-bold">
+              ⚡
+            </div>
+            <span className="text-2xl font-bold">Pulse<span className="text-[#7c6ff7]">.</span></span>
+          </Link>
+
+          {/* Navigation */}
+          <nav className="flex-1 space-y-2 mb-8">
+            {[
+              { label: "Home", icon: "🏠", href: "/" },
+              { label: "Activity", icon: "📊", href: "/activity" },
+              { label: "Explore", icon: "🔍", href: "/explore", active: true },
+              { label: "Profile", icon: "👤", href: "/dashboard" },
+            ].map((item) => (
+              <Link key={item.label} href={item.href} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition ${item.active ? 'bg-[#7c6ff7]/20 border border-[#7c6ff7]/50 text-[#a89cf7]' : 'text-[#9490b8] hover:text-[#f0eeff] hover:bg-[#1c1c2e]'}`}>
+                <span className="text-lg">{item.icon}</span>
+                <span className="font-medium">{item.label}</span>
+              </Link>
+            ))}
+          </nav>
+
+          {/* Bottom Actions */}
+          <div className="space-y-3">
+            <Link href="/blog/create" className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-linear-to-r from-[#7c6ff7] to-[#a89cf7] text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-[#7c6ff7]/30 transition">
+              <span>✨</span> Create
+            </Link>
+            <button onClick={handleLogout} className="w-full px-4 py-3 border border-[#2a2740] hover:border-[#7c6ff7]/50 text-[#9490b8] hover:text-[#f0eeff] rounded-xl font-medium transition hover:bg-[#1c1c2e]">
+              Logout
+            </button>
+          </div>
+
+          {/* Close button on mobile */}
+          <button onClick={() => setSidebarOpen(false)} className="md:hidden absolute top-6 right-6 text-[#9490b8] hover:text-[#f0eeff]">
+            ✕
+          </button>
+        </aside>
+
+        {/* Mobile overlay */}
+        {sidebarOpen && <div onClick={() => setSidebarOpen(false)} className="md:hidden fixed inset-0 bg-black/50 z-30" />}
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="max-w-6xl mx-auto p-6 md:p-8">
+            {/* Header with mobile menu toggle */}
+            <div className="flex items-center justify-between mb-8">
+              <button onClick={() => setSidebarOpen(true)} className="md:hidden text-[#7c6ff7]">
+                ☰
+              </button>
+              <h1 className="text-3xl font-bold">Explore</h1>
+              <div className="w-10 h-10" />
+            </div>
+
+            {/* Categories */}
+            <div className="flex gap-3 overflow-x-auto pb-4">
+              {categories.map((item, index) => (
+                <button
+                  key={item}
+                  className={`whitespace-nowrap rounded-xl px-5 py-2 text-sm font-medium ${
+                    index === 0
+                      ? "bg-[#7c6ff7] text-white"
+                      : "bg-[#1c1c2e] text-[#9490b8] hover:text-[#f0eeff]"
+                  }`}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+
+            {/* Tabs */}
+            <div className="mt-6 flex justify-center gap-16 border-b border-[#2a2740] pb-4">
+              {tabs.map((tab, index) => (
+                <button
+                  key={tab}
+                  className={`text-sm font-semibold ${
+                    index === 0
+                      ? "border-b-2 border-[#7c6ff7] pb-2 text-[#7c6ff7]"
+                      : "text-[#9490b8]"
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            {/* FEED */}
+            <div className="mt-8 space-y-8">
+              {posts.length === 0 && (
+                <div className="rounded-3xl border border-[#2a2740] bg-[#141420] p-10 text-center">
+                  <h2 className="text-xl font-semibold text-[#f0eeff]">
+                    No posts yet
+                  </h2>
+                  <p className="mt-3 text-[#9490b8]">
+                    Be the first person to create a post.
+                  </p>
+                </div>
+              )}
+
+              {posts.map((post) => (
+                <ExplorePostCard
+                  key={post._id || post.id}
+                  post={post}
+                />
+              ))}
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

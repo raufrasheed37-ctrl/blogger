@@ -22,7 +22,8 @@ const useAuthStore = create((set) => ({
     set({ isLoading: true, error: null });
     try {
       const apiBase = useAuthStore.getState()._apiBase;
-      const res = await fetch(`${apiBase}/api/auth/login`, {
+      const apiRoot = apiBase && apiBase.endsWith('/api') ? apiBase : `${apiBase.replace(/\/$/, '')}/api`;
+      const res = await fetch(`${apiRoot}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -43,7 +44,8 @@ const useAuthStore = create((set) => ({
     set({ isLoading: true, error: null });
     try {
       const apiBase = useAuthStore.getState()._apiBase;
-      const res = await fetch(`${apiBase}/api/auth/register`, {
+      const apiRoot = apiBase && apiBase.endsWith('/api') ? apiBase : `${apiBase.replace(/\/$/, '')}/api`;
+      const res = await fetch(`${apiRoot}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, name }),

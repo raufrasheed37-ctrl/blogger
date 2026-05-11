@@ -8,67 +8,40 @@ import { useEffect, useRef, useState } from "react";
 import { blogAPI } from "@/utils/api";
 
 export default function Home() {
-  const navItems = [
-    { label: "Home", icon: <HomeIcon /> },
-    { label: "Activity", icon: <ActivityIcon /> },
-    { label: "Explore", icon: <ExploreIcon /> },
-    { label: "Profile", icon: <ProfileIcon /> },
-  ];
-
-  const samplePosts = [];
   const [posts, setPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(true);
-
-  const upNext = [
-    {
-      title: "How top newsletter writers structure weeklies",
-      readTime: "6 min read",
-      thumbClass: "from-orange-500 to-rose-500",
-    },
-    {
-      title: "Monetizing niche audiences without sponsorships",
-      readTime: "4 min read",
-      thumbClass: "from-emerald-500 to-lime-500",
-    },
-    {
-      title: "Building a repeatable content system",
-      readTime: "8 min read",
-      thumbClass: "from-cyan-500 to-blue-500",
-    },
-  ];
-
-  const heroSlides = [
-    {
-      title: "Make money doing the work you believe in.",
-      words:
-        "Turn your ideas into income with clear positioning, focused content, and consistent execution.",
-    },
-    {
-      title: "Build trust first, and revenue follows.",
-      words:
-        "People buy confidence, clarity, and outcomes. Show up with value every week and let momentum compound.",
-    },
-    {
-      title: "Create once, grow for years.",
-      words:
-        "Design systems that publish, repurpose, and distribute your best work across platforms without burning out.",
-    },
-  ];
-
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeSlide, setActiveSlide] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
   const token = useAuthStore((s) => s.token);
   const user = useAuthStore((s) => s.user);
   const hydrate = useAuthStore((s) => s.hydrate);
   const hasSession = Boolean(isMounted && (token || user || localStorage.getItem("token")));
-  const postsPerPage = 7;
+  const postsPerPage = 6;
   const totalPages = Math.max(1, Math.ceil(posts.length / postsPerPage));
   const listRef = useRef(null);
 
   const start = (currentPage - 1) * postsPerPage;
   const visiblePosts = posts.slice(start, start + postsPerPage);
+  const featuredPost = posts[0];
+  const recentPosts = posts.slice(1, 4);
+
+  const heroContent = [
+    {
+      title: "Discover Stories That Inspire",
+      subtitle: "Explore thoughtfully crafted articles from creators building authentic communities",
+    },
+    {
+      title: "Where Ideas Meet Impact",
+      subtitle: "Read, learn, and grow with premium content designed for creators and thinkers",
+    },
+    {
+      title: "Your Creative Hub Awaits",
+      subtitle: "Join a community of writers and readers shaping the future of content",
+    },
+  ];
+
+  const [activeHero, setActiveHero] = useState(0);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => setIsMounted(true));
@@ -98,7 +71,7 @@ export default function Home() {
           likes: post.likes ?? 0,
           comments: post.comments ?? 0,
           text: post.excerpt || "",
-          avatarClass: "from-orange-400 to-amber-500",
+          avatarClass: "from-purple-400 to-pink-500",
           author: post.author,
           authorId: post.author?._id || post.author?.id,
         }));
@@ -137,260 +110,315 @@ export default function Home() {
   };
 
   useEffect(() => {
-    if (listRef.current) {
-      listRef.current.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  }, [currentPage]);
-
-  useEffect(() => {
     const timer = setInterval(() => {
-      setActiveSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 4500);
+      setActiveHero((prev) => (prev + 1) % heroContent.length);
+    }, 5000);
 
     return () => clearInterval(timer);
-  }, [heroSlides.length]);
+  }, [heroContent.length]);
 
   return (
-    <div className="min-h-screen bg-[#090909] text-zinc-100">
-      <div className="mx-auto flex w-full max-w-360 items-start gap-4 px-4 py-6 lg:gap-6 lg:px-6">
-        <aside className="hidden min-h-[92vh] w-62.5 flex-col rounded-3xl border border-white/10 bg-linear-to-b from-[#121212] via-[#0d0d0d] to-[#111111] p-5 shadow-[0_30px_70px_-40px_rgba(0,0,0,0.9)] md:sticky md:top-6 md:flex">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-zinc-400">Pulse</p>
+    <div className="min-h-screen bg-linear-to-br from-slate-950 via-purple-950 to-slate-900 text-white overflow-hidden">
+      {/* Animated gradient background */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-0 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute top-1/2 left-1/3 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl" />
+      </div>
 
-            <h1 className="mt-2 text-xl font-semibold text-zinc-100">Creator Hub</h1>
+      {/* Navigation */}
+      <nav className="z-50 sticky top-0 backdrop-blur-lg bg-slate-950/40 border-b border-purple-500/20">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="w-10 h-10 bg-linear-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center transform group-hover:scale-110 transition">
+              <PulseIcon className="w-6 h-6" />
+            </div>
+            <span className="text-xl font-bold">Pulse</span>
+          </Link>
+
+          <div className="hidden md:flex items-center gap-8">
+            <Link href="/" className="text-gray-300 hover:text-white transition font-medium">Home</Link>
+            <Link href="/explore" className="text-gray-300 hover:text-white transition font-medium">Explore</Link>
+            <Link href="/activity" className="text-gray-300 hover:text-white transition font-medium">Activity</Link>
           </div>
 
-          <nav className="mt-8 flex flex-col gap-1">
-            {navItems.map((item, index) => {
-              if (item.label === "Profile") {
-                return (
-                  <ProfileNavButton key={item.label} item={item} index={index} />
-                );
-              }
-
-              return (
-                <Link
-                  href={
-                    item.label === "Explore"
-                      ? "/explore"
-                      : item.label === "Activity"
-                        ? "/activity"
-                      : item.label === "Home"
-                        ? "/"
-                        : "#"
-                  }
-                  key={item.label}
-                  className={`group flex items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm font-medium transition ${
-                    index === 0
-                      ? "bg-zinc-800/80 text-zinc-100"
-                      : "text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200"
-                  }`}
-                >
-                  <span className="text-zinc-300 transition group-hover:text-zinc-100">{item.icon}</span>
-
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-
-          <button
-            type="button"
-            onClick={handleCreateClick}
-            className="mt-auto rounded-2xl bg-orange-500 px-4 py-3 text-sm font-semibold text-zinc-950 shadow-[0_14px_35px_-20px_rgba(249,115,22,0.9)] transition hover:bg-orange-400"
-          >
-            Create
-          </button>
-
-          {token && (
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="rounded-2xl bg-zinc-700 px-4 py-3 text-sm font-semibold text-zinc-100 transition hover:bg-zinc-600"
-            >
-              Logout
+          <div className="flex items-center gap-4">
+            <button onClick={handleCreateClick} className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-linear-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 transition font-semibold shadow-lg">
+              <span>✨</span> Create
             </button>
-          )}
-        </aside>
-
-        <main className="w-full min-w-0 flex-1 space-y-5 rounded-3xl border border-white/10 bg-[#0f0f0f] p-4 shadow-[0_30px_70px_-40px_rgba(0,0,0,0.95)] sm:p-5 lg:p-6">
-          <section className="relative overflow-hidden rounded-3xl bg-linear-to-r from-emerald-600 via-emerald-500 to-lime-500 p-6 shadow-[0_25px_60px_-30px_rgba(16,185,129,0.9)] sm:p-8">
-            <div className="absolute -right-14 -top-16 h-44 w-44 rounded-full bg-white/20 blur-2xl" />
-
-            <div className="absolute bottom-2 right-4 hidden opacity-95 sm:block">
-              <HeroIllustration />
-            </div>
-
-            <div className="relative max-w-135">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-100">
-                Build your own business
-              </p>
-
-              <h2 className="mt-3 text-3xl font-bold leading-tight text-[#0a0f0b] sm:text-4xl">
-                {heroSlides[activeSlide].title}
-              </h2>
-
-              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-emerald-950/90 sm:text-base">
-                {heroSlides[activeSlide].words}
-              </p>
-
-              <div className="mt-4 flex items-center gap-2">
-                {heroSlides.map((slide, index) => (
-                  <button
-                    type="button"
-                    key={slide.title}
-                    onClick={() => setActiveSlide(index)}
-                    aria-label={`Show slide ${index + 1}`}
-                    className={`h-2.5 rounded-full transition-all ${
-                      activeSlide === index ? "w-9 bg-[#0a0f0b]" : "w-2.5 bg-emerald-950/40 hover:bg-emerald-950/70"
-                    }`}
-                  />
-                ))}
-              </div>
-
-              <div className="mt-6 flex flex-wrap items-center gap-4">
-                <button
-                    type="button"
-                    onClick={() => {
-                        if (token) {
-                          router.push('/dashboard');
-                        } else {
-                          router.push('/login?next=/dashboard');
-                        }
-                      }}
-                    className="rounded-xl bg-orange-500 px-5 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-orange-400"
-                  >
-                    Open profile dashboard
-                  </button>
-
-                <a href="#" className="text-sm font-semibold text-emerald-950 underline-offset-4 transition hover:underline">
-                  Learn more
-                </a>
-              </div>
-            </div>
-          </section>
-
-          <section ref={listRef} className="h-375 space-y-6 overflow-y-auto pr-2">
-            {postsLoading ? (
-              <div className="space-y-6">
-                {[...Array(4)].map((_, index) => (
-                  <div key={index} className="h-28 animate-pulse rounded-3xl border border-white/10 bg-white/4" />
-                ))}
-              </div>
-            ) : visiblePosts.length > 0 ? (
-              visiblePosts.map((post) => (
-                <BlogCard key={post.slug || post._id || post.id || post.handle} post={post} />
-              ))
+            {hasSession ? (
+              <button onClick={handleLogout} className="px-4 py-2 rounded-lg border border-purple-500/30 hover:border-purple-500 hover:bg-purple-500/10 transition font-medium">
+                Logout
+              </button>
             ) : (
-              <div className="rounded-3xl border border-white/10 bg-white/4 p-8 text-center text-sm text-zinc-400">
-                No posts yet.
-              </div>
+              <Link href="/login" className="px-4 py-2 rounded-lg border border-purple-500/30 hover:border-purple-500 hover:bg-purple-500/10 transition font-medium">
+                Sign in
+              </Link>
             )}
-          </section>
+          </div>
+        </div>
+      </nav>
 
-          <div className="mt-6 flex items-center justify-center gap-3">
-            <button
-              type="button"
-              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-              disabled={currentPage === 1}
-              className="rounded-xl border border-white/10 px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Previous
+      {/* Hero Section */}
+      <section className="relative z-10 max-w-7xl mx-auto px-6 py-16 md:py-24">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          {/* Left Content */}
+          <div className="space-y-8">
+            <div>
+              <span className="inline-block px-4 py-2 rounded-full bg-purple-500/20 border border-purple-500/50 text-purple-200 text-sm font-semibold mb-6">
+                Welcome to Pulse 🌟
+              </span>
+              <h1 className="text-5xl md:text-6xl font-black leading-tight space-y-2">
+                <span className="block">{heroContent[activeHero].title.split(' ').slice(0, 2).join(' ')}</span>
+                <span className="block bg-linear-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  {heroContent[activeHero].title.split(' ').slice(2).join(' ')}
+                </span>
+              </h1>
+              <p className="text-lg text-gray-300 mt-6 leading-relaxed max-w-lg">
+                {heroContent[activeHero].subtitle}
+              </p>
+            </div>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <button onClick={() => router.push('/explore')} className="px-8 py-4 bg-linear-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-xl font-bold text-lg transition transform hover:scale-105 shadow-xl">
+                Explore Articles
+              </button>
+              <button onClick={() => {
+                if (token) router.push('/dashboard');
+                else router.push('/login?next=/dashboard');
+              }} className="px-8 py-4 border-2 border-purple-500/50 hover:border-purple-400 rounded-xl font-bold text-lg transition hover:bg-purple-500/10">
+                Go to Dashboard
+              </button>
+            </div>
+
+            {/* Social Proof */}
+            <div className="flex items-center gap-6 pt-8 border-t border-purple-500/20">
+              <div className="flex -space-x-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className={`w-10 h-10 rounded-full border-2 border-slate-950 bg-linear-to-br from-purple-${400 + i*100} to-pink-${400 + i*100}`} />
+                ))}
+              </div>
+              <div>
+                <p className="font-bold text-lg">10k+ Readers</p>
+                <p className="text-gray-400">Enjoying premium content daily</p>
+              </div>
+            </div>
+
+            {/* Slide Indicators */}
+            <div className="flex gap-2 pt-4">
+              {heroContent.map((_, idx) => (
+                <button key={idx} onClick={() => setActiveHero(idx)} className={`h-2 rounded-full transition ${idx === activeHero ? 'w-8 bg-purple-500' : 'w-2 bg-purple-500/40 hover:bg-purple-500/60'}`} />
+              ))}
+            </div>
+          </div>
+
+          {/* Right Featured Article Card */}
+          {featuredPost ? (
+            <Link href={`/blog/${featuredPost.slug}`} className="group">
+              <div className="relative rounded-2xl overflow-hidden backdrop-blur-xl border border-purple-500/30 bg-linear-to-br from-purple-500/10 to-indigo-500/10 hover:border-purple-500/60 transition shadow-2xl h-full">
+                <div className="absolute inset-0 bg-linear-to-br from-purple-600/20 via-transparent to-indigo-600/20 group-hover:from-purple-600/30 transition" />
+                
+                <div className="relative p-8 h-full flex flex-col justify-between min-h-125">
+                  <div>
+                    <span className="inline-block px-3 py-1 rounded-full bg-linear-to-r from-purple-500 to-indigo-500 text-white text-xs font-bold mb-4">
+                      {featuredPost.category}
+                    </span>
+                    <h3 className="text-3xl font-black text-white group-hover:text-purple-200 transition leading-tight line-clamp-3">
+                      {featuredPost.title}
+                    </h3>
+                    <p className="mt-6 text-gray-300 line-clamp-3">{featuredPost.text}</p>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-6 border-t border-purple-500/20">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-full bg-linear-to-br ${featuredPost.avatarClass}`} />
+                      <div>
+                        <p className="font-bold text-sm">{featuredPost.name}</p>
+                        <p className="text-gray-400 text-xs">{featuredPost.time}</p>
+                      </div>
+                    </div>
+                    <span className="text-xs text-gray-400">5 min read</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ) : (
+            <div className="rounded-2xl border border-purple-500/30 bg-purple-500/5 h-96 flex items-center justify-center text-gray-400">
+              No featured article yet
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Featured Articles Grid */}
+      <section className="relative z-10 max-w-7xl mx-auto px-6 py-20">
+        <div className="mb-12">
+          <h2 className="text-4xl font-black mb-3">Featured Articles</h2>
+          <p className="text-gray-400 text-lg">Handpicked stories worth your time</p>
+        </div>
+
+        {postsLoading ? (
+          <div className="grid md:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="rounded-2xl border border-purple-500/20 bg-purple-500/5 h-96 animate-pulse" />
+            ))}
+          </div>
+        ) : recentPosts.length > 0 ? (
+          <div className="grid md:grid-cols-3 gap-6">
+            {recentPosts.map((post) => (
+              <Link key={post.slug} href={`/blog/${post.slug}`} className="group">
+                <div className="h-full rounded-2xl overflow-hidden backdrop-blur-xl border border-purple-500/30 bg-linear-to-br from-purple-500/10 to-indigo-500/10 hover:border-purple-500/60 transition shadow-lg hover:shadow-2xl duration-300 transform hover:-translate-y-1 flex flex-col">
+                  {/* Image placeholder */}
+                  <div className={`h-48 bg-linear-to-br ${post.avatarClass} relative overflow-hidden`}>
+                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition" />
+                    <div className="absolute top-4 right-4">
+                      <span className="px-3 py-1 rounded-full bg-black/60 backdrop-blur-sm text-purple-200 text-xs font-bold">
+                        {post.category}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 p-6 flex flex-col">
+                    <h3 className="text-xl font-bold text-white group-hover:text-purple-200 transition mb-3 line-clamp-2">
+                      {post.title}
+                    </h3>
+                    <p className="text-gray-400 text-sm mb-6 line-clamp-2 flex-1">{post.text}</p>
+
+                    <div className="flex items-center justify-between pt-4 border-t border-purple-500/20">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-8 h-8 rounded-full bg-linear-to-br ${post.avatarClass}`} />
+                        <div>
+                          <p className="font-bold text-xs text-white">{post.name}</p>
+                          <p className="text-gray-500 text-xs">{post.time}</p>
+                        </div>
+                      </div>
+                      <span className="text-xs text-gray-400">5 min</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-purple-500/20 bg-purple-500/5 p-12 text-center text-gray-400">
+            No articles available yet
+          </div>
+        )}
+      </section>
+
+      {/* All Articles Section */}
+      <section className="relative z-10 max-w-7xl mx-auto px-6 py-20">
+        <div className="mb-12">
+          <h2 className="text-4xl font-black mb-3">Latest Articles</h2>
+          <p className="text-gray-400 text-lg">Explore our full collection</p>
+        </div>
+
+        {postsLoading ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-32 rounded-2xl border border-purple-500/20 bg-purple-500/5 animate-pulse" />
+            ))}
+          </div>
+        ) : visiblePosts.length > 0 ? (
+          <div className="space-y-4" ref={listRef}>
+            {visiblePosts.map((post) => (
+              <BlogCard key={post.slug || post._id || post.id} post={post} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-purple-500/20 bg-purple-500/5 p-12 text-center text-gray-400">
+            No articles yet
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-12">
+            <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-4 py-2 rounded-lg border border-purple-500/30 hover:border-purple-500 disabled:opacity-40 transition">
+              ← Previous
             </button>
-
-            {Array.from({ length: totalPages }, (_, index) => {
-              const page = index + 1;
-
+            {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
+              const page = i + 1;
               return (
-                <button
-                  type="button"
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`rounded-xl px-4 py-2 text-sm font-semibold ${
-                    currentPage === page ? "bg-orange-500 text-zinc-950" : "border border-white/10 text-white"
-                  }`}
-                >
+                <button key={page} onClick={() => setCurrentPage(page)} className={`w-10 h-10 rounded-lg font-bold transition ${currentPage === page ? 'bg-linear-to-r from-purple-600 to-indigo-600' : 'border border-purple-500/30 hover:border-purple-500'}`}>
                   {page}
                 </button>
               );
             })}
-
-            <button
-              type="button"
-              onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
-              disabled={currentPage === totalPages}
-              className="rounded-xl border border-white/10 px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Next
+            <button onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-4 py-2 rounded-lg border border-purple-500/30 hover:border-purple-500 disabled:opacity-40 transition">
+              Next →
             </button>
           </div>
-        </main>
+        )}
+      </section>
 
-        <aside className="hidden w-[320px] shrink-0 space-y-4 rounded-3xl border border-white/10 bg-[#101010] p-5 shadow-[0_30px_70px_-45px_rgba(0,0,0,0.9)] xl:sticky xl:top-6 xl:block">
-          <label className="flex items-center gap-2 rounded-2xl border border-white/10 bg-zinc-900/80 px-3 py-2.5">
-            <SearchIcon />
-
-            <input
-              type="search"
-              placeholder="Search posts, writers, topics"
-              className="w-full bg-transparent text-sm text-zinc-100 placeholder:text-zinc-500 focus:outline-none"
-            />
-          </label>
-
-          {!hasSession && (
-            <section className="rounded-3xl border border-white/10 bg-[#161616] p-5 shadow-[0_25px_40px_-32px_rgba(0,0,0,0.95)]">
-      <h3 className="text-xl font-semibold text-zinc-100">
-        Log in or sign up
-      </h3>
-
-      <p className="mt-2 text-sm leading-6 text-zinc-400">
-        Join creators and readers building profitable communities.
-      </p>
-
-      <div className="mt-4 space-y-2.5">
-        <div>
-          <Link href="/register">
-            <button className="w-full rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition hover:bg-orange-400"
-            >
-              Get started
-            </button>
-          </Link>
-        </div>
-
-        <div>
-          <Link href="/login">
-            <button className="w-full rounded-xl bg-zinc-700 px-4 py-2.5 text-sm font-semibold text-zinc-100 transition hover:bg-zinc-600"
-            >
-              Sign in
-            </button>
-          </Link>
-        </div>
-      </div>
-    </section>
-          )}
-
-          <section className="rounded-3xl border border-white/10 bg-[#161616] p-5 shadow-[0_25px_40px_-32px_rgba(0,0,0,0.95)]">
-            <h4 className="text-sm font-semibold uppercase tracking-[0.18em] text-zinc-400">
-              Up next
-            </h4>
-
-            <div className="mt-4 space-y-3">
-              {upNext.map((item) => (
-                <article key={item.title} className="flex gap-3 rounded-2xl border border-white/10 bg-[#1d1d1d] p-3 transition hover:border-white/20">
-                  <div className={`mt-1 h-10 w-10 shrink-0 rounded-full bg-linear-to-br ${item.thumbClass}`} />
-
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium leading-5 text-zinc-200">{item.title}</p>
-
-                    <p className="mt-1 text-xs text-zinc-500">{item.readTime}</p>
-                  </div>
-                </article>
-              ))}
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-purple-500/20 bg-slate-950/60 backdrop-blur-xl py-16 mt-20">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid md:grid-cols-5 gap-8 mb-12">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 bg-linear-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                  <PulseIcon className="w-4 h-4" />
+                </div>
+                <span className="font-bold text-lg">Pulse</span>
+              </div>
+              <p className="text-gray-400 text-sm">Premium content platform for creators</p>
             </div>
-          </section>
-        </aside>
-      </div>
+
+            <div>
+              <h4 className="font-bold mb-4">Explore</h4>
+              <ul className="space-y-2 text-gray-400 text-sm">
+                <li><Link href="/" className="hover:text-purple-400 transition">Home</Link></li>
+                <li><Link href="/explore" className="hover:text-purple-400 transition">Articles</Link></li>
+                <li><Link href="/activity" className="hover:text-purple-400 transition">Trending</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-bold mb-4">Community</h4>
+              <ul className="space-y-2 text-gray-400 text-sm">
+                <li><Link href="/" className="hover:text-purple-400 transition">Blog</Link></li>
+                <li><Link href="/" className="hover:text-purple-400 transition">Writers</Link></li>
+                <li><Link href="/" className="hover:text-purple-400 transition">Creators</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-bold mb-4">Resources</h4>
+              <ul className="space-y-2 text-gray-400 text-sm">
+                <li><Link href="/" className="hover:text-purple-400 transition">Help Center</Link></li>
+                <li><Link href="/" className="hover:text-purple-400 transition">Guidelines</Link></li>
+                <li><Link href="/" className="hover:text-purple-400 transition">API</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-bold mb-4">Legal</h4>
+              <ul className="space-y-2 text-gray-400 text-sm">
+                <li><Link href="/" className="hover:text-purple-400 transition">Privacy</Link></li>
+                <li><Link href="/" className="hover:text-purple-400 transition">Terms</Link></li>
+                <li><Link href="/" className="hover:text-purple-400 transition">Contact</Link></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-purple-500/20 pt-8 flex flex-col md:flex-row items-center justify-between text-gray-400 text-sm">
+            <p>&copy; 2026 Pulse. All rights reserved.</p>
+            
+          </div>
+        </div>
+      </footer>
     </div>
+  );
+}
+
+function PulseIcon({ className = "w-5 h-5" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" />
+    </svg>
   );
 }
 
@@ -428,50 +456,11 @@ function ProfileIcon() {
   );
 }
 
-function HeroIllustration() {
-  return (
-    <svg width="220" height="160" viewBox="0 0 220 160" fill="none">
-      <rect x="32" y="36" width="130" height="88" rx="12" fill="#ffffff" fillOpacity="0.95" />
-      <rect x="44" y="52" width="74" height="8" rx="4" fill="#9ca3af" />
-      <rect x="44" y="68" width="104" height="8" rx="4" fill="#d1d5db" />
-      <rect x="44" y="84" width="90" height="8" rx="4" fill="#d1d5db" />
-      <path d="m156 32 25 25-50 50-25-25 50-50Z" fill="#f97316" />
-      <path d="m168 44 13 13" stroke="#7c2d12" strokeWidth="4" strokeLinecap="round" />
-      <circle cx="178" cy="116" r="18" fill="#fb923c" fillOpacity="0.86" />
-    </svg>
-  );
-}
-
 function SearchIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-zinc-500">
       <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="1.7" />
       <path d="m16.2 16.2 4 4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
     </svg>
-  );
-}
-
-function ProfileNavButton({ item, index }) {
-  const router = useRouter();
-  const token = useAuthStore((s) => s.token);
-
-  return (
-    <button
-      type="button"
-      onClick={() => {
-        if (token) {
-          router.push("/dashboard");
-        } else {
-          router.push("/login?next=/dashboard");
-        }
-      }}
-      className={`group flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm font-medium transition ${
-        index === 0 ? "bg-zinc-800/80 text-zinc-100" : "text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200"
-      }`}
-    >
-      <span className="text-zinc-300 transition group-hover:text-zinc-100">{item.icon}</span>
-
-      <span>{item.label}</span>
-    </button>
   );
 }

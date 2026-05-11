@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { blogAPI } from "@/utils/api";
-import useAuthStore from "@/store/authstore";
+import { authAPI, blogAPI } from "@/utils/api";
+import useAuthStore, { getClientAuthToken } from "@/store/authstore";
 
 function Icon({ name, className = "h-4 w-4" }) {
   const icons = {
@@ -75,6 +75,9 @@ export default function CreatePostPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const user = useAuthStore((s) => s.user);
+  const token = useAuthStore((s) => s.token);
+  const hydrate = useAuthStore((s) => s.hydrate);
+  const setUser = useAuthStore((s) => s.setUser);
   const [isBoldActive, setIsBoldActive] = useState(false);
   const [isItalicActive, setIsItalicActive] = useState(false);
   const [isUnderlineActive, setIsUnderlineActive] = useState(false);
@@ -121,6 +124,36 @@ export default function CreatePostPage() {
     document.addEventListener("selectionchange", updateFormatStates);
     return () => document.removeEventListener("selectionchange", updateFormatStates);
   }, [updateFormatStates]);
+
+  useEffect(() => {
+    hydrate();
+  }, [hydrate]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!token || user) {
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    (async () => {
+      try {
+        const me = await authAPI.getMe();
+        const resolvedUser = me?.user || me;
+        if (!cancelled && resolvedUser?._id) {
+          setUser(resolvedUser);
+        }
+      } catch (error) {
+        // Keep create flow token-based even if profile fetch fails.
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [token, user, setUser]);
 
   const insertImage = useCallback((file) => {
     if (!file) return;
@@ -284,7 +317,8 @@ export default function CreatePostPage() {
   const handleSave = async () => {
     if (isSubmitting) return;
 
-    if (!user || !user._id) {
+    const authToken = token || getClientAuthToken();
+    if (!authToken) {
       setSubmitError("Please log in to create a post.");
       return;
     }
@@ -328,7 +362,7 @@ export default function CreatePostPage() {
       contentHtmlVal,
     ].join("");
 
-      const created = await blogAPI.create(payloadTitle, payloadContent, payloadExcerpt, user._id);
+      const created = await blogAPI.create(payloadTitle, payloadContent, payloadExcerpt, user?._id);
       const nextSlug = created?.slug || created?._id || created?.id;
 
       if (nextSlug) {

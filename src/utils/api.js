@@ -1,5 +1,5 @@
 import axios from 'axios';
-import useAuthStore from '@/store/authstore';
+import useAuthStore, { getClientAuthToken } from '@/store/authstore';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -15,10 +15,22 @@ const api = axios.create({
 
 // Request interceptor to add auth token
 api.interceptors.request.use((config) => {
-  const token = useAuthStore.getState().token;
+  // Prefer in-memory store token, fallback to localStorage/cookie token
+  const token = useAuthStore.getState().token || getClientAuthToken();
+
+  // Debug: log token presence (do not log full token in production)
+  try {
+    // eslint-disable-next-line no-console
+    console.debug('[api] request', { url: config.url, hasToken: Boolean(token) });
+  } catch (e) {}
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  } else {
+    try {
+      // eslint-disable-next-line no-console
+      console.debug('[api] no auth token available for request', { url: config.url });
+    } catch (e) {}
   }
 
   return config;

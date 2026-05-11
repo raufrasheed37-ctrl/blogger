@@ -2,7 +2,7 @@ import Link from "next/link";
 import PostActions from "@/components/PostActions";
 import CommentSection from "@/components/CommentSection";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 
   const posts = [
@@ -271,7 +271,7 @@ export async function generateStaticParams() {
 
 async function fetchPostFromBackend(slug) {
   try {
-    const response = await fetch(`${API_BASE_URL}/posts/${encodeURIComponent(slug)}`, {
+    const response = await fetch(`${API_BASE_URL}/api/posts/${encodeURIComponent(slug)}`, {
       cache: "no-store",
     });
 

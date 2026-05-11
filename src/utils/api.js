@@ -3,11 +3,16 @@ import useAuthStore, { getClientAuthToken } from '@/store/authstore';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
+// Ensure /api path is included
+const BASE_URL = `${API_BASE_URL}${API_BASE_URL.endsWith('/api') ? '' : '/api'}`;
+
+console.log('API Configuration:', { API_BASE_URL, BASE_URL });
+
 /**
  * Axios instance with automatic auth token injection
  */
 const api = axios.create({
-  baseURL: `${API_BASE_URL}/api`,
+  baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },

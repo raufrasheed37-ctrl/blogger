@@ -576,7 +576,7 @@ export default function PostDetailPage() {
               </footer>
 
               <div className="mt-10">
-                <CommentSection postId={normalizedPost.slug} />
+                <CommentSection postId={post._id} />
               </div>
             </section>
 

@@ -83,8 +83,11 @@ export default function CommentSection({
         }),
       });
 
-      if (!res.ok) throw new Error("Failed to post");
-
+      if (!res.ok) {
+        const errData = await res.json();
+        console.log(errData);
+       throw new Error(errData.message || "Failed to post");
+      }
       const data = await res.json();
 
       setComments((prev) => [data, ...prev]);

@@ -340,9 +340,45 @@ export default function CommentSection({
                     {/* ACTIONS */}
                     <div className="mt-4 flex items-center gap-5 text-sm text-zinc-500">
 
-  <button className="transition hover:text-orange-400">
-    ❤️ {comment.likes || 0}
-  </button>
+  <button
+  onClick={async () => {
+    if (!requireAuth()) return;
+
+    try {
+      const res = await fetch(
+        `${API_ROOT}/comments/${comment._id}/like`,
+        {
+          method: "PUT",
+          headers: {
+            ...getAuthHeaders(),
+          },
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed");
+      }
+
+      const data = await res.json();
+
+      setComments((prev) =>
+        prev.map((c) =>
+          c._id === comment._id
+            ? {
+                ...c,
+                likes: data.likes,
+              }
+            : c
+        )
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  }}
+  className="transition hover:text-orange-400"
+>
+  ❤️ {comment.likes || 0}
+</button>
 
     <button
   onClick={() => {

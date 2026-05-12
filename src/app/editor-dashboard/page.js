@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import styles from './styles.module.css'
 import { blogAPI } from '@/utils/api'
@@ -105,7 +105,7 @@ function getMetrics(draft) {
   return { words, chars, readingTime }
 }
 
-export default function EditorDashboard() {
+function EditorDashboardContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const slugParam = searchParams?.get?.('slug') || ''
@@ -497,5 +497,13 @@ export default function EditorDashboard() {
         </div>
       </footer>
     </div>
+  )
+}
+
+export default function EditorDashboard() {
+  return (
+    <Suspense fallback={<div />}>
+      <EditorDashboardContent />
+    </Suspense>
   )
 }

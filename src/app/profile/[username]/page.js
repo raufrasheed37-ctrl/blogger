@@ -94,14 +94,12 @@ export default function ProfilePage() {
   const [subscribed, setSubscribed] = useState(false);
   const [profileUser, setProfileUser] = useState(null);
   const [userPosts, setUserPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(Boolean(authorId));
+  const [error, setError] = useState(authorId ? null : "User not found");
 
   // Fetch user profile and posts
   useEffect(() => {
     if (!authorId) {
-      setError("User not found");
-      setLoading(false);
       return;
     }
 

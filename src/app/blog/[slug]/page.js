@@ -256,12 +256,6 @@ export default function PostDetailPage() {
     );
   }, [normalizedPost, post, user]);
 
-  useEffect(() => {
-    if (!normalizedPost) return;
-
-    setLiveViews(0);
-  }, [normalizedPost]);
-
   const handleShare = async () => {
     if (!normalizedPost) return;
 

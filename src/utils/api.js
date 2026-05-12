@@ -23,6 +23,13 @@ api.interceptors.request.use((config) => {
   // Prefer in-memory store token, fallback to localStorage/cookie token
   const token = useAuthStore.getState().token || getClientAuthToken();
 
+  if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+    if (config.headers) {
+      delete config.headers['Content-Type'];
+      delete config.headers['content-type'];
+    }
+  }
+
   // Debug: log token presence (do not log full token in production)
   try {
     // eslint-disable-next-line no-console
@@ -60,6 +67,9 @@ export const authAPI = {
 
   getMe: () =>
     api.get('/auth/me'),
+
+  updateMe: (formData) =>
+    api.put('/auth/me', formData),
 };
 
 // Blog endpoints
@@ -70,14 +80,18 @@ export const blogAPI = {
 
   getByAuthor: (authorId) => api.get(`/posts/author/${authorId}`),
 
-  create: (title, content, excerpt, author) =>
-    api.post('/posts', { title, content, excerpt, author }),
+  create: (payload) =>
+    api.post('/posts', payload),
 
   update: (id, title, content, excerpt) =>
     api.put(`/posts/${id}`, { title, content, excerpt }),
 
   delete: (id) =>
     api.delete(`/posts/${id}`),
+};
+
+export const authorsAPI = {
+  getById: (authorId) => api.get(`/authors/${authorId}`),
 };
 
 // Subscribe endpoints

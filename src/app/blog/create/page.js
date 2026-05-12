@@ -1,552 +1,405 @@
 "use client";
 
-import { useState } from "react";
-import { useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { authAPI, blogAPI } from "@/utils/api";
-import useAuthStore, { getClientAuthToken } from "@/store/authstore";
-
-function Icon({ name, className = "h-4 w-4" }) {
-  const icons = {
-    bold: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-        <path d="M15.6 10.79A3.5 3.5 0 0 0 13 3H7v18h8a4 4 0 0 0 .6-7.21zM9 5h4a2 2 0 0 1 0 4H9V5zm5 14H9v-6h5a3 3 0 0 1 0 6z" />
-      </svg>
-    ),
-    italic: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-        <path d="M10 4v3h2.21l-3.42 10H6v3h8v-3h-2.21l3.42-10H18V4z" />
-      </svg>
-    ),
-    underline: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-        <path d="M5 3v6a7 7 0 0 0 14 0V3h-2v6a5 5 0 0 1-10 0V3H5zM5 19v2h14v-2H5z" />
-      </svg>
-    ),
-    link: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-        <path d="M3.9 12a5 5 0 0 1 0-7.07l1.41-1.41A5 5 0 0 1 12.36 6l-1.41 1.41A3 3 0 0 0 6.83 7.8L5.42 9.21A3 3 0 0 0 6.83 12.6L8.24 11.19A1 1 0 0 1 9.66 12.6L8.24 14a3 3 0 0 1-4.24-4.24L3.9 12zM20.1 12a5 5 0 0 1 0 7.07l-1.41 1.41A5 5 0 0 1 11.64 18l1.41-1.41A3 3 0 0 0 17.17 16.2l1.41-1.41A3 3 0 0 0 17.17 9.4L15.76 10.81A1 1 0 0 1 14.34 9.4L15.76 8a3 3 0 0 1 4.24 4.24L20.1 12z" />
-      </svg>
-    ),
-    image: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-        <path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14l4-4 3 3 5-5 5 5z" />
-      </svg>
-    ),
-    left: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-        <path d="M3 3h18v2H3V3zm0 8h12v2H3v-2zm0 8h18v2H3v-2z" />
-      </svg>
-    ),
-    center: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-        <path d="M3 3h18v2H3V3zm3 8h12v2H6v-2zm-3 8h18v2H3v-2z" />
-      </svg>
-    ),
-    right: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-        <path d="M3 3h18v2H3V3zm6 8h12v2H9v-2zm-6 8h18v2H3v-2z" />
-      </svg>
-    ),
-    preview: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-        <path d="M12 5c-7 0-11 6-11 7s4 7 11 7 11-6 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z" />
-      </svg>
-    ),
-    continue: (
-      <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-        <path d="M12 2L3 21h18L12 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z" />
-      </svg>
-    ),
-  };
-
-  return icons[name] || null;
-}
+import Link from "next/link";
+import Image from "next/image";
+import { blogAPI } from "@/utils/api";
+import useAuthStore from "@/store/authstore";
 
 export default function CreatePostPage() {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
-  const [tags, setTags] = useState([""]);
+  const [content, setContent] = useState("");
+  const [tags, setTags] = useState([]);
   const [newTag, setNewTag] = useState("");
-  const [isPreview, setIsPreview] = useState(false);
-  const [hasBodyContent, setHasBodyContent] = useState(false);
-  const [contentHtml, setContentHtml] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState("");
-  const user = useAuthStore((s) => s.user);
-  const token = useAuthStore((s) => s.token);
-  const hydrate = useAuthStore((s) => s.hydrate);
-  const setUser = useAuthStore((s) => s.setUser);
-  const [isBoldActive, setIsBoldActive] = useState(false);
-  const [isItalicActive, setIsItalicActive] = useState(false);
-  const [isUnderlineActive, setIsUnderlineActive] = useState(false);
-  const editorRef = useRef(null);
-  const fileInputRef = useRef(null);
-  const selectedImageRef = useRef(null);
-  const [selectedImageVisible, setSelectedImageVisible] = useState(false);
-  const [overlayPos, setOverlayPos] = useState({ top: 0, left: 0 });
-  const [replacePending, setReplacePending] = useState(false);
+  const [category, setCategory] = useState("General");
+  const [visibility, setVisibility] = useState("public");
+  const [allowComments, setAllowComments] = useState(true);
+  const [featureProfile, setFeatureProfile] = useState(false);
+  const [metaTitle, setMetaTitle] = useState("");
+  const [metaDesc, setMetaDesc] = useState("");
+  const [coverImage, setCoverImage] = useState(null);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [error, setError] = useState("");
+  const { user, isHydrated, hydrate } = useAuthStore();
+  const coverInputRef = useRef(null);
 
-  const exec = useCallback((command, value = null) => {
-    if (!editorRef.current) return;
-    document.execCommand(command, false, value);
-    editorRef.current.focus();
-  }, []);
-
-  const updateFormatStates = useCallback(() => {
-    const editor = editorRef.current;
-    if (!editor) return;
-
-    const sel = window.getSelection();
-    if (!sel || sel.rangeCount === 0) {
-      setIsBoldActive(false);
-      setIsItalicActive(false);
-      setIsUnderlineActive(false);
-      return;
-    }
-
-    const anchor = sel.anchorNode;
-    if (!anchor || !editor.contains(anchor)) {
-      setIsBoldActive(false);
-      setIsItalicActive(false);
-      setIsUnderlineActive(false);
-      return;
-    }
-
-    // Use legacy command state to detect active formatting
-    setIsBoldActive(document.queryCommandState("bold"));
-    setIsItalicActive(document.queryCommandState("italic"));
-    setIsUnderlineActive(document.queryCommandState("underline"));
-  }, []);
-
-  useEffect(() => {
-    document.addEventListener("selectionchange", updateFormatStates);
-    return () => document.removeEventListener("selectionchange", updateFormatStates);
-  }, [updateFormatStates]);
-
+  // Hydrate on mount
   useEffect(() => {
     hydrate();
   }, [hydrate]);
 
+  // Redirect only after hydration is finished
   useEffect(() => {
-    let cancelled = false;
-
-    if (!token || user) {
-      return () => {
-        cancelled = true;
-      };
+    if (isHydrated && !user?._id) {
+      router.push("/login");
     }
+  }, [isHydrated, user, router]);
 
-    (async () => {
-      try {
-        const me = await authAPI.getMe();
-        const resolvedUser = me?.user || me;
-        if (!cancelled && resolvedUser?._id) {
-          setUser(resolvedUser);
-        }
-      } catch (error) {
-        // Keep create flow token-based even if profile fetch fails.
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [token, user, setUser]);
-
-  const insertImage = useCallback((file) => {
-    if (!file) return;
-    const url = URL.createObjectURL(file);
-    exec(
-      "insertHTML",
-      `<figure><img src="${url}" alt="${file.name || "uploaded image"}" style="max-width:100%;height:auto;border-radius:8px;" /></figure><p><br></p>`
-    );
-
-    // Move caret after the inserted image so typing continues below it.
-    requestAnimationFrame(() => {
-      const editor = editorRef.current;
-      if (!editor) return;
-      editor.focus();
-
-      const selection = window.getSelection();
-      if (!selection) return;
-
-      const range = document.createRange();
-      range.selectNodeContents(editor);
-      range.collapse(false);
-      selection.removeAllRanges();
-      selection.addRange(range);
-
-      setHasBodyContent(Boolean(editor.innerText?.trim()));
-      setContentHtml(editor.innerHTML || "");
-    });
-  }, [exec]);
-
-  // Replace image or insert depending on replacePending
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-      if (replacePending && selectedImageRef.current) {
-        const url = URL.createObjectURL(file);
-        // replace the selected image src
-        selectedImageRef.current.src = url;
-        // remove any highlight selection on replace
-        selectedImageRef.current.removeAttribute("data-selected");
-        selectedImageRef.current = null;
-        setSelectedImageVisible(false);
-        setReplacePending(false);
-        e.target.value = null;
-        return;
-      }
-
-    insertImage(file);
-    
-    // update stored content
-    requestAnimationFrame(() => {
-      setContentHtml(editorRef.current?.innerHTML || "");
-    });
-    e.target.value = null;
-  };
-
-  // select image element and position overlay
-  const selectImage = (img) => {
-    if (!img) {
-      selectedImageRef.current = null;
-      setSelectedImageVisible(false);
-      return;
-    }
-    selectedImageRef.current = img;
-    setSelectedImageVisible(true);
-    const rect = img.getBoundingClientRect();
-    setOverlayPos({ top: rect.top + window.scrollY - 44, left: rect.left + window.scrollX });
-  };
-
-  const deleteImage = useCallback(() => {
-    const img = selectedImageRef.current;
-    if (!img) return;
-    const figure = img.closest("figure");
-    if (figure) figure.remove();
-    else img.remove();
-    selectedImageRef.current = null;
-    setSelectedImageVisible(false);
-    setHasBodyContent(Boolean(editorRef.current?.innerText?.trim()));
-  }, []);
-
-  const toggleHighlight = useCallback(() => {
-    const img = selectedImageRef.current;
-    if (!img) return;
-    const is = img.getAttribute("data-highlight") === "true";
-    if (is) {
-      img.removeAttribute("data-highlight");
-      img.style.outline = "";
-      img.style.boxShadow = "";
-    } else {
-      img.setAttribute("data-highlight", "true");
-      img.style.outline = "2px solid rgba(99,102,241,0.18)"; // faint indigo
-      img.style.boxShadow = "0 6px 18px rgba(15,23,42,0.04)";
-    }
-    // keep selection
-    setOverlayPos((pos) => ({ ...pos }));
-  }, []);
-
-  useEffect(() => {
-    const editor = editorRef.current;
-    if (!editor) return;
-
-    const onClick = (ev) => {
-      const img = ev.target.closest && ev.target.closest("img");
-      if (img && editor.contains(img)) {
-        ev.preventDefault();
-        selectImage(img);
-      } else {
-        // clicking outside image clears selection
-        selectedImageRef.current = null;
-        setSelectedImageVisible(false);
-      }
-    };
-
-    editor.addEventListener("click", onClick);
-
-    const onKey = (ev) => {
-      if (!selectedImageRef.current) return;
-      if (ev.key === "Delete" || ev.key === "Backspace") {
-        ev.preventDefault();
-        deleteImage();
-      }
-    };
-
-    window.addEventListener("keydown", onKey);
-
-    return () => {
-      editor.removeEventListener("click", onClick);
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [deleteImage]);
-
-  // Sync stored content into editor when switching from preview to edit or on mount
-  useEffect(() => {
-    const editor = editorRef.current;
-    if (!editor) return;
-
-    if (!isPreview) {
-      // restore saved HTML into the editor
-      if (contentHtml && editor.innerHTML !== contentHtml) {
-        editor.innerHTML = contentHtml;
-      }
-    } else {
-      // when entering preview, capture current editor HTML
-      setContentHtml(editor.innerHTML || "");
-    }
-  }, [isPreview, contentHtml]);
-
+  const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
+  const readingTime = Math.ceil(wordCount / 200);
+  const charCount = content.length;
 
   const addTag = () => {
-    const t = newTag.trim();
-    if (!t) return;
-    setTags((s) => Array.from(new Set([...s, t])));
-    setNewTag("");
+    if (newTag.trim() && !tags.includes(newTag.trim())) {
+      setTags([...tags, newTag.trim()]);
+      setNewTag("");
+    }
   };
 
-  const removeTag = (t) => {
-    if (isPreview) return;
-    setTags((s) => s.filter((x) => x !== t));
+  const removeTag = (index) => {
+    setTags(tags.filter((_, i) => i !== index));
   };
 
-  const handleSave = async () => {
-    if (isSubmitting) return;
+  const handleCoverUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setCoverImage(event.target?.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
-    const authToken = token || getClientAuthToken();
-    if (!authToken) {
-      setSubmitError("Please log in to create a post.");
+  const handlePublish = async () => {
+    if (!title.trim()) {
+      setError("Title is required");
+      return;
+    }
+    if (!content.trim()) {
+      setError("Content is required");
+      return;
+    }
+    if (!user?._id) {
+      setError("User not authenticated. Please login again.");
+      router.push("/login");
       return;
     }
 
-    // Always use the current editor DOM as the source of truth
-    const editorEl = editorRef.current;
-    const contentHtmlVal = editorEl?.innerHTML ?? contentHtml ?? "";
-
-    // Convert editor HTML -> plain text for validation/excerpt
-    const tmp = document.createElement("div");
-    tmp.innerHTML = contentHtmlVal;
-    const rawText = tmp.innerText?.replace(/\u00A0/g, " ") ?? "";
-    let contentText = rawText.trim();
-
-    // If user never wrote anything, contentText may include placeholder text.
-    // Treat placeholder-ish content as empty.
-    const isPlaceholderOnly =
-      !contentText ||
-      contentText.length < 20 ||
-      /start writing\.+/i.test(contentText) ||
-      /^start writing\.*$/i.test(contentText);
-
-    const normalizedTitle = title.trim();
-    const fallbackTitle = normalizedTitle || "Untitled";
-
-    if (isPlaceholderOnly) {
-      setSubmitError("Please add your post content before continuing.");
-      return;
-    }
-
-    setSubmitError("");
-    setIsSubmitting(true);
+    setIsPublishing(true);
+    setError("");
 
     try {
-      const payloadTitle = fallbackTitle;
-      const payloadExcerpt = subtitle.trim() || contentText.slice(0, 180);
-    // Ensure we only submit real editor content (typed by the user)
-    // Use the same sanitized HTML we validated above.
-    const payloadContent = [
-      `<p><strong>Tags:</strong> ${tags.join(", ") || "none"}</p>`,
-      contentHtmlVal,
-    ].join("");
+      const payload = {
+        title: title.trim(),
+        description: subtitle.trim() || content.slice(0, 180),
+        content: content.trim(),
+        author: user._id,
+        tags: tags.length > 0 ? tags : ["general"],
+        category: category || "general",
+        isPublished: true,
+        enableComments: allowComments,
+        coverImage: coverImage,
+      };
 
-      const created = await blogAPI.create(payloadTitle, payloadContent, payloadExcerpt, user?._id);
-      const nextSlug = created?.slug || created?._id || created?.id;
+      console.log("Publishing payload:", payload);
 
-      if (nextSlug) {
-        // Redirect to success/published page with post data
-        const params = new URLSearchParams({
-          slug: nextSlug,
-          title: payloadTitle,
-          excerpt: payloadExcerpt,
-        });
-        router.push(`/blog/published?${params.toString()}`);
-        return;
+      const response = await blogAPI.create(payload);
+
+      console.log("Backend response:", response);
+
+      const slug = response?.slug || response?._id;
+      const postTitle = response?.title || title;
+      const postDesc = response?.description || subtitle || content.slice(0, 150);
+
+      if (slug) {
+        router.push(
+          `/blog/published?slug=${slug}&title=${encodeURIComponent(postTitle)}&excerpt=${encodeURIComponent(postDesc)}`
+        );
+      } else {
+        setError("Post created but could not get post ID");
       }
-
-      router.push("/blog");
-    } catch (error) {
-      setSubmitError(error?.message || "Failed to continue. Please try again.");
+    } catch (err) {
+      const errorMsg = err?.message || err?.response?.data?.message || err?.toString() || "Failed to publish post";
+      setError(errorMsg);
+      console.error("Publish error details:", {
+        message: err?.message,
+        response: err?.response?.data,
+        status: err?.response?.status,
+        error: err,
+      });
     } finally {
-      setIsSubmitting(false);
+      setIsPublishing(false);
     }
   };
 
+  // Show loading while authenticating
+  if (!isHydrated) {
+    return (
+      <div className="min-h-screen h-screen bg-[#0d0d14] flex items-center justify-center">
+        <div className="animate-pulse text-[#9490b8]">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user?._id) {
+    return null;
+  }
+
   return (
-    <main className="mx-auto max-w-7xl px-8 py-16 w-full min-h-screen bg-white">
-      <div className="w-full text-slate-800">
-        <header className="mb-6 flex items-center justify-between">
-            <h1 className="text-2xl font-semibold text-orange-500">Create Blog</h1>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsPreview((s) => !s)}
-              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm shadow-sm"
-            >
-              <Icon name="preview" /> <span>{isPreview ? "Edit" : "Preview"}</span>
-            </button>
+    <div className="min-h-screen h-screen bg-[#0d0d14] text-[#f0eeff] overflow-hidden">
+      {/* Background effects */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-20 left-1/4 w-96 h-96 bg-[#7c6ff7]/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-[#7c6ff7]/5 rounded-full blur-3xl" />
+      </div>
 
-            <button
-              onClick={handleSave}
-              disabled={isSubmitting}
-                className="inline-flex items-center gap-2 rounded-full bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow"
-            >
-              <Icon name="continue" /> <span>{isSubmitting ? "Saving..." : "Continue"}</span>
-            </button>
-          </div>
-        </header>
+      <div className="relative z-10 w-full h-full flex flex-col">
+        {/* Top Navigation */}
+        <div className="flex items-center justify-between px-6 sm:px-8 py-4 border-b border-[#2a2740] bg-[#0d0d14] shrink-0">
+          <Link href="/blog" className="flex items-center gap-2 group">
+            <div className="w-8 h-8 rounded-lg bg-linear-to-br from-[#7c6ff7] to-[#a89cf7] flex items-center justify-center">
+              ⚡
+            </div>
+            <span className="text-lg font-bold">Pulse<span className="text-[#7c6ff7]">.</span></span>
+          </Link>
 
-        {submitError && <p className="mb-4 text-sm text-red-600">{submitError}</p>}
-
-        {/* Toolbar */}
-        {!isPreview && (
-          <div className="mb-6 flex items-center gap-3 p-3">
-              <div className="flex gap-2">
-              <button
-                onClick={() => { exec("bold"); requestAnimationFrame(updateFormatStates); }}
-                className={`rounded px-2 py-1 ${isBoldActive ? "bg-slate-800 text-white" : "hover:bg-slate-100"}`}
-                aria-pressed={isBoldActive}
-              >
-                <Icon name="bold" />
-              </button>
-              <button
-                onClick={() => { exec("italic"); requestAnimationFrame(updateFormatStates); }}
-                className={`rounded px-2 py-1 ${isItalicActive ? "bg-slate-800 text-white" : "hover:bg-slate-100"}`}
-                aria-pressed={isItalicActive}
-              >
-                <Icon name="italic" />
-              </button>
-              <button
-                onClick={() => { exec("underline"); requestAnimationFrame(updateFormatStates); }}
-                className={`rounded px-2 py-1 ${isUnderlineActive ? "bg-slate-800 text-white" : "hover:bg-slate-100"}`}
-                aria-pressed={isUnderlineActive}
-              >
-                <Icon name="underline" />
-              </button>
-
-              <button
-                onClick={() => {
-                  const url = prompt("Insert link URL");
-                  if (url) exec("createLink", url);
-                }}
-                className="rounded px-2 py-1 hover:bg-slate-100"
-              >
-                <Icon name="link" />
-              </button>
-
-              <button onClick={() => fileInputRef.current?.click()} className="rounded px-2 py-1 hover:bg-slate-100">
-                <Icon name="image" />
-              </button>
-              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+          <div className="flex items-center gap-4">
+            {/* Draft Status */}
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-[#f59e0b]/10 border border-[#f59e0b]/30 rounded-full text-xs font-medium text-[#f59e0b]">
+              <span className="inline-block w-2 h-2 bg-[#f59e0b] rounded-full" />
+              Draft
             </div>
 
-            <div className="ml-auto flex gap-2">
-              <button onClick={() => exec("justifyLeft")} className="rounded px-2 py-1 hover:bg-slate-100">
-                <Icon name="left" />
-              </button>
-              <button onClick={() => exec("justifyCenter")} className="rounded px-2 py-1 hover:bg-slate-100">
-                <Icon name="center" />
-              </button>
-              <button onClick={() => exec("justifyRight")} className="rounded px-2 py-1 hover:bg-slate-100">
-                <Icon name="right" />
-              </button>
-            </div>
+            {/* Preview Button */}
+            <button className="px-4 py-2 text-sm font-medium text-[#9490b8] hover:text-[#f0eeff] hover:bg-[#1c1c2e] rounded-lg transition border border-transparent hover:border-[#2a2740]">
+              Preview
+            </button>
+
+            {/* Publish Button */}
+            <button
+              onClick={handlePublish}
+              disabled={isPublishing}
+              className="px-6 py-2 text-sm font-semibold text-white bg-linear-to-r from-[#7c6ff7] to-[#a89cf7] rounded-lg hover:shadow-lg hover:shadow-[#7c6ff7]/30 transition disabled:opacity-50"
+            >
+              {isPublishing ? "Publishing..." : "Publish now"}
+            </button>
           </div>
-        )}
+        </div>
 
-        {/* Editable template */}
-        <div className="w-full p-8">
-          <div className="mb-4 flex items-center justify-between">
-            <div />
-            <div className="text-sm text-slate-500">Soft neutral palette · Minimal</div>
-          </div>
-
-          <div className="space-y-4">
-            {/* header removed */}
-
-            <div className="p-10">
-              <div className="prose max-w-none min-h-90" style={{ whiteSpace: "pre-wrap" }}>
-                {isPreview ? (
-                  <>
-                    <h1 className="text-4xl font-bold mb-3">{title.trim() || "Title"}</h1>
-                    <h3 className="text-base text-slate-500 mb-5">{subtitle.trim() || "Add a subtitle..."}</h3>
-                  </>
-                ) : (
-                  <>
-                    <input
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      placeholder="Title"
-                      className="mb-3 w-full bg-transparent text-4xl font-bold outline-none placeholder:text-slate-400"
+        {/* Main Editor Container - Full height */}
+        <div className="flex-1 overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 h-full w-full">
+            {/* Left Editor Area */}
+            <div className="lg:col-span-2 border-r border-[#2a2740] overflow-y-auto flex flex-col bg-[#0d0d14]">
+              <div className="flex-1 p-8 space-y-6 overflow-y-auto">
+                {/* Cover Image Upload */}
+                <div
+                  onClick={() => coverInputRef.current?.click()}
+                  className="relative w-full h-48 rounded-xl border-2 border-dashed border-[#2a2740] hover:border-[#7c6ff7] bg-[#1c1c2e] flex items-center justify-center cursor-pointer group transition shrink-0"
+                >
+                  {coverImage ? (
+                    <Image
+                      src={coverImage}
+                      alt="Cover"
+                      fill
+                      unoptimized
+                      className="object-cover rounded-lg"
                     />
-                    <input
-                      value={subtitle}
-                      onChange={(e) => setSubtitle(e.target.value)}
-                      placeholder="Add a subtitle..."
-                      className="mb-5 w-full bg-transparent text-base text-slate-500 outline-none placeholder:text-slate-400"
-                    />
-                  </>
-                )}
-
-                {/* Tags */}
-                <div className="mb-4 flex flex-wrap gap-2">
-                  {tags.map((t) => (
-                    <span key={t} className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-sm">
-                      {t}
-                      {!isPreview && (
-                        <button onClick={() => removeTag(t)} aria-label={`Remove ${t}`} className="text-xs text-slate-400">✕</button>
-                      )}
-                    </span>
-                  ))}
-                  {!isPreview && (
-                    <div className="inline-flex items-center gap-2">
-                      <input value={newTag} onChange={(e) => setNewTag(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }} placeholder="Add tag" className="rounded px-2 py-1 border border-slate-200 text-sm" />
-                      <button onClick={addTag} className="rounded bg-slate-800 px-2 py-1 text-sm text-white">Add</button>
+                  ) : (
+                    <div className="text-center">
+                      <div className="text-3xl mb-2">📸</div>
+                      <p className="text-sm text-[#9490b8]">Click to upload cover image</p>
                     </div>
                   )}
-                </div>
-
-                <div className="relative min-h-45 text-slate-700">{/* main content area */}
-                  {!isPreview && !hasBodyContent && (
-                    <p className="pointer-events-none absolute left-0 top-0 text-base text-slate-400">Start writing...</p>
-                  )}
-                  <div
-                    ref={editorRef}
-                    contentEditable={!isPreview}
-                    suppressContentEditableWarning
-                    onInput={(e) => {
-                      setHasBodyContent(Boolean(e.currentTarget.textContent?.trim()));
-                      setContentHtml(e.currentTarget.innerHTML || "");
-                      requestAnimationFrame(updateFormatStates);
-                    }}
-                    className="min-h-45 outline-none"
+                  <input
+                    ref={coverInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleCoverUpload}
+                    className="hidden"
                   />
                 </div>
-                {selectedImageVisible && (
-                  <div style={{ position: "fixed", top: overlayPos.top, left: overlayPos.left, zIndex: 60 }}>
-                    <div className="inline-flex items-center gap-2 rounded bg-white p-2 shadow-md">
-                      <button onClick={deleteImage} className="text-sm text-red-600 px-2 py-1">Delete</button>
-                      <button onClick={() => { setReplacePending(true); fileInputRef.current?.click(); }} className="text-sm px-2 py-1">Replace</button>
-                      <button onClick={toggleHighlight} className="text-sm px-2 py-1">Highlight</button>
+
+                {/* Title Input */}
+                <div>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Enter your article title..."
+                    className="w-full bg-transparent text-4xl font-bold text-[#f0eeff] placeholder-[#9490b8]/50 outline-none"
+                  />
+                </div>
+
+                {/* Subtitle Input */}
+                <div className="pt-4 border-t border-[#2a2740]">
+                  <input
+                    type="text"
+                    value={subtitle}
+                    onChange={(e) => setSubtitle(e.target.value)}
+                    placeholder="Add a compelling subtitle..."
+                    className="w-full bg-transparent text-lg text-[#9490b8] placeholder-[#9490b8]/30 outline-none"
+                  />
+                </div>
+
+                {/* Content Textarea */}
+                <textarea
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder="Start writing your article..."
+                  className="w-full flex-1 bg-transparent text-base text-[#f0eeff] placeholder-[#9490b8]/30 outline-none resize-none leading-relaxed min-h-96"
+                />
+              </div>
+
+              {/* Bottom Stats Bar */}
+              <div className="border-t border-[#2a2740] px-8 py-4 flex items-center gap-6 text-xs text-[#9490b8] bg-[#141420] shrink-0">
+                <span>Words: <span className="text-[#7c6ff7]">{wordCount}</span></span>
+                <span>Reading time: <span className="text-[#7c6ff7]">{readingTime} min</span></span>
+                <span>Characters: <span className="text-[#7c6ff7]">{charCount}</span></span>
+              </div>
+            </div>
+
+            {/* Right Settings Panel */}
+            <div className="border-l border-[#2a2740] overflow-y-auto bg-[#1c1c2e] p-6 space-y-6">
+              {/* Cover Image Card */}
+              <div className="bg-[#141420] border border-[#2a2740] rounded-xl p-4">
+                <p className="text-xs uppercase tracking-wider text-[#9490b8] font-semibold mb-3">Cover Image</p>
+                <button
+                  onClick={() => coverInputRef.current?.click()}
+                  className="w-full py-2 text-sm border border-[#2a2740] text-[#9490b8] hover:text-[#f0eeff] hover:border-[#7c6ff7]/50 rounded-lg transition"
+                >
+                  {coverImage ? "Change cover" : "Upload cover"}
+                </button>
+              </div>
+
+              {/* Tags Section */}
+              <div className="bg-[#141420] border border-[#2a2740] rounded-xl p-4">
+                <p className="text-xs uppercase tracking-wider text-[#9490b8] font-semibold mb-3">Tags</p>
+                <div className="flex gap-2 mb-3 flex-wrap">
+                  {tags.map((tag, idx) => (
+                    <div key={idx} className="flex items-center gap-2 px-3 py-1 bg-[#7c6ff7]/20 border border-[#7c6ff7]/50 text-[#a89cf7] text-xs rounded-full">
+                      {tag}
+                      <button
+                        onClick={() => removeTag(idx)}
+                        className="hover:text-[#f0eeff] transition"
+                      >
+                        ✕
+                      </button>
                     </div>
-                  </div>
-                )}
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    onKeyPress={(e) => e.key === "Enter" && addTag()}
+                    placeholder="Add tag..."
+                    className="flex-1 px-3 py-2 bg-[#0d0d14] border border-[#2a2740] text-[#f0eeff] placeholder-[#9490b8]/30 rounded-lg outline-none focus:border-[#7c6ff7] text-sm"
+                  />
+                  <button
+                    onClick={addTag}
+                    className="px-3 py-2 bg-[#7c6ff7] text-white rounded-lg text-sm font-medium hover:shadow-lg hover:shadow-[#7c6ff7]/30 transition"
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
+
+              {/* Category */}
+              <div className="bg-[#141420] border border-[#2a2740] rounded-xl p-4">
+                <p className="text-xs uppercase tracking-wider text-[#9490b8] font-semibold mb-3">Category</p>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#0d0d14] border border-[#2a2740] text-[#f0eeff] rounded-lg outline-none focus:border-[#7c6ff7] text-sm"
+                >
+                  <option>General</option>
+                  <option>Technology</option>
+                  <option>Business</option>
+                  <option>Personal</option>
+                  <option>Lifestyle</option>
+                </select>
+              </div>
+
+              {/* Visibility */}
+              <div className="bg-[#141420] border border-[#2a2740] rounded-xl p-4">
+                <p className="text-xs uppercase tracking-wider text-[#9490b8] font-semibold mb-3">Visibility</p>
+                <select
+                  value={visibility}
+                  onChange={(e) => setVisibility(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#0d0d14] border border-[#2a2740] text-[#f0eeff] rounded-lg outline-none focus:border-[#7c6ff7] text-sm"
+                >
+                  <option value="public">Public</option>
+                  <option value="private">Private</option>
+                  <option value="draft">Draft</option>
+                </select>
+              </div>
+
+              {/* Toggles */}
+              <div className="bg-[#141420] border border-[#2a2740] rounded-xl p-4 space-y-4">
+                <label className="flex items-center justify-between cursor-pointer group">
+                  <span className="text-sm text-[#9490b8] group-hover:text-[#f0eeff] transition">Allow comments</span>
+                  <input
+                    type="checkbox"
+                    checked={allowComments}
+                    onChange={(e) => setAllowComments(e.target.checked)}
+                    className="w-5 h-5"
+                  />
+                </label>
+                <label className="flex items-center justify-between cursor-pointer group">
+                  <span className="text-sm text-[#9490b8] group-hover:text-[#f0eeff] transition">Feature on profile</span>
+                  <input
+                    type="checkbox"
+                    checked={featureProfile}
+                    onChange={(e) => setFeatureProfile(e.target.checked)}
+                    className="w-5 h-5"
+                  />
+                </label>
+              </div>
+
+              {/* Meta Info */}
+              <div className="bg-[#141420] border border-[#2a2740] rounded-xl p-4 space-y-4">
+                <div>
+                  <p className="text-xs uppercase tracking-wider text-[#9490b8] font-semibold mb-2">Meta title</p>
+                  <input
+                    type="text"
+                    value={metaTitle}
+                    onChange={(e) => setMetaTitle(e.target.value)}
+                    placeholder="SEO title (auto-filled)"
+                    className="w-full px-3 py-2 bg-[#0d0d14] border border-[#2a2740] text-[#f0eeff] placeholder-[#9490b8]/30 rounded-lg outline-none focus:border-[#7c6ff7] text-sm"
+                  />
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wider text-[#9490b8] font-semibold mb-2">Meta description</p>
+                  <textarea
+                    value={metaDesc}
+                    onChange={(e) => setMetaDesc(e.target.value)}
+                    placeholder="SEO description (auto-filled)"
+                    rows="3"
+                    className="w-full px-3 py-2 bg-[#0d0d14] border border-[#2a2740] text-[#f0eeff] placeholder-[#9490b8]/30 rounded-lg outline-none focus:border-[#7c6ff7] text-sm resize-none"
+                  />
+                </div>
+              </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-400">
+                  {error}
+                </div>
+              )}
+
+              {/* Publish Buttons */}
+              <div className="space-y-3 pt-4 border-t border-[#2a2740]">
+                <button
+                  onClick={handlePublish}
+                  disabled={isPublishing}
+                  className="w-full py-3 bg-linear-to-r from-[#7c6ff7] to-[#a89cf7] text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-[#7c6ff7]/30 transition disabled:opacity-50"
+                >
+                  {isPublishing ? "Publishing..." : "Publish now"}
+                </button>
+                <button className="w-full py-2 border border-[#2a2740] text-[#9490b8] hover:text-[#f0eeff] hover:bg-[#141420] font-medium rounded-lg transition">
+                  Save as draft
+                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

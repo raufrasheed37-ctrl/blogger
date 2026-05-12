@@ -79,7 +79,7 @@ export default function PostActions({ post }) {
       {isAuthor && (
         <>
           <Link
-            href={`/blog/${post._id || post.id || post.slug}/edit`}
+            href={`/editor-dashboard?slug=${post._id || post.id || post.slug}`}
             className="rounded-xl bg-zinc-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-zinc-600"
           >
             Edit

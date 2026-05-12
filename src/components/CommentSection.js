@@ -1,12 +1,24 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
+import useAuthStore from "@/store/authstore";
+import { getClientAuthToken } from "@/store/authstore";
 import { useAuthRedirect } from "@/utils/auth";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_ROOT = `${API_BASE_URL}${API_BASE_URL.endsWith("/api") ? "" : "/api"}`;
+
+function getAuthHeaders() {
+  const token = getClientAuthToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 export default function CommentSection({
   postId,
   requireAuth: requireAuthProp,
 }) {
+  const currentUser = useAuthStore((state) => state.user);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -24,9 +36,11 @@ export default function CommentSection({
     try {
       setFetching(true);
 
-      const res = await fetch(
-        `http://localhost:5000/api/comments/${postId}`
-      );
+      const res = await fetch(`${API_ROOT}/comments/${postId}`, {
+        headers: {
+          ...getAuthHeaders(),
+        },
+      });
 
       if (!res.ok) throw new Error("Failed to fetch");
 
@@ -57,10 +71,11 @@ export default function CommentSection({
     try {
       setLoading(true);
 
-      const res = await fetch("http://localhost:5000/api/comments", {
+      const res = await fetch(`${API_ROOT}/comments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({
           text: commentText,
@@ -82,47 +97,48 @@ export default function CommentSection({
   };
 
   const handleReply = async (parentCommentId) => {
-  if (!requireAuth()) return;
-  if (!replyText.trim()) return;
+    if (!requireAuth()) return;
+    if (!replyText.trim()) return;
 
-  try {
-    const res = await fetch(
-      "http://localhost:5000/api/comments",
-      {
+    try {
+      const res = await fetch(`${API_ROOT}/comments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({
           text: replyText,
           postId,
           parentComment: parentCommentId,
         }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to reply");
       }
-    );
 
-    if (!res.ok) {
-      throw new Error("Failed to reply");
+      setReplyText("");
+      setReplyingTo(null);
+
+      fetchComments();
+      setExpandedReplies((prev) => ({
+        ...prev,
+        [parentCommentId]: true,
+      }));
+    } catch (err) {
+      console.log(err);
     }
-
-    setReplyText("");
-    setReplyingTo(null);
-
-    fetchComments();
-    setExpandedReplies((prev) => ({
-  ...prev,
-  [parentCommentId]: true,
-}));
-  } catch (err) {
-    console.log(err);
-  }
-};
+  };
 
   // Delete comment
   const handleDelete = async (id) => {
     try {
-      await fetch(`http://localhost:5000/api/comments/${id}`, {
+      await fetch(`${API_ROOT}/comments/${id}`, {
         method: "DELETE",
+        headers: {
+          ...getAuthHeaders(),
+        },
       });
 
       setComments((prev) =>
@@ -143,16 +159,41 @@ export default function CommentSection({
   const handleSaveEdit = (id) => {
     if (!editText.trim()) return;
 
-    setComments((prev) =>
-      prev.map((c) =>
-        c._id === id
-          ? { ...c, text: editText }
-          : c
-      )
-    );
-
-    setEditingId(null);
-    setEditText("");
+    fetch(`${API_ROOT}/comments/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify({ text: editText }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to update comment");
+        return res.json();
+      })
+      .then((updated) => {
+        setComments((prev) =>
+          prev.map((c) =>
+            c._id === id
+              ? { ...c, text: updated?.text || editText }
+              : c
+          )
+        );
+        setEditingId(null);
+        setEditText("");
+      })
+      .catch((err) => {
+        console.log(err);
+        setComments((prev) =>
+          prev.map((c) =>
+            c._id === id
+              ? { ...c, text: editText }
+              : c
+          )
+        );
+        setEditingId(null);
+        setEditText("");
+      });
   };
 
   const handleCancelEdit = () => {
@@ -210,7 +251,16 @@ export default function CommentSection({
           </p>
         )}
 
-        {comments.map((comment) => (
+        {comments.map((comment) => {
+          const isCurrentUserComment = Boolean(
+            currentUser && (
+              (comment.user?._id && currentUser._id && comment.user._id === currentUser._id) ||
+              (comment.user?.id && currentUser.id && comment.user.id === currentUser.id) ||
+              (comment.user?.email && currentUser.email && comment.user.email === currentUser.email)
+            )
+          );
+
+          return (
           <div
             key={comment._id}
             className="rounded-[28px] border border-white/10 bg-[#151515] p-5 transition hover:border-white/20"
@@ -219,7 +269,11 @@ export default function CommentSection({
             <div className="flex items-start gap-4">
 
               {/* AVATAR */}
-              <div className="h-11 w-11 shrink-0 rounded-full bg-gradient-to-br from-orange-400 to-amber-500" />
+              {isCurrentUserComment ? (
+                <Link href="/dashboard" className="h-11 w-11 shrink-0 rounded-full bg-linear-to-br from-orange-400 to-amber-500 hover:opacity-80 transition cursor-pointer" />
+              ) : (
+                <Link href={`/profile/${comment.user?._id || comment.user?.id || comment.user?.username || comment.user?.name?.toLowerCase() || "user"}`} className="h-11 w-11 shrink-0 rounded-full bg-linear-to-br from-orange-400 to-amber-500 hover:opacity-80 transition cursor-pointer" />
+              )}
 
               {/* CONTENT */}
               <div className="flex-1">
@@ -260,9 +314,15 @@ export default function CommentSection({
                     {/* HEADER */}
                     <div className="flex flex-wrap items-center gap-2 text-sm">
 
-                      <span className="text-[15px] font-semibold text-white">
-                        {comment.user?.name || "User"}
-                      </span>
+                      {isCurrentUserComment ? (
+                        <Link href="/dashboard" className="text-[15px] font-semibold text-white hover:text-[#a89cf7] transition">
+                          {comment.user?.name || "User"}
+                        </Link>
+                      ) : (
+                        <Link href={`/profile/${comment.user?._id || comment.user?.id || comment.user?.username || comment.user?.name?.toLowerCase() || "user"}`} className="text-[15px] font-semibold text-white hover:text-[#a89cf7] transition">
+                          {comment.user?.name || "User"}
+                        </Link>
+                      )}
 
                       <span className="text-xs text-zinc-500">
                         {new Date(
@@ -280,9 +340,45 @@ export default function CommentSection({
                     {/* ACTIONS */}
                     <div className="mt-4 flex items-center gap-5 text-sm text-zinc-500">
 
-  <button className="transition hover:text-orange-400">
-    ❤️ {comment.likes || 0}
-  </button>
+  <button
+  onClick={async () => {
+    if (!requireAuth()) return;
+
+    try {
+      const res = await fetch(
+        `${API_ROOT}/comments/${comment._id}/like`,
+        {
+          method: "PUT",
+          headers: {
+            ...getAuthHeaders(),
+          },
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed");
+      }
+
+      const data = await res.json();
+
+      setComments((prev) =>
+        prev.map((c) =>
+          c._id === comment._id
+            ? {
+                ...c,
+                likes: data.likes,
+              }
+            : c
+        )
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  }}
+  className="transition hover:text-orange-400"
+>
+  ❤️ {comment.likes || 0}
+</button>
 
     <button
   onClick={() => {
@@ -386,7 +482,8 @@ export default function CommentSection({
               </div>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

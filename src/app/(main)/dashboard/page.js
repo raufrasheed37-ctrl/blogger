@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import useAuthStore from '@/store/authstore';
 import { authAPI, blogAPI } from '@/utils/api';
 import { useEffect } from 'react';
+import { Home, User, Heart, BarChart3, LogOut, Eye, Search, PenSquare, Plus , FileText, BookOpen, Users, Table,} from 'lucide-react';
+import { Expletus_Sans } from "next/font/google";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -114,17 +116,17 @@ export default function DashboardPage() {
   const initial = (displayName?.[0] || 'U').toUpperCase();
 
   const tabs = [
-    { label: "Activity", icon: "📊" },
-    { label: "Posts", icon: "✍️", count: authorPosts.length },
-    { label: "Likes", icon: "❤️" },
-    { label: "Reads", icon: "👁️" },
+    { label: "Activity", icon: BarChart3 },
+    { label: "Posts", icon: PenSquare, count: authorPosts.length },
+    { label: "Likes", icon: Heart },
+    { label: "Reads", icon: Eye },
   ];
 
   const stats = [
-    { label: "Total Reads", value: "0", icon: "📖" },
-    { label: "Subscribers", value: user?.subscribers ?? 0, icon: "👥" },
-    { label: "Posts", value: authorPosts.length, icon: "📝" },
-    { label: "Likes Received", value: "0", icon: "♥️" },
+    { label: "Total Reads", value: "0", icon: BookOpen },
+    { label: "Subscribers", value: user?.subscribers ?? 0, icon: Users },
+    { label: "Posts", value: authorPosts.length, icon: FileText },
+    { label: "Likes Received", value: "0", icon: Heart },
   ];
 
   return (
@@ -149,13 +151,13 @@ export default function DashboardPage() {
           {/* Navigation */}
           <nav className="flex-1 space-y-2 mb-8">
             {[
-              { label: "Home", icon: "🏠", href: "/" },
-              { label: "Activity", icon: "📊", href: "/activity" },
-              { label: "Explore", icon: "🔍", href: "/explore" },
-              { label: "Profile", icon: "👤", href: "/dashboard", active: true },
+              { label: "Home", icon: Home, href: "/" },
+              { label: "Activity", icon: BarChart3, href: "/activity" },
+              { label: "Explore", icon: Search, href: "/explore" },
+              { label: "Profile", icon: User, href: "/dashboard", active: true },
             ].map((item) => (
               <Link key={item.label} href={item.href} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition ${item.active ? 'bg-[#7c6ff7]/20 border border-[#7c6ff7]/50 text-[#a89cf7]' : 'text-[#9490b8] hover:text-[#f0eeff] hover:bg-[#1c1c2e]'}`}>
-                <span className="text-lg">{item.icon}</span>
+                <item.icon className="h-5 w-5" />
                 <span className="font-medium">{item.label}</span>
               </Link>
             ))}
@@ -227,19 +229,23 @@ export default function DashboardPage() {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {stats.map((stat, idx) => (
+              {stats.map((stat, idx) => {
+                const Icon = stat.icon;
+                return (
                 <div key={idx} className="rounded-xl bg-[#141420] border border-[#2a2740] p-6 hover:border-[#7c6ff7]/50 transition group">
                   <p className="text-[#9490b8] text-sm font-medium mb-2">{stat.label}</p>
                   <p className="text-3xl font-bold text-[#f0eeff] group-hover:text-[#7c6ff7] transition">{stat.value}</p>
-                  <div className="text-3xl mt-3 opacity-50 group-hover:opacity-100 transition">{stat.icon}</div>
+                    <Icon className="h-8 w-8 mt-3 opacity-50 group-hover:opacity-100 transition" />
                 </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Tabs */}
             <div className="flex gap-1 border-b border-[#2a2740] overflow-x-auto">
               {tabs.map((tab) => {
                 const isActive = activeTab === tab.label;
+                const TabIcon = tab.icon;
                 return (
                   <button key={tab.label} onClick={() => setActiveTab(tab.label)} className={`relative px-4 py-3 font-medium text-sm transition whitespace-nowrap ${
                     isActive 
@@ -247,9 +253,10 @@ export default function DashboardPage() {
                       : 'text-[#9490b8] hover:text-[#f0eeff]'
                   }`}>
                     <span className="flex items-center gap-2">
-                      {tab.icon}
+                      <TabIcon className="h-4 w-4" />
                       {tab.label}
                       {tab.count !== undefined && <span className="text-xs text-[#9490b8]">({tab.count})</span>}
+                     
                     </span>
                   </button>
                 );

@@ -1,29 +1,36 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function PostPublishedPage() {
+export const dynamic = "force-dynamic";
+
+function PostPublishedContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [copied, setCopied] = useState(false);
-  const [postData, setPostData] = useState(null);
+  const slug = searchParams.get("slug");
+  const title = searchParams.get("title");
+  const excerpt = searchParams.get("excerpt");
+  const postData = useMemo(() => {
+    if (!slug || !title) return null;
+
+    return {
+      slug,
+      title,
+      excerpt: excerpt || "Your blog post is now live.",
+    };
+  }, [excerpt, slug, title]);
 
   // Get post data from URL params or sessionStorage
   useEffect(() => {
-    const slug = searchParams.get("slug");
-    const title = searchParams.get("title");
-    const excerpt = searchParams.get("excerpt");
-    
-    if (slug && title) {
-      setPostData({ slug, title, excerpt: excerpt || "Your blog post is now live." });
-    } else {
+    if (!postData) {
       // Fallback if no params - redirect after 3 seconds
       const timer = setTimeout(() => router.push("/blog"), 3000);
       return () => clearTimeout(timer);
     }
-  }, [searchParams, router]);
+  }, [postData, router]);
 
   const postUrl = postData ? `${typeof window !== "undefined" ? window.location.origin : ""}/blog/${postData.slug}` : "";
 
@@ -90,7 +97,7 @@ export default function PostPublishedPage() {
               </div>
 
               {/* Edit Button */}
-              <Link href={`/blog/${postData.slug}/edit`} className="px-4 py-2 text-sm font-medium text-[#9490b8] hover:text-[#f0eeff] hover:bg-[#1c1c2e] rounded-lg transition border border-transparent hover:border-[#2a2740]">
+              <Link href={`/editor-dashboard?slug=${postData.slug}`} className="px-4 py-2 text-sm font-medium text-[#9490b8] hover:text-[#f0eeff] hover:bg-[#1c1c2e] rounded-lg transition border border-transparent hover:border-[#2a2740]">
                 Edit post
               </Link>
 
@@ -235,7 +242,7 @@ export default function PostPublishedPage() {
 
               {/* What's Next */}
               <div className="bg-[#1c1c2e] border border-[#2a2740] rounded-lg p-4 space-y-3">
-                <p className="text-sm font-semibold text-[#f0eeff]">What's next?</p>
+                <p className="text-sm font-semibold text-[#f0eeff]">What&apos;s next?</p>
                 <div className="space-y-2 text-xs text-[#9490b8]">
                   <label className="flex items-center gap-2 cursor-pointer hover:text-[#f0eeff] transition">
                     <input type="checkbox" className="rounded" />
@@ -264,5 +271,19 @@ export default function PostPublishedPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PostPublishedPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#0d0d14] flex items-center justify-center">
+          <div className="animate-pulse text-[#9490b8]">Loading...</div>
+        </div>
+      }
+    >
+      <PostPublishedContent />
+    </Suspense>
   );
 }

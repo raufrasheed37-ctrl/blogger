@@ -1,404 +1,647 @@
+"use client";
+
 import Link from "next/link";
-import PostActions from "@/components/PostActions";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { blogAPI } from "@/utils/api";
 import CommentSection from "@/components/CommentSection";
+import useAuthStore, { isClientAuthenticated } from "@/store/authstore";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_ROOT = `${API_BASE_URL}${API_BASE_URL.endsWith("/api") ? "" : "/api"}`;
 
-
-  const posts = [
-  {
-      name: "Sarah Johnson",
-      handle: "@sarahwrites",
-      time: "2h ago",
-      slug: "how-consistency-builds-online-income",
-      title: "How Consistency Builds Online Income",
-      category: "Business",
-      likes: 128,
-      comments: 24,
-      text: "Consistency builds what motivation cannot. Real online income comes from showing up repeatedly and earning trust over time.",
-      avatarClass: "from-emerald-400 to-teal-500",
-    },
-    {
-      name: "Daniel Brooks",
-      handle: "@danielmedia",
-      time: "5h ago",
-      slug: "sports-business-behind-modern-football",
-      title: "The Sports Business Behind Modern Football",
-      category: "Sports",
-      likes: 214,
-      comments: 39,
-      text: "Modern football is now a billion-dollar business powered by branding and global media rights.",
-      avatarClass: "from-orange-400 to-amber-500",
-    },
-    {
-name: "Olivia Grant",
-handle: "@oliviabuilds",
-time: "1d ago",
-slug: "why-small-brands-win-online",
-title: "Why Small Brands Win Online",
-category: "Business",
-likes: 175,
-comments: 28,
-text: "Smaller brands move faster, connect deeper, and build stronger trust than large corporate systems.",
-avatarClass: "from-purple-400 to-pink-500",
-},
-{
-name: "Marcus Reed",
-handle: "@sportsmind",
-time: "1d ago",
-slug: "athletes-as-global-brands",
-title: "Athletes Are Becoming Global Brands",
-category: "Sports",
-likes: 245,
-comments: 44,
-text: "Athletes today are media companies, brand ambassadors, and business founders beyond the field.",
-avatarClass: "from-orange-500 to-red-500",
-},
-{
-name: "Lena Fox",
-handle: "@entdaily",
-time: "1d ago",
-slug: "streaming-platforms-changing-hollywood",
-title: "How Streaming Platforms Changed Hollywood",
-category: "Entertainment",
-likes: 201,
-comments: 36,
-text: "Streaming shifted power from traditional studios to audiences who now decide what survives.",
-avatarClass: "from-cyan-500 to-indigo-500",
-},
-{
-name: "Victor Hayes",
-handle: "@startupfocus",
-time: "1d ago",
-slug: "startup-founders-and-focus",
-title: "Startup Founders Need Focus, Not More Ideas",
-category: "Startups",
-likes: 149,
-comments: 21,
-text: "Most founders fail from distraction, not lack of ideas. Focus is the real competitive advantage.",
-avatarClass: "from-violet-500 to-purple-600",
-}, 
-
-    {
-name: "Ella Monroe",
-handle: "@showbizdaily",
-time: "2d ago",
-slug: "celebrity-culture-and-digital-power",
-title: "Celebrity Culture and Digital Power",
-category: "Entertainment",
-likes: 205,
-comments: 35,
-text: "Celebrities now compete with creators in real-time. Digital relevance moves faster than traditional fame.",
-avatarClass: "from-cyan-600 to-blue-600",
-},
-{
-name: "Nathan Cole",
-handle: "@startupengine",
-time: "2d ago",
-slug: "launch-fast-learn-faster",
-title: "Launch Fast, Learn Faster",
-category: "Startups",
-likes: 158,
-comments: 23,
-text: "Waiting for perfection kills momentum. Startups grow by testing reality, not planning forever.",
-avatarClass: "from-violet-600 to-purple-700",
-},
-{
-name: "Ariana West",
-handle: "@techshift",
-time: "2d ago",
-slug: "automation-is-the-new-advantage",
-title: "Automation Is the New Competitive Advantage",
-category: "Technology",
-likes: 295,
-comments: 54,
-text: "Teams that automate repetitive work create more time for strategy, creativity, and scale.",
-avatarClass: "from-pink-600 to-rose-600",
-},
-{
-name: "Leo Bennett",
-handle: "@freelancewins",
-time: "2d ago",
-slug: "raising-prices-without-losing-clients",
-title: "Raise Your Prices Without Losing Clients",
-category: "Freelancing",
-likes: 211,
-comments: 32,
-text: "Clients pay for confidence and outcomes, not just hours. Better positioning supports premium pricing.",
-avatarClass: "from-yellow-600 to-orange-700",
-},
-    {
-name: "Clara James",
-handle: "@conversionlab",
-time: "3d ago",
-slug: "why-simple-offers-convert-more",
-title: "Why Simple Offers Convert More",
-category: "Marketing",
-likes: 187,
-comments: 25,
-text: "Confused customers do not buy. Clear offers outperform clever but complicated messaging.",
-avatarClass: "from-indigo-600 to-blue-700",
-},
-{
-name: "David Stone",
-handle: "@disciplinefirst",
-time: "3d ago",
-slug: "protecting-focus-in-a-distracted-world",
-title: "Protecting Focus in a Distracted World",
-category: "Personal Growth",
-likes: 322,
-comments: 66,
-text: "Focus is now a business skill. Protecting attention protects performance and long-term growth.",
-avatarClass: "from-lime-600 to-green-700",
-},
-{
-name: "Julia Reyes",
-handle: "@creatoreconomy",
-time: "3d ago",
-slug: "community-first-business-models",
-title: "Community-First Business Models",
-category: "Creator Economy",
-likes: 230,
-comments: 38,
-text: "The strongest digital businesses begin with community. Revenue becomes stronger when trust comes first.",
-avatarClass: "from-sky-600 to-cyan-700",
-},
-{
-name: "Brandon Scott",
-handle: "@zerofounder",
-time: "3d ago",
-slug: "solving-small-problems-for-big-profit",
-title: "Solve Small Problems for Big Profit",
-category: "Business",
-likes: 248,
-comments: 40,
-text: "Massive companies often begin by solving one simple painful problem better than everyone else.",
-avatarClass: "from-red-600 to-pink-700",
-},  
-    {
-name: "Jordan Miles",
-handle: "@freelanceflow",
-time: "1d ago",
-slug: "high-paying-clients-without-cold-dms",
-title: "Finding High-Paying Clients Without Cold DMs",
-category: "Freelancing",
-likes: 196,
-comments: 30,
-text: "Positioning and authority attract better clients faster than random outreach ever will.",
-avatarClass: "from-yellow-500 to-orange-600",
-},
-{
-name: "Grace Allen",
-handle: "@marketqueen",
-time: "1d ago",
-slug: "storytelling-sells-better-than-ads",
-title: "Storytelling Sells Better Than Ads",
-category: "Marketing",
-likes: 183,
-comments: 26,
-text: "People ignore advertisements but remember stories. Narrative creates emotional conversion.",
-avatarClass: "from-blue-500 to-indigo-600",
-},
-{
-name: "Kevin Ross",
-handle: "@growthmode",
-time: "2d ago",
-slug: "daily-systems-for-high-performance",
-title: "Daily Systems for High Performance",
-category: "Personal Growth",
-likes: 310,
-comments: 61,
-text: "Peak performance is built by repeatable habits, not occasional motivation spikes.",
-avatarClass: "from-lime-500 to-green-600",
-},
-{
-name: "Isabella Cruz",
-handle: "@creatorfuture",
-time: "2d ago",
-slug: "monetizing-trust-in-the-creator-economy",
-title: "Monetizing Trust in the Creator Economy",
-category: "Creator Economy",
-likes: 223,
-comments: 37,
-text: "Trust converts faster than attention. Communities buy from creators they genuinely believe in.",
-avatarClass: "from-sky-500 to-cyan-600",
-},
-{
-name: "Ethan Blake",
-handle: "@founderjournal",
-time: "2d ago",
-slug: "profitable-business-before-scaling",
-title: "Build a Profitable Business Before Scaling",
-category: "Business",
-likes: 259,
-comments: 42,
-text: "Scaling a broken model only creates bigger problems. Profitability should come before expansion.",
-avatarClass: "from-red-500 to-pink-600",
-},
-    {
-name: "Nina Park",
-handle: "@futuretech",
-time: "1d ago",
-slug: "future-of-remote-work-with-ai",
-title: "The Future of Remote Work with AI",
-category: "Technology",
-likes: 288,
-comments: 52,
-text: "AI tools are changing productivity, hiring, and collaboration across global remote teams.",
-avatarClass: "from-pink-500 to-rose-500",
-}, 
-
-{
-  name: "Sophie Carter",
-  handle: "@clientgrowth",
-  time: "1d ago",
-  slug: "building-client-trust-that-converts",
-  title: "Building Client Trust That Converts",
-  category: "Freelancing",
-  likes: 207,
-  comments: 34,
-  text: "Clients buy confidence before they buy services. Trust is the fastest path to premium opportunities.",
-  avatarClass: "from-amber-500 to-yellow-600",
-},
+const SECTION_TEMPLATES = [
+  { id: "overview", title: "Overview" },
+  { id: "insights", title: "Core insights" },
+  { id: "takeaways", title: "Takeaways" },
+  { id: "closing", title: "Closing note" },
 ];
-    
 
-export async function generateStaticParams() {
-  return posts.map((post) => ({
-    slug: post.slug,
-  }));
-} 
-
-async function fetchPostFromBackend(slug) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/posts/${encodeURIComponent(slug)}`, {
-      cache: "no-store",
-    });
-
-    if (!response.ok) {
-      return null;
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("Failed to fetch post from backend:", error);
-    return null;
-  }
+function sanitizeText(value) {
+  if (!value) return "";
+  return String(value)
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
-export default async function SinglePostPage({ params }) {
-  const resolvedParams = await params;
-  const slug = decodeURIComponent(resolvedParams?.slug || ""); 
+function splitContent(content) {
+  const clean = sanitizeText(content);
+  if (!clean) return [];
 
-  let post = posts.find(
-    (item) =>
-      item.slug.trim().toLowerCase() ===
-      slug.trim().toLowerCase()
-  );
+  const paragraphs = clean
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
 
-  if (!post) {
-    post = await fetchPostFromBackend(slug);
+  if (paragraphs.length > 1) {
+    return paragraphs;
   }
 
-  if (!post) {
-    return (
-      <main className="min-h-screen bg-[#090909] p-10 text-white">
-        <h1>Post not found</h1>
-      </main>
-    );
-  } 
+  const sentences = clean
+    .split(/(?<=[.!?])\s+/)
+    .map((sentence) => sentence.trim())
+    .filter(Boolean);
 
-  return (
-  <main className="min-h-screen bg-[#090909] text-zinc-100 px-4 py-8">
-    <div className="mx-auto max-w-3xl">
+  if (sentences.length > 3) {
+    const chunkSize = Math.max(1, Math.ceil(sentences.length / 4));
+    return Array.from({ length: Math.ceil(sentences.length / chunkSize) }, (_, index) =>
+      sentences.slice(index * chunkSize, index * chunkSize + chunkSize).join(" ")
+    ).filter(Boolean);
+  }
 
-      {/* Back */}
-      <Link
-        href="/"
-        className="text-sm text-zinc-400 transition hover:text-white"
-      >
-        ← Back to Home
-      </Link>
+  return clean ? [clean] : [];
+}
 
-      {/* Main Article */}
-      <section className="mt-8">
+function buildSections(post) {
+  const paragraphs = splitContent(post?.content || post?.body || post?.excerpt || "");
+  const chunkSize = Math.max(1, Math.ceil(Math.max(paragraphs.length, 1) / SECTION_TEMPLATES.length));
 
-        {/* Author Header */}
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div
-              className={`h-12 w-12 rounded-full bg-linear-to-br ${post.avatarClass}`}
-            />
+  return SECTION_TEMPLATES.map((section, index) => ({
+    ...section,
+    paragraphs: paragraphs.slice(index * chunkSize, index * chunkSize + chunkSize),
+  })).filter((section) => section.paragraphs.length > 0);
+}
 
-            <div>
-              <h3 className="font-semibold text-white">
-                {post.name}
-              </h3>
+function initialsFromName(name) {
+  return String(name || "P")
+    .split(" ")
+    .slice(0, 2)
+    .map((part) => part.charAt(0))
+    .join("")
+    .toUpperCase();
+}
 
-              <p className="text-sm text-zinc-500">
-                {post.handle} • {post.time}
-              </p>
-            </div>
-          </div>
+function buildFallbackPost(slug) {
+  return {
+    _id: slug,
+    slug,
+    title: "Pulse editorial article",
+    excerpt: "A premium dark-mode article view designed for reading, sharing, and managing your work.",
+    content:
+      "This is a refined Pulse fallback article preview. Connect a real post and the layout will render your content, author details, tags, and stats in a premium editorial experience.\n\nThe design keeps the reading surface calm and focused while surfacing the tools you need to manage, share, and update the post.\n\nUse this as a polished post view for your published content.",
+    category: "Pulse",
+    tags: ["Pulse", "Editorial", "Design"],
+    likes: 128,
+    comments: 24,
+    views: 2140,
+    reads: 840,
+    createdAt: new Date().toISOString(),
+    author: {
+      name: "Pulse Author",
+      username: "pulseauthor",
+      email: "author@pulse.blog",
+    },
+  };
+}
 
-          <div className="flex gap-2">
-            <PostActions post={post} />
-          </div>
-        </div>
+async function fetchPostFromBackend(slug) {
+  const response = await fetch(`${API_ROOT}/posts/${encodeURIComponent(slug)}`, {
+    cache: "no-store",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 
-        {/* Title */}
-        <h1 className="mt-8 text-4xl font-bold leading-tight text-white">
-          {post.title}
-        </h1>
+  if (!response.ok) {
+    throw new Error(`Failed to load post (${response.status})`);
+  }
 
-        {/* Article Content */}
-        <div className="mt-8 space-y-6 text-[17px] leading-8 text-zinc-300">
-          {post.content ? (
-            <div dangerouslySetInnerHTML={{ __html: post.content }} />
-          ) : (
-            <p>{post.text}</p>
-          )}
+  const data = await response.json();
+  return data?.post || data?.data || data;
+}
 
-        </div>
-
-        {/* Actions */}
-        <div className="mt-10 flex items-center gap-8 border-y border-white/10 py-5 text-sm text-zinc-400">
-          <button className="transition hover:text-red-400">
-            ♡ {post.likes}
-          </button>
-
-          <button className="transition hover:text-white">
-            💬 {post.comments}
-          </button>
-
-          <button className="transition hover:text-white">
-            ↻ 4
-          </button>
-
-          <button className="transition hover:text-white">
-            ↗ Share
-          </button>
-        </div>
-
-        {/* Stats Row */}
-        <div className="mt-6 flex flex-wrap justify-between gap-4 border-b border-white/10 pb-6 text-sm text-zinc-500">
-          <div>
-            {post.likes} Likes • {post.comments} Replies • 4 Restacks
-          </div>
-
-          <div>
-            Apr 27 at 7:26 PM
-          </div>
-        </div>
-
-        {/* Comments (client) */}
-        <div className="mt-8">
-          <CommentSection postId={post.slug} />
-        </div>
-
-      </section>
+function StatCard({ label, value, accent = false }) {
+  return (
+    <div className="rounded-2xl border border-[#2a2740] bg-[#141420]/80 p-4 shadow-[0_10px_40px_rgba(0,0,0,0.25)] backdrop-blur-sm">
+      <p className="text-[11px] uppercase tracking-[0.24em] text-[#9490b8]">{label}</p>
+      <p className={`mt-3 text-2xl font-semibold ${accent ? "text-[#a89cf7]" : "text-[#f0eeff]"}`}>{value}</p>
     </div>
-  </main>
-);
-    
+  );
+}
+
+function ShareIconButton({ label, onClick, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#2a2740] bg-[#141420] text-[#f0eeff] transition hover:border-[#7c6ff7]/60 hover:bg-[#1c1c2e] hover:text-[#a89cf7]"
+    >
+      {children}
+    </button>
+  );
+}
+
+export default function PostDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const slug = Array.isArray(params?.slug) ? params.slug[0] : params?.slug;
+  const user = useAuthStore((state) => state.user);
+  const token = useAuthStore((state) => state.token);
+
+  const [post, setPost] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [activeSection, setActiveSection] = useState("overview");
+  const [liked, setLiked] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [liveViews, setLiveViews] = useState(0);
+  const [shareCopied, setShareCopied] = useState(false);
+
+  const isLoggedIn = Boolean(token || isClientAuthenticated());
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadPost() {
+      if (!slug) {
+        setError("Missing post slug.");
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      setError("");
+
+      try {
+        let resolvedPost;
+
+        try {
+          resolvedPost = await fetchPostFromBackend(slug);
+        } catch (backendError) {
+          const fallback = await blogAPI.getById(slug);
+          resolvedPost = fallback?.post || fallback?.data || fallback;
+          console.debug("Loaded post via fallback endpoint:", backendError?.message || backendError);
+        }
+
+        if (!cancelled) {
+          setPost(resolvedPost || buildFallbackPost(slug));
+        }
+      } catch (fetchError) {
+        if (!cancelled) {
+          setPost(buildFallbackPost(slug));
+          setError(fetchError?.message || "Unable to load this post right now.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadPost();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+
+  const normalizedPost = useMemo(() => {
+    if (!post) return null;
+
+    const author = post.author || {};
+    const content = sanitizeText(post.content || post.body || post.excerpt || "");
+    const paragraphs = splitContent(content);
+    const sections = buildSections({ ...post, content });
+    const tags = Array.isArray(post.tags) && post.tags.length > 0 ? post.tags : [post.category || "Pulse"];
+    const views = 0;
+    const reads = 0;
+    const likes = Number(post.likes ?? 0);
+    const comments = Number(post.comments ?? 0);
+    const createdAt = post.createdAt ? new Date(post.createdAt) : new Date();
+    const readTime = Math.max(1, Math.ceil(Math.max(content.split(/\s+/).filter(Boolean).length, 1) / 200));
+
+    return {
+      id: post._id || post.id || slug,
+      slug: post.slug || slug,
+      title: post.title || "Untitled article",
+      subtitle: post.subtitle || post.excerpt || "A premium editorial reading experience from Pulse.",
+      category: post.category || tags[0] || "Pulse",
+      tags,
+      authorName: author.name || author.username || author.email?.split("@")[0] || "Pulse Author",
+      authorHandle: author.username ? `@${author.username}` : author.email ? `@${author.email.split("@")[0]}` : "@pulse",
+      authorAvatar: author.avatar || initialsFromName(author.name || author.username || author.email),
+      createdAtLabel: Number.isNaN(createdAt.getTime()) ? "Recently published" : createdAt.toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+      readTime,
+      content,
+      paragraphs,
+      sections,
+      views,
+      reads,
+      likes,
+      comments,
+      quote: paragraphs[1] || paragraphs[0] || post.excerpt || "Write a strong editorial hook to anchor the reading experience.",
+    };
+  }, [post, slug]);
+
+  const isAuthor = useMemo(() => {
+    if (!normalizedPost || !user) return false;
+
+    const author = post?.author || {};
+    const postAuthorId = author._id || author.id || post?.authorId || null;
+    const postAuthorEmail = author.email || null;
+    const postAuthorName = author.name || null;
+    const currentUserId = user?._id || user?.id || null;
+
+    return Boolean(
+      (postAuthorId && currentUserId && postAuthorId === currentUserId) ||
+      (postAuthorEmail && user.email && postAuthorEmail === user.email) ||
+      (postAuthorName && user.name && postAuthorName === user.name)
+    );
+  }, [normalizedPost, post, user]);
+
+  const handleShare = async () => {
+    if (!normalizedPost) return;
+
+    const url = typeof window !== "undefined" ? window.location.href : "";
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: normalizedPost.title,
+          text: normalizedPost.subtitle,
+          url,
+        });
+      } else {
+        await navigator.clipboard.writeText(url);
+        setShareCopied(true);
+        window.setTimeout(() => setShareCopied(false), 1800);
+      }
+    } catch (shareError) {
+      console.debug("Share cancelled or failed:", shareError);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!normalizedPost) return;
+
+    const confirmed = window.confirm("Delete this post? This action cannot be undone.");
+    if (!confirmed) return;
+
+    try {
+      await blogAPI.delete(normalizedPost.id);
+      router.push("/dashboard");
+    } catch (deleteError) {
+      setError(deleteError?.message || "Unable to delete this post.");
+    }
+  };
+
+  const scrollToSection = (sectionId) => {
+    setActiveSection(sectionId);
+    const target = document.getElementById(sectionId);
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0d0d14] text-[#f0eeff] flex items-center justify-center">
+        <div className="rounded-full border border-[#2a2740] bg-[#141420] px-5 py-3 text-sm text-[#9490b8] shadow-lg">
+          Loading Pulse article...
+        </div>
+      </div>
+    );
   }
+
+  if (!normalizedPost) {
+    return (
+      <div className="min-h-screen bg-[#0d0d14] text-[#f0eeff] flex items-center justify-center px-6">
+        <div className="max-w-md rounded-3xl border border-[#2a2740] bg-[#141420] p-8 text-center shadow-2xl">
+          <p className="text-sm uppercase tracking-[0.3em] text-[#9490b8]">Pulse</p>
+          <h1 className="mt-4 text-3xl font-semibold">Article not found</h1>
+          <p className="mt-3 text-sm leading-6 text-[#9490b8]">
+            We could not load this post. You can go back to the blog or try again from the dashboard.
+          </p>
+          <div className="mt-6 flex items-center justify-center gap-3">
+            <Link href="/blog" className="rounded-full bg-[#7c6ff7] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#8c7ef8]">
+              Back to blog
+            </Link>
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="rounded-full border border-[#2a2740] px-5 py-2.5 text-sm text-[#f0eeff] transition hover:border-[#7c6ff7]/60 hover:bg-[#1c1c2e]"
+            >
+              Go back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-screen overflow-hidden bg-[#0d0d14] text-[#f0eeff]">
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -left-32 -top-32 h-80 w-80 rounded-full bg-[#7c6ff7]/12 blur-3xl" />
+        <div className="absolute -right-24 top-24 h-96 w-96 rounded-full bg-[#a89cf7]/10 blur-3xl" />
+        <div className="absolute -bottom-32 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-[#7c6ff7]/8 blur-3xl" />
+      </div>
+
+      <div className="relative mx-auto flex h-full max-w-7xl flex-col px-4 py-4 sm:px-6 lg:px-8">
+        <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-4xl border border-[#2a2740] bg-[#11111a]/95 shadow-[0_30px_120px_rgba(0,0,0,0.55)] backdrop-blur-xl">
+          <header className="flex flex-col gap-4 border-b border-[#2a2740] bg-[#0f0f17]/90 px-5 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="inline-flex items-center gap-2 rounded-full border border-[#2a2740] bg-[#141420] px-4 py-2 text-sm text-[#f0eeff] transition hover:border-[#7c6ff7]/60 hover:bg-[#1c1c2e]"
+              >
+                <span aria-hidden>←</span>
+                Back
+              </button>
+
+              <Link href="/" className="flex items-center gap-2">
+                <span
+                  className="text-2xl font-semibold text-[#f0eeff]"
+                  style={{ fontFamily: "Fraunces, serif" }}
+                >
+                  Pulse.
+                </span>
+              </Link>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={handleShare}
+                className="rounded-full border border-[#2a2740] bg-[#141420] px-4 py-2 text-sm font-medium text-[#f0eeff] transition hover:border-[#7c6ff7]/60 hover:bg-[#1c1c2e] hover:text-[#a89cf7]"
+              >
+                {shareCopied ? "Link copied" : "Share"}
+              </button>
+              {isAuthor ? (
+                <>
+                  <Link
+                    href={`/editor-dashboard?slug=${normalizedPost.slug}`}
+                    className="rounded-full border border-[#7c6ff7]/40 bg-[#7c6ff7]/10 px-4 py-2 text-sm font-medium text-[#a89cf7] transition hover:border-[#7c6ff7]/70 hover:bg-[#7c6ff7]/20"
+                  >
+                    Edit Post
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    className="rounded-full border border-rose-500/30 bg-rose-500/10 px-4 py-2 text-sm font-medium text-rose-300 transition hover:bg-rose-500/20 hover:text-rose-200"
+                  >
+                    Delete
+                  </button>
+                </>
+              ) : null}
+            </div>
+          </header>
+
+          <main className="grid min-h-0 flex-1 gap-0 lg:grid-cols-[1.6fr_0.82fr]">
+            <section className="min-h-0 overflow-y-auto border-r border-[#2a2740] px-5 py-6 sm:px-6 lg:px-8">
+              <div className="rounded-[1.75rem] border border-[#2a2740] bg-[linear-gradient(180deg,rgba(124,111,247,0.12),rgba(20,20,32,0.88))] px-6 py-10 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:px-8">
+                <div className="flex min-h-56 flex-col items-center justify-center gap-5 text-center">
+                  <div className="flex h-24 w-24 items-center justify-center rounded-full border border-[#7c6ff7]/30 bg-[#0d0d14] text-4xl shadow-[0_0_45px_rgba(124,111,247,0.25)]">
+                    ✦
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.4em] text-[#a89cf7]">Editorial article</p>
+                    <h2
+                      className="mt-3 text-2xl font-semibold text-[#f0eeff] sm:text-3xl"
+                      style={{ fontFamily: "Fraunces, serif" }}
+                    >
+                      Premium reading surface
+                    </h2>
+                    <p className="mt-2 text-sm text-[#9490b8]">
+                      Focused layout, calm spacing, and a cinematic reading experience.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <span className="inline-flex rounded-full border border-[#7c6ff7]/30 bg-[#7c6ff7]/10 px-3 py-1 text-xs font-medium text-[#a89cf7]">
+                  {normalizedPost.category}
+                </span>
+                <h1
+                  className="mt-4 max-w-4xl text-4xl font-semibold leading-tight text-[#f0eeff] sm:text-5xl"
+                  style={{ fontFamily: "Fraunces, serif" }}
+                >
+                  {normalizedPost.title}
+                </h1>
+                <p className="mt-4 max-w-3xl text-base leading-7 text-[#9490b8] sm:text-lg">
+                  {normalizedPost.subtitle}
+                </p>
+
+                <div className="mt-6 flex flex-wrap items-center gap-4 rounded-2xl border border-[#2a2740] bg-[#141420]/80 px-4 py-4">
+                  {isAuthor ? (
+                    <Link href="/dashboard" className="flex items-center gap-3 hover:opacity-80 transition">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[linear-gradient(135deg,#7c6ff7,#a89cf7)] text-sm font-semibold text-white cursor-pointer">
+                        {normalizedPost.authorAvatar}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-[#f0eeff]">{normalizedPost.authorName}</p>
+                        <p className="text-xs text-[#9490b8]">{normalizedPost.authorHandle}</p>
+                      </div>
+                    </Link>
+                  ) : (
+                    <Link href={`/profile/${post?.author?._id || post?.author?.id || post?.author?.username || normalizedPost.authorName.toLowerCase()}`} className="flex items-center gap-3 hover:opacity-80 transition">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[linear-gradient(135deg,#7c6ff7,#a89cf7)] text-sm font-semibold text-white cursor-pointer">
+                        {normalizedPost.authorAvatar}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-[#f0eeff]">{normalizedPost.authorName}</p>
+                        <p className="text-xs text-[#9490b8]">{normalizedPost.authorHandle}</p>
+                      </div>
+                    </Link>
+                  )}
+
+                  <div className="h-8 w-px bg-[#2a2740]" />
+                  <p className="text-sm text-[#9490b8]">{normalizedPost.createdAtLabel}</p>
+                  <p className="text-sm text-[#9490b8]">{normalizedPost.readTime} min read</p>
+                  {isAuthor ? (
+                    <button
+                      type="button"
+                      className="rounded-full border border-[#2a2740] bg-[#0f0f17] px-4 py-2 text-sm font-medium text-[#a89cf7] transition hover:border-[#7c6ff7]/60 hover:bg-[#1c1c2e]"
+                    >
+                      Your post
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+
+              <article className="mt-10 space-y-10">
+                {normalizedPost.sections.length > 0 ? (
+                  normalizedPost.sections.map((section, index) => (
+                    <section key={section.id} id={section.id} className="scroll-mt-28">
+                      <div className="mb-4 flex items-center gap-3">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-full border border-[#2a2740] bg-[#141420] text-sm text-[#a89cf7]">
+                          0{index + 1}
+                        </span>
+                        <h2
+                          className="text-2xl font-semibold text-[#f0eeff]"
+                          style={{ fontFamily: "Fraunces, serif" }}
+                        >
+                          {section.title}
+                        </h2>
+                      </div>
+
+                      <div className="space-y-5 text-base leading-8 text-[#d4d1ec]">
+                        {section.paragraphs.map((paragraph, paragraphIndex) => {
+                          const isQuote = index === 1 && paragraphIndex === 0;
+                          if (isQuote) {
+                            return (
+                              <blockquote
+                                key={`${section.id}-${paragraphIndex}`}
+                                className="border-l-4 border-[#7c6ff7] bg-[#141420] px-5 py-4 text-[1.05rem] italic text-[#f0eeff] shadow-[0_10px_30px_rgba(124,111,247,0.1)]"
+                                style={{ fontFamily: "Fraunces, serif" }}
+                              >
+                                {paragraph}
+                              </blockquote>
+                            );
+                          }
+
+                          return (
+                            <p key={`${section.id}-${paragraphIndex}`}>
+                              {paragraph}
+                            </p>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  ))
+                ) : (
+                  <section className="rounded-3xl border border-[#2a2740] bg-[#141420]/80 p-6 text-[#d4d1ec]">
+                    <p>{normalizedPost.subtitle}</p>
+                  </section>
+                )}
+              </article>
+
+              <footer className="mt-12 border-t border-[#2a2740] pt-6">
+                <div className="flex flex-wrap gap-2">
+                  {normalizedPost.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full border border-[#2a2740] bg-[#141420] px-3 py-1 text-xs text-[#a89cf7] transition hover:border-[#7c6ff7]/60 hover:bg-[#1c1c2e]"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setLiked((current) => !current)}
+                      className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+                        liked
+                          ? "border-[#7c6ff7]/70 bg-[#7c6ff7]/20 text-[#f0eeff]"
+                          : "border-[#2a2740] bg-[#141420] text-[#f0eeff] hover:border-[#7c6ff7]/60 hover:bg-[#1c1c2e]"
+                      }`}
+                    >
+                      Like {liked ? normalizedPost.likes + 1 : normalizedPost.likes}
+                    </button>
+                    <button
+                      type="button"
+                      className="rounded-full border border-[#2a2740] bg-[#141420] px-4 py-2 text-sm font-medium text-[#f0eeff] transition hover:border-[#7c6ff7]/60 hover:bg-[#1c1c2e]"
+                    >
+                      Comment {normalizedPost.comments}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSaved((current) => !current)}
+                      className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+                        saved
+                          ? "border-[#7c6ff7]/70 bg-[#7c6ff7]/20 text-[#f0eeff]"
+                          : "border-[#2a2740] bg-[#141420] text-[#f0eeff] hover:border-[#7c6ff7]/60 hover:bg-[#1c1c2e]"
+                      }`}
+                    >
+                      {saved ? "Saved" : "Save"}
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <ShareIconButton label="Share on X" onClick={handleShare}>
+                      <span className="text-sm font-semibold">X</span>
+                    </ShareIconButton>
+                    <ShareIconButton label="Share on LinkedIn" onClick={handleShare}>
+                      <span className="text-sm font-semibold">in</span>
+                    </ShareIconButton>
+                    <ShareIconButton label="Copy link" onClick={handleShare}>
+                      <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current">
+                        <path d="M10 13a5 5 0 0 1 0-7.07l2.12-2.12a5 5 0 1 1 7.07 7.07l-1.41 1.41-1.41-1.41 1.41-1.41a3 3 0 1 0-4.24-4.24L11.41 8.41A3 3 0 0 0 15.66 12.66l-1.41 1.41A5 5 0 0 1 10 13zm4 1a5 5 0 0 1 0 7.07l-2.12 2.12a5 5 0 1 1-7.07-7.07l1.41-1.41 1.41 1.41-1.41 1.41a3 3 0 1 0 4.24 4.24l2.12-2.12A3 3 0 0 0 10.34 12l1.41-1.41A5 5 0 0 1 14 14z" />
+                      </svg>
+                    </ShareIconButton>
+                  </div>
+                </div>
+              </footer>
+
+              <div className="mt-10">
+                <CommentSection postId={normalizedPost.slug} />
+              </div>
+            </section>
+
+            <aside className="space-y-6 bg-[#0f0f17]/55 px-5 py-6 sm:px-6 lg:border-l lg:border-[#2a2740] lg:px-6 lg:sticky lg:top-0 lg:h-full lg:self-start lg:overflow-hidden">
+              <div className="rounded-3xl border border-[#2a2740] bg-[#141420]/80 p-5 shadow-[0_20px_70px_rgba(0,0,0,0.25)]">
+                <p className="text-xs uppercase tracking-[0.34em] text-[#9490b8]">Post stats</p>
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <StatCard label="Views" value={liveViews.toLocaleString()} accent />
+                  <StatCard label="Reads" value={normalizedPost.reads.toLocaleString()} />
+                  <StatCard label="Likes" value={(liked ? normalizedPost.likes + 1 : normalizedPost.likes).toLocaleString()} />
+                  <StatCard label="Comments" value={normalizedPost.comments.toLocaleString()} />
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-[#2a2740] bg-[#141420]/80 p-5 shadow-[0_20px_70px_rgba(0,0,0,0.25)]">
+                <p className="text-xs uppercase tracking-[0.34em] text-[#9490b8]">In this post</p>
+                <div className="mt-4 space-y-2">
+                  {normalizedPost.sections.map((section) => (
+                    <button
+                      key={section.id}
+                      type="button"
+                      onClick={() => scrollToSection(section.id)}
+                      className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left text-sm transition ${
+                        activeSection === section.id
+                          ? "border-[#7c6ff7]/60 bg-[#7c6ff7]/15 text-[#f0eeff]"
+                          : "border-[#2a2740] bg-[#0f0f17] text-[#9490b8] hover:border-[#7c6ff7]/40 hover:bg-[#1c1c2e] hover:text-[#f0eeff]"
+                      }`}
+                    >
+                      <span>{section.title}</span>
+                      <span className="text-xs text-[#a89cf7]">{String(section.paragraphs.length).padStart(2, "0")}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {isAuthor ? (
+                <div className="rounded-3xl border border-[#2a2740] bg-[#141420]/80 p-5 shadow-[0_20px_70px_rgba(0,0,0,0.25)]">
+                  <p className="text-xs uppercase tracking-[0.34em] text-[#9490b8]">Manage post</p>
+                  <div className="mt-4 space-y-3">
+                    <Link
+                      href={`/editor-dashboard?slug=${normalizedPost.slug}`}
+                      className="block rounded-2xl border border-[#7c6ff7]/35 bg-[#0f0f17] px-4 py-3 text-center text-sm font-medium text-[#a89cf7] transition hover:border-[#7c6ff7]/60 hover:bg-[#1c1c2e]"
+                    >
+                      Edit post
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={handleDelete}
+                      className="block w-full rounded-2xl border border-[#2a2740] bg-[#0f0f17] px-4 py-3 text-sm font-medium text-rose-200 transition hover:border-rose-500/40 hover:bg-[#1c1c2e]"
+                    >
+                      Delete post
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+            </aside>
+          </main>
+        </div>
+      </div>
+
+      {error ? (
+        <div className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-full border border-rose-500/30 bg-rose-500/15 px-4 py-2 text-sm text-rose-200 shadow-xl">
+          {error}
+        </div>
+      ) : null}
+    </div>
+  );
+}

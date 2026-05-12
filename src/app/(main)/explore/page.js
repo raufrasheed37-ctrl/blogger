@@ -6,6 +6,7 @@ import useAuthStore from "@/store/authstore";
 import { getLoginRedirect } from "@/utils/auth";
 import { isClientAuthenticated } from "@/store/authstore";
 import CommentSection from "@/components/CommentSection";
+import { Home, User, Heart, BarChart3, LogOut, Eye, Search, PenSquare, Plus , FileText, BookOpen, Users, Table,} from 'lucide-react';
 import Link from "next/link";
 
 export default function ExplorePage() {
@@ -66,6 +67,18 @@ export default function ExplorePage() {
 
     const [showComments, setShowComments] = useState(false);
 
+    const postAuthorId = post?.author?._id || post?.author?.id || post?.authorId || null;
+    const postAuthorEmail = post?.author?.email || null;
+    const postAuthorName = post?.author?.name || null;
+    const currentUserId = user?._id || user?.id || null;
+    const isAuthor = Boolean(
+      user && (
+        (postAuthorId && currentUserId && postAuthorId === currentUserId) ||
+        (postAuthorEmail && user.email && postAuthorEmail === user.email) ||
+        (postAuthorName && user.name && postAuthorName === user.name)
+      )
+    );
+
     const requireAuth = () => {
       if (token || isClientAuthenticated()) {
         return true;
@@ -98,27 +111,51 @@ export default function ExplorePage() {
         {/* HEADER */}
         <div className="flex items-start justify-between">
 
-          <div className="flex gap-4">
+          {isAuthor ? (
+            <Link href="/dashboard" className="flex gap-4 hover:opacity-80 transition">
 
-            <div className="h-12 w-12 rounded-full bg-linear-to-br from-[#7c6ff7] to-[#a89cf7]" />
+              <div className="h-12 w-12 rounded-full bg-linear-to-br from-[#7c6ff7] to-[#a89cf7] cursor-pointer" />
 
-            <div>
-              <h3 className="text-lg font-semibold text-[#f0eeff]">
-                {post.author?.name || "User"}
-              </h3>
+              <div>
+                <h3 className="text-lg font-semibold text-[#f0eeff]">
+                  {post.author?.name || "User"}
+                </h3>
 
-              <p className="text-sm text-[#9490b8]">
-                @{post.author?.name || "user"}
-              </p>
+                <p className="text-sm text-[#9490b8]">
+                  @{post.author?.username || post.author?.name?.toLowerCase() || "user"}
+                </p>
 
-              <p className="text-sm text-[#9490b8]">
-                {new Date(
-                  post.createdAt
-                ).toLocaleDateString()}
-              </p>
-            </div>
+                <p className="text-sm text-[#9490b8]">
+                  {new Date(
+                    post.createdAt
+                  ).toLocaleDateString()}
+                </p>
+              </div>
 
-          </div>
+            </Link>
+          ) : (
+            <Link href={`/profile/${post.author?._id || post.author?.id || post.author?.username || post.author?.name?.toLowerCase() || "user"}`} className="flex gap-4 hover:opacity-80 transition">
+
+              <div className="h-12 w-12 rounded-full bg-linear-to-br from-[#7c6ff7] to-[#a89cf7] cursor-pointer" />
+
+              <div>
+                <h3 className="text-lg font-semibold text-[#f0eeff]">
+                  {post.author?.name || "User"}
+                </h3>
+
+                <p className="text-sm text-[#9490b8]">
+                  @{post.author?.username || post.author?.name?.toLowerCase() || "user"}
+                </p>
+
+                <p className="text-sm text-[#9490b8]">
+                  {new Date(
+                    post.createdAt
+                  ).toLocaleDateString()}
+                </p>
+              </div>
+
+            </Link>
+          )}
 
           <button
             type="button"
@@ -250,16 +287,28 @@ export default function ExplorePage() {
           {/* Navigation */}
           <nav className="flex-1 space-y-2 mb-8">
             {[
-              { label: "Home", icon: "🏠", href: "/" },
-              { label: "Activity", icon: "📊", href: "/activity" },
-              { label: "Explore", icon: "🔍", href: "/explore", active: true },
-              { label: "Profile", icon: "👤", href: "/dashboard" },
-            ].map((item) => (
-              <Link key={item.label} href={item.href} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition ${item.active ? 'bg-[#7c6ff7]/20 border border-[#7c6ff7]/50 text-[#a89cf7]' : 'text-[#9490b8] hover:text-[#f0eeff] hover:bg-[#1c1c2e]'}`}>
-                <span className="text-lg">{item.icon}</span>
-                <span className="font-medium">{item.label}</span>
-              </Link>
-            ))}
+  { label: "Home", icon: Home, href: "/" },
+  { label: "Activity", icon: BarChart3, href: "/activity" },
+  { label: "Explore", icon: Search, href: "/explore" },
+  { label: "Profile", icon: User, href: "/dashboard", active: true },
+].map((item) => {
+  const Icon = item.icon;
+
+  return (
+    <Link
+      key={item.label}
+      href={item.href}
+      className={`flex items-center gap-3 px-4 py-3 rounded-xl transition ${
+        item.active
+          ? 'bg-[#7c6ff7]/20 border border-[#7c6ff7]/50 text-[#a89cf7]'
+          : 'text-[#9490b8] hover:text-[#f0eeff] hover:bg-[#1c1c2e]'
+      }`}
+    >
+      <Icon className="h-5 w-5" />
+      <span className="font-medium">{item.label}</span>
+    </Link>
+  );
+})}
           </nav>
 
           {/* Bottom Actions */}

@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/store/authstore";
+import { Home, User, Heart, BarChart3, LogOut, Eye, Search, PenSquare, Plus , FileText, BookOpen, Users, Table,} from 'lucide-react';
 
 const data = [
   {
@@ -173,17 +174,29 @@ export default function ActivityPage() {
 
           {/* Navigation */}
           <nav className="flex-1 space-y-2 mb-8">
-            {[
-              { label: "Home", icon: "🏠", href: "/" },
-              { label: "Activity", icon: "📊", href: "/activity", active: true },
-              { label: "Explore", icon: "🔍", href: "/explore" },
-              { label: "Profile", icon: "👤", href: "/dashboard" },
-            ].map((item) => (
-              <Link key={item.label} href={item.href} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition ${item.active ? 'bg-[#7c6ff7]/20 border border-[#7c6ff7]/50 text-[#a89cf7]' : 'text-[#9490b8] hover:text-[#f0eeff] hover:bg-[#1c1c2e]'}`}>
-                <span className="text-lg">{item.icon}</span>
-                <span className="font-medium">{item.label}</span>
-              </Link>
-            ))}
+           {[
+  { label: "Home", icon: Home, href: "/" },
+  { label: "Activity", icon: BarChart3, href: "/activity" },
+  { label: "Explore", icon: Search, href: "/explore" },
+  { label: "Profile", icon: User, href: "/dashboard", active: true },
+].map((item) => {
+  const Icon = item.icon;
+
+  return (
+    <Link
+      key={item.label}
+      href={item.href}
+      className={`flex items-center gap-3 px-4 py-3 rounded-xl transition ${
+        item.active
+          ? 'bg-[#7c6ff7]/20 border border-[#7c6ff7]/50 text-[#a89cf7]'
+          : 'text-[#9490b8] hover:text-[#f0eeff] hover:bg-[#1c1c2e]'
+      }`}
+    >
+      <Icon className="h-5 w-5" />
+      <span className="font-medium">{item.label}</span>
+    </Link>
+  );
+})}
           </nav>
 
           {/* Bottom Actions */}

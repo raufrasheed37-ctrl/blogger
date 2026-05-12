@@ -66,6 +66,18 @@ export default function ExplorePage() {
 
     const [showComments, setShowComments] = useState(false);
 
+    const postAuthorId = post?.author?._id || post?.author?.id || post?.authorId || null;
+    const postAuthorEmail = post?.author?.email || null;
+    const postAuthorName = post?.author?.name || null;
+    const currentUserId = user?._id || user?.id || null;
+    const isAuthor = Boolean(
+      user && (
+        (postAuthorId && currentUserId && postAuthorId === currentUserId) ||
+        (postAuthorEmail && user.email && postAuthorEmail === user.email) ||
+        (postAuthorName && user.name && postAuthorName === user.name)
+      )
+    );
+
     const requireAuth = () => {
       if (token || isClientAuthenticated()) {
         return true;
@@ -98,27 +110,51 @@ export default function ExplorePage() {
         {/* HEADER */}
         <div className="flex items-start justify-between">
 
-          <div className="flex gap-4">
+          {isAuthor ? (
+            <Link href="/dashboard" className="flex gap-4 hover:opacity-80 transition">
 
-            <div className="h-12 w-12 rounded-full bg-linear-to-br from-[#7c6ff7] to-[#a89cf7]" />
+              <div className="h-12 w-12 rounded-full bg-linear-to-br from-[#7c6ff7] to-[#a89cf7] cursor-pointer" />
 
-            <div>
-              <h3 className="text-lg font-semibold text-[#f0eeff]">
-                {post.author?.name || "User"}
-              </h3>
+              <div>
+                <h3 className="text-lg font-semibold text-[#f0eeff]">
+                  {post.author?.name || "User"}
+                </h3>
 
-              <p className="text-sm text-[#9490b8]">
-                @{post.author?.name || "user"}
-              </p>
+                <p className="text-sm text-[#9490b8]">
+                  @{post.author?.username || post.author?.name?.toLowerCase() || "user"}
+                </p>
 
-              <p className="text-sm text-[#9490b8]">
-                {new Date(
-                  post.createdAt
-                ).toLocaleDateString()}
-              </p>
-            </div>
+                <p className="text-sm text-[#9490b8]">
+                  {new Date(
+                    post.createdAt
+                  ).toLocaleDateString()}
+                </p>
+              </div>
 
-          </div>
+            </Link>
+          ) : (
+            <Link href={`/profile/${post.author?._id || post.author?.id || post.author?.username || post.author?.name?.toLowerCase() || "user"}`} className="flex gap-4 hover:opacity-80 transition">
+
+              <div className="h-12 w-12 rounded-full bg-linear-to-br from-[#7c6ff7] to-[#a89cf7] cursor-pointer" />
+
+              <div>
+                <h3 className="text-lg font-semibold text-[#f0eeff]">
+                  {post.author?.name || "User"}
+                </h3>
+
+                <p className="text-sm text-[#9490b8]">
+                  @{post.author?.username || post.author?.name?.toLowerCase() || "user"}
+                </p>
+
+                <p className="text-sm text-[#9490b8]">
+                  {new Date(
+                    post.createdAt
+                  ).toLocaleDateString()}
+                </p>
+              </div>
+
+            </Link>
+          )}
 
           <button
             type="button"

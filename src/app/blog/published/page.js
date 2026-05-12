@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 export default function PostPublishedPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -90,7 +92,7 @@ export default function PostPublishedPage() {
               </div>
 
               {/* Edit Button */}
-              <Link href={`/blog/${postData.slug}/edit`} className="px-4 py-2 text-sm font-medium text-[#9490b8] hover:text-[#f0eeff] hover:bg-[#1c1c2e] rounded-lg transition border border-transparent hover:border-[#2a2740]">
+              <Link href={`/editor-dashboard?slug=${postData.slug}`} className="px-4 py-2 text-sm font-medium text-[#9490b8] hover:text-[#f0eeff] hover:bg-[#1c1c2e] rounded-lg transition border border-transparent hover:border-[#2a2740]">
                 Edit post
               </Link>
 

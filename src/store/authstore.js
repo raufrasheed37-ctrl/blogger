@@ -11,6 +11,7 @@ const useAuthStore = create((set) => ({
   user: null,
   token: null,
   isLoading: false,
+  isHydrated: false,
   error: null,
 
   // ACTIONS
@@ -172,19 +173,44 @@ const useAuthStore = create((set) => ({
   },
 
   // HYDRATE
-  hydrate: () => {
+  hydrate: async () => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    set({ isLoading: true });
+
     const token =
-      localStorage.getItem(
-        "token"
-      ) ||
+      localStorage.getItem("token") ||
       readAuthTokenCookie();
 
-    if (token) {
-      set({ token });
+    if (!token) {
+      set({ token: null, user: null, isLoading: false, isHydrated: true });
+      return;
+    }
 
-      setAuthTokenCookie(
-        token
-      );
+    setAuthTokenCookie(token);
+    set({ token });
+
+    try {
+      const apiBase = useAuthStore.getState()._apiBase;
+      const response = await fetch(`${apiBase}/api/auth/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to restore session");
+      }
+
+      set({ user: data.user || data, isLoading: false, isHydrated: true });
+    } catch (error) {
+      localStorage.removeItem("token");
+      clearAuthTokenCookie();
+      set({ token: null, user: null, isLoading: false, isHydrated: true, error: error.message });
     }
   },
 }));

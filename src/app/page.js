@@ -144,7 +144,7 @@ export default function Home() {
 
           <div className="flex items-center gap-4">
             <button onClick={handleCreateClick} className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-linear-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 transition font-semibold shadow-lg">
-              <span>✨</span> Create
+            Create
             </button>
             {hasSession ? (
               <button onClick={handleLogout} className="px-4 py-2 rounded-lg border border-purple-500/30 hover:border-purple-500 hover:bg-purple-500/10 transition font-medium">

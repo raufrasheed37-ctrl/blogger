@@ -63,15 +63,23 @@ export default function BlogCard({ post }) {
     <article className="border-b border-white/10 py-6 transition hover:bg-white/2">
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-1 gap-3">
-          <div
-            className={`h-11 w-11 shrink-0 rounded-full bg-linear-to-br ${post.avatarClass}`}
-          />
+          {isAuthor ? (
+            <Link href="/dashboard" className="h-11 w-11 shrink-0 rounded-full hover:opacity-80 transition cursor-pointer" style={{ backgroundImage: `linear-gradient(to bottom right, rgb(124, 111, 247), rgb(168, 156, 247))` }} />
+          ) : (
+            <Link href={`/profile/${postAuthorId || post.author?.username || post.name?.toLowerCase() || "user"}`} className="h-11 w-11 shrink-0 rounded-full hover:opacity-80 transition cursor-pointer" style={{ backgroundImage: `linear-gradient(to bottom right, rgb(124, 111, 247), rgb(168, 156, 247))` }} />
+          )}
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="text-sm font-semibold text-white">
-                {post.name}
-              </p>
+              {isAuthor ? (
+                <Link href="/dashboard" className="text-sm font-semibold text-white hover:text-[#a89cf7] transition">
+                  {post.name}
+                </Link>
+              ) : (
+                <Link href={`/profile/${postAuthorId || post.author?.username || post.name?.toLowerCase() || "user"}`} className="text-sm font-semibold text-white hover:text-[#a89cf7] transition">
+                  {post.name}
+                </Link>
+              )}
 
               <p className="text-xs text-zinc-500">
                 {post.handle}

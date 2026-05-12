@@ -97,39 +97,48 @@ export default function CommentSection({
   };
 
   const handleReply = async (parentCommentId) => {
-    if (!requireAuth()) return;
-    if (!replyText.trim()) return;
+  if (!requireAuth()) return;
 
-    try {
-      const res = await fetch(`${API_ROOT}/comments`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...getAuthHeaders(),
-        },
-        body: JSON.stringify({
-          text: replyText,
-          postId,
-          parentComment: parentCommentId,
-        }),
-      });
+  if (!replyText.trim()) return;
 
-      if (!res.ok) {
-        throw new Error("Failed to reply");
-      }
+  try {
 
-      setReplyText("");
-      setReplyingTo(null);
+    console.log("Reply text:", replyText);
+    console.log("Parent ID:", parentCommentId);
 
-      fetchComments();
-      setExpandedReplies((prev) => ({
-        ...prev,
-        [parentCommentId]: true,
-      }));
-    } catch (err) {
+    const res = await fetch(`${API_ROOT}/comments`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify({
+        text: replyText,
+        postId,
+        parentComment: parentCommentId,
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
       console.log(err);
+      throw new Error("Failed to reply");
     }
-  };
+
+    setReplyText("");
+    setReplyingTo(null);
+
+    await fetchComments();
+
+    setExpandedReplies((prev) => ({
+      ...prev,
+      [parentCommentId]: true,
+    }));
+
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   // Delete comment
   const handleDelete = async (id) => {

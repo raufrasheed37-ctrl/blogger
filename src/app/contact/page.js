@@ -170,7 +170,7 @@ export default function ContactPage() {
 
       // UPDATE USER PROFILE
       const response = await axios.put(
-        "http://localhost:5000/api/contact/profile",
+        "https://blog-backend-3p8r.onrender.com/api/contact/profile",
         payload,
         {
           headers: {

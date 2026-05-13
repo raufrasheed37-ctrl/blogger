@@ -317,6 +317,7 @@ export default function ProfilePage() {
             {profileUser.socialLinks?.twitter && <SocialButton icon="X" url={profileUser.socialLinks.twitter} />}
             {profileUser.socialLinks?.linkedin && <SocialButton icon="LinkedIn" url={profileUser.socialLinks.linkedin} />}
             {profileUser.socialLinks?.github && <SocialButton icon="GitHub" url={profileUser.socialLinks.github} />}
+        </div>
 
                <button
   className={`${styles.primary} ${styles.subscribeBtn}`}
@@ -356,11 +357,26 @@ export default function ProfilePage() {
         data.subscribed
       );
 
-      setProfileUser((prev) => ({
-        ...prev,
-        subscribers:
-          data.subscribers,
-      }));
+       setProfileUser((prev) => ({
+  ...prev,
+  subscribers: data.subscribers,
+  subscribersList: data.subscribed
+    ? [
+        ...(prev.subscribersList || []),
+        currentUser._id ||
+          currentUser.id,
+      ]
+    : (
+        prev.subscribersList || []
+      ).filter(
+        (id) =>
+          id.toString() !==
+          (
+            currentUser._id ||
+            currentUser.id
+          ).toString()
+      ),
+}));
     } catch (err) {
       console.log(err);
     }
@@ -494,10 +510,25 @@ export default function ProfilePage() {
       );
 
       setProfileUser((prev) => ({
-        ...prev,
-        subscribers:
-          data.subscribers,
-      }));
+  ...prev,
+  subscribers: data.subscribers,
+  subscribersList: data.subscribed
+    ? [
+        ...(prev.subscribersList || []),
+        currentUser._id ||
+          currentUser.id,
+      ]
+    : (
+        prev.subscribersList || []
+      ).filter(
+        (id) =>
+          id.toString() !==
+          (
+            currentUser._id ||
+            currentUser.id
+          ).toString()
+      ),
+}));
     } catch (err) {
       console.log(err);
     }

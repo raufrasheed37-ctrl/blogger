@@ -294,9 +294,55 @@ export default function ProfilePage() {
             {profileUser.socialLinks?.twitter && <SocialButton icon="X" url={profileUser.socialLinks.twitter} />}
             {profileUser.socialLinks?.linkedin && <SocialButton icon="LinkedIn" url={profileUser.socialLinks.linkedin} />}
             {profileUser.socialLinks?.github && <SocialButton icon="GitHub" url={profileUser.socialLinks.github} />}
-          </div>
 
-          <button className={`${styles.primary} ${styles.subscribeBtn}`} onClick={() => setSubscribed(!subscribed)}>
+               <button
+  className={`${styles.primary} ${styles.subscribeBtn}`}
+  onClick={async () => {
+    try {
+      const token =
+        localStorage.getItem("token");
+
+      if (!token) {
+        router.push(
+          `/login?next=/profile/${authorId}`
+        );
+        return;
+      }
+
+      const res = await fetch(
+        `${API_ROOT}/subscribe`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            authorId:
+              profileUser._id ||
+              profileUser.id,
+          }),
+        }
+      );
+
+      const data =
+        await res.json();
+
+      setSubscribed(
+        data.subscribed
+      );
+
+      setProfileUser((prev) => ({
+        ...prev,
+        subscribers:
+          data.subscribers,
+      }));
+    } catch (err) {
+      console.log(err);
+    }
+  }}
+>
             {subscribed ? "✓ Subscribed" : "Subscribe"}
           </button>
         </div>
@@ -387,9 +433,53 @@ export default function ProfilePage() {
               Get notified whenever {profileUser.name || "this creator"} publishes new articles.
             </p>
             <button
-              onClick={() => setSubscribed(!subscribed)}
-              className={`${styles.primary} ${styles.fullWidth}`}
-            >
+  className={`${styles.primary} ${styles.subscribeBtn}`}
+  onClick={async () => {
+    try {
+      const token =
+        localStorage.getItem("token");
+
+      if (!token) {
+        router.push(
+          `/login?next=/profile/${authorId}`
+        );
+        return;
+      }
+
+      const res = await fetch(
+        `${API_ROOT}/subscribe`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            authorId:
+              profileUser._id ||
+              profileUser.id,
+          }),
+        }
+      );
+
+      const data =
+        await res.json();
+
+      setSubscribed(
+        data.subscribed
+      );
+
+      setProfileUser((prev) => ({
+        ...prev,
+        subscribers:
+          data.subscribers,
+      }));
+    } catch (err) {
+      console.log(err);
+    }
+  }}
+>
               {subscribed ? "✓ Subscribed" : "Subscribe"}
             </button>
           </div>

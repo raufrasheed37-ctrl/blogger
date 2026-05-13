@@ -317,6 +317,7 @@ export default function ProfilePage() {
             {profileUser.socialLinks?.twitter && <SocialButton icon="X" url={profileUser.socialLinks.twitter} />}
             {profileUser.socialLinks?.linkedin && <SocialButton icon="LinkedIn" url={profileUser.socialLinks.linkedin} />}
             {profileUser.socialLinks?.github && <SocialButton icon="GitHub" url={profileUser.socialLinks.github} />}
+        </div>
 
                <button
   className={`${styles.primary} ${styles.subscribeBtn}`}

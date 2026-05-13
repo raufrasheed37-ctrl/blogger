@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import useAuthStore from "@/store/authstore";
 import { useEffect, useRef, useState } from "react";
 import { blogAPI } from "@/utils/api";
+import id from "zod/v4/locales/id.cjs";
 
 export default function Home() {
   const [posts, setPosts] = useState([]);
@@ -62,6 +63,7 @@ export default function Home() {
         if (cancelled) return;
 
         const mappedPosts = livePosts.map((post) => ({
+          _id: post._id,
           name: post.author?.name || "Anonymous",
           handle: post.author?.email ? `@${post.author.email.split("@")[0]}` : "@anonymous",
           time: post.createdAt ? new Date(post.createdAt).toLocaleDateString() : "just now",

@@ -529,34 +529,66 @@ export default function PostDetailPage() {
 
                 <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
                   <div className="flex flex-wrap items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setLiked((current) => !current)}
-                      className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
-                        liked
-                          ? "border-[#7c6ff7]/70 bg-[#7c6ff7]/20 text-[#f0eeff]"
-                          : "border-[#2a2740] bg-[#141420] text-[#f0eeff] hover:border-[#7c6ff7]/60 hover:bg-[#1c1c2e]"
-                      }`}
-                    >
-                      Like {liked ? normalizedPost.likes + 1 : normalizedPost.likes}
-                    </button>
+                   <button
+  type="button"
+  onClick={async () => {
+    if (!isLoggedIn) {
+      router.push(`/login?next=/blog/${normalizedPost.slug}`);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${API_ROOT}/posts/${normalizedPost.id}/like`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to like");
+      }
+
+      const data = await response.json();
+
+      setLiked(data.liked);
+
+      setPost((prev) => ({
+        ...prev,
+        likes: data.likes,
+      }));
+    } catch (err) {
+      console.log(err);
+    }
+  }}
+  className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+    liked
+      ? "border-[#7c6ff7]/70 bg-[#7c6ff7]/20 text-[#f0eeff]"
+      : "border-[#2a2740] bg-[#141420] text-[#f0eeff] hover:border-[#7c6ff7]/60 hover:bg-[#1c1c2e]"
+  }`}
+>
+  Like {post.likes}
+</button>
                     <button
                       type="button"
                       className="rounded-full border border-[#2a2740] bg-[#141420] px-4 py-2 text-sm font-medium text-[#f0eeff] transition hover:border-[#7c6ff7]/60 hover:bg-[#1c1c2e]"
                     >
-                      Comment {normalizedPost.comments}
+                      Comment {post.comments}
                     </button>
                     <button
-                      type="button"
-                      onClick={() => setSaved((current) => !current)}
-                      className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
-                        saved
-                          ? "border-[#7c6ff7]/70 bg-[#7c6ff7]/20 text-[#f0eeff]"
-                          : "border-[#2a2740] bg-[#141420] text-[#f0eeff] hover:border-[#7c6ff7]/60 hover:bg-[#1c1c2e]"
-                      }`}
-                    >
-                      {saved ? "Saved" : "Save"}
-                    </button>
+  type="button"
+  onClick={() => setSaved((current) => !current)}
+  className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+    saved
+      ? "border-[#7c6ff7]/70 bg-[#7c6ff7]/20 text-[#f0eeff]"
+      : "border-[#2a2740] bg-[#141420] text-[#f0eeff] hover:border-[#7c6ff7]/60 hover:bg-[#1c1c2e]"
+  }`}
+>
+  {saved ? "Saved" : "Save"}
+</button>
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -576,7 +608,15 @@ export default function PostDetailPage() {
               </footer>
 
               <div className="mt-10">
-                <CommentSection postId={post._id} />
+                <CommentSection
+  postId={post._id}
+  onCommentAdded={() => {
+    setPost((prev) => ({
+      ...prev,
+      comments: (prev.comments || 0) + 1,
+    }));
+  }}
+/>
               </div>
             </section>
 
@@ -586,7 +626,7 @@ export default function PostDetailPage() {
                 <div className="mt-4 grid grid-cols-2 gap-3">
                   <StatCard label="Views" value={liveViews.toLocaleString()} accent />
                   <StatCard label="Reads" value={normalizedPost.reads.toLocaleString()} />
-                  <StatCard label="Likes" value={(liked ? normalizedPost.likes + 1 : normalizedPost.likes).toLocaleString()} />
+                  <StatCard label="Likes" value={normalizedPost.likes.toLocaleString()} />
                   <StatCard label="Comments" value={normalizedPost.comments.toLocaleString()} />
                 </div>
               </div>

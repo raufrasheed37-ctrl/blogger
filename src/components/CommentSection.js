@@ -16,7 +16,7 @@ function getAuthHeaders() {
 
 export default function CommentSection({
   postId,
-  requireAuth: requireAuthProp,
+  requireAuth: requireAuthProp, onCommentAdded,
 }) {
   const currentUser = useAuthStore((state) => state.user);
   const [comments, setComments] = useState([]);
@@ -92,6 +92,9 @@ export default function CommentSection({
 
       setComments((prev) => [data, ...prev]);
       setCommentText("");
+      if (onCommentAdded) {
+        onCommentAdded();
+      }
     } catch (err) {
       console.log(err);
     } finally {

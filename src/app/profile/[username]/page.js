@@ -153,13 +153,24 @@ export default function ProfilePage() {
   }, [activeTab, userPosts]);
 
   const categories = useMemo(() => {
-    const categoryMap = {};
-    categoryMap["All posts"] = userPosts.length;
+    const map = {};
     userPosts.forEach((post) => {
-      const cat = post.category || post.tags?.[0] || "General";
-      categoryMap[cat] = (categoryMap[cat] || 0) + 1;
+      const raw = post.category || post.tags?.[0] || "General";
+      const key = String(raw).trim().toLowerCase();
+      const display = String(raw)
+        .trim()
+        .split(" ")
+        .filter(Boolean)
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ");
+
+      if (!map[key]) map[key] = { name: display || "General", count: 0 };
+      map[key].count += 1;
     });
-    return Object.entries(categoryMap).map(([name, count]) => ({ name, count }));
+
+    const categoriesArr = [{ name: "All posts", count: userPosts.length }];
+    Object.values(map).forEach((c) => categoriesArr.push({ name: c.name, count: c.count }));
+    return categoriesArr;
   }, [userPosts]);
 
   const tabs = useMemo(() => {
@@ -253,11 +264,7 @@ export default function ProfilePage() {
               Categories
             </Link>
           </div>
-          <div className={styles.navButtons}>
-            <button className={styles.iconBtn}>🔍</button>
-            <button className={styles.outlined}>Sign in</button>
-            <button className={styles.primary}>Get started</button>
-          </div>
+          <div className={styles.navButtons} />
         </div>
       </nav>
 
@@ -275,7 +282,7 @@ export default function ProfilePage() {
           </h1>
 
           <p className={styles.handle}>
-            @{profileUser.username || profileUser.email?.split("@")[0] || "creator"} 
+            @{profileUser.username || profileUser.name || profileUser.email?.split("@")[0] || "creator"} 
             {profileUser.location && ` · ${profileUser.location}`}
           </p>
 

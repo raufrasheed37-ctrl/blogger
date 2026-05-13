@@ -308,23 +308,37 @@ export default function BlogCard({
 
           <button
             type="button"
-            onClick={() => {
-              if (
-                !requireAuth()
-              )
-                return;
+          onClick={async () => {
+  if (!requireAuth()) return;
 
-              if (
-                isAuthor
-              )
-                return;
+  if (isAuthor) return;
 
-              setSubscribed(
-                (
-                  prev
-                ) => !prev
-              );
-            }}
+  try {
+    const res = await fetch(
+      `${API_ROOT}/subscribe`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getClientAuthToken()}`,
+        },
+        body: JSON.stringify({
+          authorId: postAuthorId,
+        }),
+      }
+    );
+
+    if (!res.ok) {
+      throw new Error("Failed to subscribe");
+    }
+
+    const data = await res.json();
+
+    setSubscribed(data.subscribed);
+  } catch (error) {
+    console.log(error);
+  }
+}}
             disabled={
               isAuthor
             }
@@ -332,8 +346,8 @@ export default function BlogCard({
               isAuthor
                 ? "cursor-not-allowed bg-white/8 text-white/35"
                 : subscribed
-                ? "bg-zinc-800 text-zinc-100"
-                : "bg-orange-500 text-black hover:bg-orange-400"
+                ? "bg-purple-600 text-white hover:bg-purple-500"
+                : "bg-purple-600 text-white hover:bg-purple-500"
             }`}
           >
             {isAuthor

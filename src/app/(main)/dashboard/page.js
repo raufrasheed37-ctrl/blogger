@@ -213,6 +213,9 @@ export default function DashboardPage() {
                   <p className="text-[#9490b8] text-sm font-semibold uppercase tracking-wider mb-2">Creator Profile</p>
                   <h2 className="text-4xl font-bold mb-2">{displayName}</h2>
                   <p className="text-[#a89cf7] text-lg mb-4">{username}</p>
+                  <p className="mx-auto mb-6 max-w-2xl text-sm leading-6 text-[#d4d1ec] md:mx-0">
+                    {user?.bio?.trim() || "Add a short bio in Edit Profile to personalize your dashboard."}
+                  </p>
                   <p className="text-[#9490b8] mb-6">{user?.subscribers ?? 0} subscribers</p>
 
                   <div className="flex flex-col sm:flex-row gap-3">

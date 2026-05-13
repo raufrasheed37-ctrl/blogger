@@ -310,13 +310,12 @@
 
 /* Tabs Section */
 .tabsSection {
-  position: relative;
+  position: sticky;
   z-index: 10;
   background: rgba(15, 15, 23, 0.5);
   border-top: 1px solid rgba(42, 39, 64, 0.5);
   border-bottom: 1px solid rgba(42, 39, 64, 0.5);
-  padding: 0;
-  sticky: top;
+  padding: 0.75rem 0 1.25rem; /* add space below tabs */
   top: 70px;
 }
 

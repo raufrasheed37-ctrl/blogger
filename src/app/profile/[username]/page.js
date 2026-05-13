@@ -356,11 +356,26 @@ export default function ProfilePage() {
         data.subscribed
       );
 
-      setProfileUser((prev) => ({
-        ...prev,
-        subscribers:
-          data.subscribers,
-      }));
+       setProfileUser((prev) => ({
+  ...prev,
+  subscribers: data.subscribers,
+  subscribersList: data.subscribed
+    ? [
+        ...(prev.subscribersList || []),
+        currentUser._id ||
+          currentUser.id,
+      ]
+    : (
+        prev.subscribersList || []
+      ).filter(
+        (id) =>
+          id.toString() !==
+          (
+            currentUser._id ||
+            currentUser.id
+          ).toString()
+      ),
+}));
     } catch (err) {
       console.log(err);
     }
@@ -494,10 +509,25 @@ export default function ProfilePage() {
       );
 
       setProfileUser((prev) => ({
-        ...prev,
-        subscribers:
-          data.subscribers,
-      }));
+  ...prev,
+  subscribers: data.subscribers,
+  subscribersList: data.subscribed
+    ? [
+        ...(prev.subscribersList || []),
+        currentUser._id ||
+          currentUser.id,
+      ]
+    : (
+        prev.subscribersList || []
+      ).filter(
+        (id) =>
+          id.toString() !==
+          (
+            currentUser._id ||
+            currentUser.id
+          ).toString()
+      ),
+}));
     } catch (err) {
       console.log(err);
     }

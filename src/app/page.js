@@ -69,7 +69,7 @@ export default function Home() {
           title: post.title,
           category: post.tags?.[0] || "General",
           likes: post.likes ?? 0,
-          comments: post.comments ?? 0,
+          comments: post.commentCount ?? 0,
           text: post.excerpt || "",
           avatarClass: "from-purple-400 to-pink-500",
           author: post.author,

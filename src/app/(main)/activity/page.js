@@ -68,8 +68,10 @@ const NotificationItem = ({ item }) => {
         </div>
 
         <div className="text-xs text-[#9490b8] whitespace-nowrap">
-          {item.time}
-        </div>
+  {new Date(
+    item.createdAt
+  ).toLocaleString()}
+</div>
       </div>
     </article>
   );
@@ -273,13 +275,13 @@ useEffect(() => {
                     </p>
 
                     <div className="space-y-5">
-                      {section.items.map((item, i) => (
-                        <NotificationItem
-                          key={`${item.user}-${item.time}-${i}`}
-                          item={item}
-                        />
-                      ))}
-                    </div>
+  {section.items.map((item) => (
+    <NotificationItem
+      key={item._id}
+      item={item}
+    />
+  ))}
+</div>
                   </div>
                 ))
               )}

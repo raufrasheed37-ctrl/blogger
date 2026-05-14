@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import useAuthStore from '@/store/authstore';
 import { authAPI, blogAPI } from '@/utils/api';
 import { useEffect } from 'react';
-import { Home, User, Heart, BarChart3, LogOut, Eye, Search, PenSquare, Plus , FileText, BookOpen, Users, Table,} from 'lucide-react';
+import { Home, User, Heart, BarChart3, LogOut,  MessageCircle, Search, PenSquare, FileText,  Users, Table, Info} from 'lucide-react';
 import { Expletus_Sans } from "next/font/google";
 
 export default function DashboardPage() {
@@ -118,15 +118,13 @@ export default function DashboardPage() {
   const tabs = [
     { label: "Activity", icon: BarChart3 },
     { label: "Posts", icon: PenSquare, count: authorPosts.length },
-    { label: "Likes", icon: Heart },
-    { label: "Reads", icon: Eye },
+    { label: "About", icon: Info },
   ];
 
   const stats = [
-    { label: "Total Reads", value: "0", icon: BookOpen },
-    { label: "Subscribers", value: user?.subscribers ?? 0, icon: Users },
     { label: "Posts", value: authorPosts.length, icon: FileText },
     { label: "Likes Received", value: "0", icon: Heart },
+    { label: "Subscribers", value: user?.subscribers ?? 0, icon: Users },
   ];
 
   return (
@@ -231,7 +229,7 @@ export default function DashboardPage() {
             </section>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center justify-center">
               {stats.map((stat, idx) => {
                 const Icon = stat.icon;
                 return (
@@ -294,7 +292,7 @@ export default function DashboardPage() {
                         <div className="flex items-start gap-4">
                           {/* Icon */}
                           <div className="w-16 h-16 rounded-lg bg-linear-to-br from-[#7c6ff7]/20 to-[#a89cf7]/20 border border-[#2a2740] flex items-center justify-center text-2xl shrink-0 group-hover:from-[#7c6ff7]/30 group-hover:to-[#a89cf7]/30 transition">
-                            📄
+                            <FileText />
                           </div>
 
                           <div className="flex-1 min-w-0">
@@ -316,11 +314,11 @@ export default function DashboardPage() {
                             </div>
                           </div>
 
-                          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                          {/* <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition">
                             <button className="p-2 hover:bg-[#1c1c2e] rounded-lg text-[#9490b8] hover:text-[#f0eeff]">❤️</button>
                             <button className="p-2 hover:bg-[#1c1c2e] rounded-lg text-[#9490b8] hover:text-[#f0eeff]">💬</button>
                             <button className="p-2 hover:bg-[#1c1c2e] rounded-lg text-[#9490b8] hover:text-[#f0eeff]">↗️</button>
-                          </div>
+                          </div> */}
                         </div>
                       </Link>
                     ))}
@@ -338,13 +336,34 @@ export default function DashboardPage() {
               </section>
             )}
 
-            {/* Likes & Reads placeholder */}
-            {(activeTab === "Likes" || activeTab === "Reads") && (
-              <div className="rounded-xl bg-[#141420] border border-[#2a2740] p-12 text-center">
-                <p className="text-4xl mb-4">{activeTab === "Likes" ? "❤️" : "👁️"}</p>
-                <h3 className="text-xl font-bold text-[#f0eeff] mb-2">Coming soon</h3>
-                <p className="text-[#9490b8]">{activeTab} tracking will appear here</p>
-              </div>
+
+            {/* About Section */}
+            {activeTab === "About" && (
+              <section className="rounded-xl bg-[#141420] border border-[#2a2740] p-6">
+                <h3 className="text-lg font-bold text-[#f0eeff] mb-5">About Me</h3>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-[#9490b8] text-sm mb-1">Bio</p>
+                    <p className="text-[#f0eeff]">{user?.bio?.trim() || "No bio added yet."}</p>
+                  </div>
+                  <div>
+                    <p className="text-[#9490b8] text-sm mb-1">Email</p>
+                    <p className="text-[#f0eeff]">{user?.email || "Not provided"}</p>
+                  </div>
+                  <div>
+                    <p className="text-[#9490b8] text-sm mb-1">Location</p>
+                    <p className="text-[#f0eeff]">{user?.address || "Not provided"}</p>
+                  </div>
+                  <div>
+                    <p className="text-[#9490b8] text-sm mb-1">Website</p>
+                    <p className="text-[#f0eeff]">{user?.website ? <a href={user.website} className="text-[#7c6ff7] hover:underline">{user.website}</a> : "Not provided"}</p>
+                  </div>
+                  <div>
+                    <p className="text-[#9490b8] text-sm mb-1">Phone</p>
+                    <p className="text-[#f0eeff]">{user?.phoneNo || user?.phone || "Not provided"}</p>
+                  </div>
+                </div>
+              </section>
             )}
           </div>
         </main>

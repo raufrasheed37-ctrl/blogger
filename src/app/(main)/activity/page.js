@@ -244,8 +244,7 @@ useEffect(() => {
               </h2>
 
               <p className="mt-3 text-sm text-[#9490b8]">
-                A feed of likes, replies, subscriptions, and restacks.
-              </p>
+  Stay updated with every interaction around your content.</p>
 
               {/* Filters */}
               <div className="mt-6 flex flex-wrap gap-3">

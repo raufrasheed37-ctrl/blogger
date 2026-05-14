@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect, } from "react";
 import useAuthStore from "@/store/authstore";
 import {
   getLoginRedirect,
@@ -51,6 +51,29 @@ export default function BlogCard({
 
   const [subscribed, setSubscribed] =
     useState(false);
+
+  useEffect(() => {
+  if (!user || !post.author)
+    return;
+
+  const subscribers =
+    post.author
+      ?.subscribersList || [];
+
+  const currentUserId =
+    user._id || user.id;
+
+  const alreadySubscribed =
+    subscribers.some(
+      (id) =>
+        id.toString() ===
+        currentUserId
+    );
+
+  setSubscribed(
+    alreadySubscribed
+  );
+}, [post.author, user]);
 
   const requireAuth = () => {
     if (

@@ -4,7 +4,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/store/authstore";
 import { Home, User, Heart, BarChart3, LogOut, Eye, Search, PenSquare, Plus , FileText, BookOpen, Users, Table,} from 'lucide-react';
+ 
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:5000";
 
+const API_ROOT = `${API_BASE_URL}${
+  API_BASE_URL.endsWith("/api")
+    ? ""
+    : "/api"
+}`;
 
 
 const TYPE_META = {

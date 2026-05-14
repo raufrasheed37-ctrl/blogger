@@ -95,8 +95,7 @@ const [subscribed, setSubscribed] =
     post?.name ||
     null;
 
-  const currentUserId =
-    user?._id || user?.id || null;
+
 
   const isAuthor = Boolean(
     user &&

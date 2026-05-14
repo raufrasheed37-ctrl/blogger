@@ -18,6 +18,8 @@ const API_ROOT = `${API_BASE_URL}${
 
 const TYPE_META = {
   like: { label: "liked your post", icon: "❤️" },
+  comment: {
+  label: "commented on your post", icon: "💬" },
   restack: { label: "restacked your post", icon: "🔁" },
   reply: { label: "replied to your post", icon: "💬" },
   subscribe: { label: "subscribed to your blog", icon: "⭐" },

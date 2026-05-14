@@ -123,6 +123,7 @@ useEffect(() => {
   const filters = [
     "All",
     "Likes",
+    "Comments",
     "Replies",
     "Restacks",
     "Subscriptions",
@@ -135,6 +136,7 @@ useEffect(() => {
 
   const filterMap = {
     Likes: "like",
+    Comments: "comment",
     Replies: "reply",
     Restacks: "restack",
     Subscriptions: "subscribe",

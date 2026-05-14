@@ -5,58 +5,40 @@ import { useRouter } from "next/navigation";
 import useAuthStore from "@/store/authstore";
 import { Home, User, Heart, BarChart3, LogOut, Eye, Search, PenSquare, Plus , FileText, BookOpen, Users, Table,} from 'lucide-react';
 
-const data = [
-  {
-    section: "Today",
-    items: [
-      {
-        type: "like",
-        user: "Alex Chen",
-        time: "3h",
-        post: "Writing online is thinking in public",
-        meta: "May 12 · 8 min read",
-      },
-      {
-        type: "restack",
-        user: "Priya Patel",
-        time: "5h",
-        post: "Writing online is thinking in public",
-        meta: "May 12 · 8 min read",
-      },
-      {
-        type: "reply",
-        user: "Noah Williams",
-        time: "6h",
-        content:
-          "Totally agree with this! The part about showing up even when you don't feel ready really hit home.",
-      },
-    ],
-  },
-  {
-    section: "Yesterday",
-    items: [
-      {
-        type: "subscribe",
-        user: "Emma Lee",
-        time: "Yesterday",
-      },
-      {
-        type: "like",
-        user: "David Kim",
-        time: "Yesterday",
-        post: "The creative process is non-linear",
-        meta: "May 10 · 6 min read",
-      },
-      {
-        type: "reply",
-        user: "Maria Garcia",
-        time: "Yesterday",
-        content: "This framework is so helpful—saving this one!",
-      },
-    ],
-  },
-];
+const [data, setData] =
+  useState([]);
 
+useEffect(() => {
+  const fetchActivity =
+    async () => {
+      try {
+        const res = await fetch(
+          `${API_ROOT}/activity`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const result =
+          await res.json();
+
+        setData([
+          {
+            section: "Recent",
+            items: result,
+          },
+        ]);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+  if (token) {
+    fetchActivity();
+  }
+}, [token]);
 const TYPE_META = {
   like: { label: "liked your post", icon: "❤️" },
   restack: { label: "restacked your post", icon: "🔁" },

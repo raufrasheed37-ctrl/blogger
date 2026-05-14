@@ -50,10 +50,24 @@ export default function BlogCard({
     useState(post.restacks || 0);
 
   const [liked, setLiked] =
-    useState(false);
+  useState(
+    currentUserId &&
+    post.likedBy?.some(
+      (id) =>
+        id.toString() ===
+        currentUserId.toString()
+    )
+  );
 
-  const [restacked, setRestacked] =
-    useState(false);
+const [restacked, setRestacked] =
+  useState(
+    currentUserId &&
+    post.restackedBy?.some(
+      (id) =>
+        id.toString() ===
+        currentUserId.toString()
+    )
+  );
 
   const subscribers =
   post.author?.subscribersList || [];

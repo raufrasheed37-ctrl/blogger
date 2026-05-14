@@ -62,21 +62,55 @@ export default function Home() {
 
         if (cancelled) return;
 
-        const mappedPosts = livePosts.map((post) => ({
-          _id: post._id,
-          name: post.author?.name || "Anonymous",
-          handle: post.author?.email ? `@${post.author.email.split("@")[0]}` : "@anonymous",
-          time: post.createdAt ? new Date(post.createdAt).toLocaleDateString() : "just now",
-          slug: post.slug || post._id,
-          title: post.title,
-          category: post.tags?.[0] || "General",
-          likes: post.likes ?? 0,
-          comments: post.commentCount ?? 0,
-          text: post.excerpt || "",
-          avatarClass: "from-purple-400 to-pink-500",
-          author: post.author,
-          authorId: post.author?._id || post.author?.id,
-        }));
+        const mappedPosts = livePosts.map((post) => {
+  const subscribersList =
+    post.author?.subscribersList || [];
+
+  const currentUserId =
+    user?._id || user?.id;
+
+  const isSubscribed =
+    currentUserId &&
+    subscribersList.some(
+      (id) =>
+        id.toString() ===
+        currentUserId.toString()
+    );
+
+  return {
+    _id: post._id,
+    name: post.author?.name || "Anonymous",
+    handle: post.author?.email
+      ? `@${
+          post.author.email.split("@")[0]
+        }`
+      : "@anonymous",
+    time: post.createdAt
+      ? new Date(
+          post.createdAt
+        ).toLocaleDateString()
+      : "just now",
+    slug: post.slug || post._id,
+    title: post.title,
+    category:
+      post.tags?.[0] || "General",
+    likes: post.likes ?? 0,
+    comments:
+      post.commentCount ?? 0,
+    text: post.excerpt || "",
+    avatarClass:
+      "from-purple-400 to-pink-500",
+
+    author: {
+      ...post.author,
+      subscribed: isSubscribed,
+    },
+
+    authorId:
+      post.author?._id ||
+      post.author?.id,
+  };
+});
 
         setPosts(mappedPosts);
       } catch (error) {

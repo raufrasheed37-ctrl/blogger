@@ -282,38 +282,47 @@ const [subscribed, setSubscribed] =
 
             <div className="mt-5 flex flex-wrap items-center gap-3 text-sm text-zinc-500">
 
-              <button
-                type="button"
-                onClick={toggleLike}
-                className={`rounded-full border px-3 py-1.5 transition ${
-                  liked
-                    ? "border-orange-500/60 bg-orange-500/10 text-orange-400"
-                    : "border-white/10 hover:border-orange-500/40 hover:text-orange-400"
-                }`}
-              >
-                ❤️ {likes}
-              </button>
+              
 
-              <Link
-                href={`/blog/${post.slug}`}
-                className="rounded-full border border-white/10 px-3 py-1.5 transition hover:border-orange-500/40 hover:text-orange-400"
-              >
-                💬 {commentCount}
-              </Link>
+              {/* LIKE */}
+<button
+  type="button"
+  onClick={toggleLike}
+  className={`flex items-center gap-2 rounded-full border px-3 py-1.5 transition ${
+    liked
+      ? "border-orange-500/60 bg-orange-500/10 text-orange-400"
+      : "border-white/10 hover:border-orange-500/40 hover:text-orange-400"
+  }`}
+>
+  <Heart
+    size={16}
+    className={liked ? "fill-current" : ""}
+  />
+  <span>{likes}</span>
+</button>
 
-              <button
-                type="button"
-                onClick={
-                  toggleRestack
-                }
-                className={`rounded-full border px-3 py-1.5 transition ${
-                  restacked
-                    ? "border-orange-500/60 bg-orange-500/10 text-orange-400"
-                    : "border-white/10 hover:border-orange-500/40 hover:text-orange-400"
-                }`}
-              >
-                ↻ {restacks}
-              </button>
+{/* COMMENT */}
+<Link
+  href={`/blog/${post.slug}`}
+  className="flex items-center gap-2 rounded-full border border-white/10 px-3 py-1.5 transition hover:border-orange-500/40 hover:text-orange-400"
+>
+  <MessageCircle size={16} />
+  <span>{commentCount}</span>
+</Link>
+
+{/* RESTACK */}
+<button
+  type="button"
+  onClick={toggleRestack}
+  className={`flex items-center gap-2 rounded-full border px-3 py-1.5 transition ${
+    restacked
+      ? "border-orange-500/60 bg-orange-500/10 text-orange-400"
+      : "border-white/10 hover:border-orange-500/40 hover:text-orange-400"
+  }`}
+>
+  <Repeat2 size={16} />
+  <span>{restacks}</span>
+</button>
 
               
 

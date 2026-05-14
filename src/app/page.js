@@ -94,7 +94,6 @@ export default function Home() {
     title: post.title,
     category:
       post.tags?.[0] || "General",
-    likes: post.likes ?? 0,
     comments:
       post.commentCount ?? 0,
     likes: post.likes ?? 0,

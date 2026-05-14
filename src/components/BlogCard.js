@@ -49,6 +49,9 @@ export default function BlogCard({
   const [restacks, setRestacks] =
     useState(post.restacks || 0);
 
+  const currentUserId =
+  user?._id || user?.id;
+
   const [liked, setLiked] =
   useState(
     currentUserId &&
@@ -71,9 +74,6 @@ const [restacked, setRestacked] =
 
   const subscribers =
   post.author?.subscribersList || [];
-
-const currentUserId =
-  user?._id || user?.id;
 
 const [subscribed, setSubscribed] =
   useState(

@@ -6,6 +6,11 @@ import { useEffect, useMemo, useState } from "react";
 import { blogAPI } from "@/utils/api";
 import CommentSection from "@/components/CommentSection";
 import useAuthStore, { isClientAuthenticated } from "@/store/authstore";
+import {
+  Heart,
+  MessageCircle,
+  Repeat2,
+} from "lucide-react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 const API_ROOT = `${API_BASE_URL}${API_BASE_URL.endsWith("/api") ? "" : "/api"}`;
@@ -528,68 +533,113 @@ export default function PostDetailPage() {
                 </div>
 
                 <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-                  <div className="flex flex-wrap items-center gap-2">
-                   <button
-  type="button"
-  onClick={async () => {
-    if (!isLoggedIn) {
-      router.push(`/login?next=/blog/${normalizedPost.slug}`);
-      return;
-    }
+                   <div className="flex flex-wrap items-center gap-3">
 
-    try {
-      const response = await fetch(
-        `${API_ROOT}/posts/${normalizedPost.id}/like`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to like");
+  {/* LIKE */}
+  <button
+    type="button"
+    onClick={async () => {
+      if (!isLoggedIn) {
+        router.push(`/login?next=/blog/${normalizedPost.slug}`);
+        return;
       }
 
-      const data = await response.json();
+      try {
+        const response = await fetch(
+          `${API_ROOT}/posts/${normalizedPost.id}/like`,
+          {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-      setLiked(data.liked);
+        if (!response.ok) {
+          throw new Error("Failed to like");
+        }
 
-      setPost((prev) => ({
-        ...prev,
-        likes: data.likes,
-      }));
-    } catch (err) {
-      console.log(err);
-    }
-  }}
-  className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
-    liked
-      ? "border-[#7c6ff7]/70 bg-[#7c6ff7]/20 text-[#f0eeff]"
-      : "border-[#2a2740] bg-[#141420] text-[#f0eeff] hover:border-[#7c6ff7]/60 hover:bg-[#1c1c2e]"
-  }`}
->
-  Like {post.likes}
-</button>
-                    <button
-                      type="button"
-                      className="rounded-full border border-[#2a2740] bg-[#141420] px-4 py-2 text-sm font-medium text-[#f0eeff] transition hover:border-[#7c6ff7]/60 hover:bg-[#1c1c2e]"
-                    >
-                      Comment {post.comments}
-                    </button>
-                    <button
-  type="button"
-  onClick={() => setSaved((current) => !current)}
-  className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
-    saved
-      ? "border-[#7c6ff7]/70 bg-[#7c6ff7]/20 text-[#f0eeff]"
-      : "border-[#2a2740] bg-[#141420] text-[#f0eeff] hover:border-[#7c6ff7]/60 hover:bg-[#1c1c2e]"
-  }`}
->
-  {saved ? "Saved" : "Save"}
-</button>
-                  </div>
+        const data = await response.json();
+
+        setLiked(data.liked);
+
+        setPost((prev) => ({
+          ...prev,
+          likes: data.likes,
+        }));
+      } catch (err) {
+        console.log(err);
+      }
+    }}
+    className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${
+      liked
+        ? "border-rose-500/60 bg-rose-500/15 text-rose-300"
+        : "border-[#2a2740] bg-[#141420] text-[#f0eeff] hover:border-rose-500/50 hover:text-rose-300"
+    }`}
+  >
+    <Heart
+      size={18}
+      className={liked ? "fill-current" : ""}
+    />
+    <span>{post.likes}</span>
+  </button>
+
+  {/* COMMENT */}
+  <button
+    type="button"
+    className="flex items-center gap-2 rounded-full border border-[#2a2740] bg-[#141420] px-4 py-2 text-sm font-medium text-[#f0eeff] transition hover:border-[#7c6ff7]/60 hover:text-[#a89cf7]"
+  >
+    <MessageCircle size={18} />
+    <span>{post.comments}</span>
+  </button>
+
+  {/* RESTACK */}
+  <button
+    type="button"
+    onClick={async () => {
+      if (!isLoggedIn) {
+        router.push(`/login?next=/blog/${normalizedPost.slug}`);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `${API_ROOT}/posts/${normalizedPost.id}/restack`,
+          {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to restack");
+        }
+
+        const data = await response.json();
+
+        setSaved(data.restacked);
+
+        setPost((prev) => ({
+          ...prev,
+          restacks: data.restacks,
+        }));
+      } catch (err) {
+        console.log(err);
+      }
+    }}
+    className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${
+      saved
+        ? "border-emerald-500/60 bg-emerald-500/15 text-emerald-300"
+        : "border-[#2a2740] bg-[#141420] text-[#f0eeff] hover:border-emerald-500/50 hover:text-emerald-300"
+    }`}
+  >
+    <Repeat2 size={18} />
+    <span>{post.restacks || 0}</span>
+  </button>
+
+</div>
 
                   <div className="flex items-center gap-2">
                     <ShareIconButton label="Share on X" onClick={handleShare}>

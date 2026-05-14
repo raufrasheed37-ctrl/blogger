@@ -11,11 +11,18 @@ import useAuthStore from "@/store/authstore";
 import { authAPI } from "@/utils/api";
 
 const contactSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
+  name: z.string().trim().min(1, "Enter your name"),
   phoneNo: z
     .string()
-    .regex(/^[0-9+]+$/, "Only numbers allowed")
-    .min(7, "Phone number too short"),
+    .trim()
+    .min(1, "Enter your phone number")
+    .refine(
+      (value) => /^\+[0-9]{1,14}$/.test(value),
+      {
+        message:
+          "Number must not be longer than 15 characters and it must start with +",
+      }
+    ),
   email: z.string().email("Invalid email address"),
   address: z.string().min(10, "Address must be at least 10 characters"),
   bio: z.string().optional(),
@@ -254,8 +261,8 @@ export default function ContactPage() {
 
 
   return (
-      <div className="min-h-screen bg-[#0d0d14] text-[#f0eeff] font-sans mx-auto max-w-2xl">
-      <div className="overflow-hidden rounded-2xl border border-[#2a2740] bg-[#0d0d14]">
+    <div className="min-h-screen bg-[#0d0d14] text-[#f0eeff]">
+      <div className="mx-auto max-w-2xl overflow-hidden rounded-2xl border border-[#2a2740] bg-[#0d0d14]">
 
         {/* TOPBAR */}
         <div className="flex items-center justify-between border-b border-[#2a2740] bg-[#141420] px-5 py-3">
@@ -384,11 +391,11 @@ export default function ContactPage() {
                   />
                 </div>
 
-                {selectedPhoto && (
+                {/* {selectedPhoto && (
                   <div className="mt-3 text-sm text-[#9490b8]">
                     Selected file: {selectedPhoto.name}
                   </div>
-                )}
+                )} */}
               </div>
             </div>
 

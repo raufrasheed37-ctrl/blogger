@@ -215,6 +215,7 @@ export default function PostDetailPage() {
     const reads = 0;
     const likes = Number(post.likes ?? 0);
     const comments = Number(post.comments ?? 0);
+    const restacks = Number(post.restacks ?? 0);
     const createdAt = post.createdAt ? new Date(post.createdAt) : new Date();
     const readTime = Math.max(1, Math.ceil(Math.max(content.split(/\s+/).filter(Boolean).length, 1) / 200));
 
@@ -241,7 +242,8 @@ export default function PostDetailPage() {
       reads,
       likes,
       comments,
-      quote: paragraphs[1] || paragraphs[0] || post.excerpt || "Write a strong editorial hook to anchor the reading experience.",
+      restacks,
+        quote: paragraphs[1] || paragraphs[0] || post.excerpt || "Write a strong editorial hook to anchor the reading experience.",
     };
   }, [post, slug]);
 
@@ -636,7 +638,7 @@ export default function PostDetailPage() {
     }`}
   >
     <Repeat2 size={18} />
-    <span>{post.restacks || 0}</span>
+    <span>{normalizedPost.restacks}</span>
   </button>
 
 </div>

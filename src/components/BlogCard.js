@@ -12,6 +12,12 @@ import {
   getClientAuthToken,
 } from "@/store/authstore";
 
+import {
+  Heart,
+  MessageCircle,
+  Repeat2,
+} from "lucide-react";
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   "http://localhost:5000";
@@ -309,9 +315,7 @@ const [subscribed, setSubscribed] =
                 ↻ {restacks}
               </button>
 
-              <span className="rounded-full border border-white/10 px-3 py-1.5">
-                Share
-              </span>
+              
 
             </div>
           </div>

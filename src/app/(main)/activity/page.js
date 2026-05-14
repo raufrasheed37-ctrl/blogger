@@ -63,7 +63,7 @@ const NotificationItem = ({ item }) => {
         <div className="flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-semibold text-[#a89cf7]">
-              {item.user}
+              {item.actor?.name}
             </span>
 
             <span className="text-[#9490b8] text-sm">
@@ -80,7 +80,7 @@ const NotificationItem = ({ item }) => {
           {item.post && (
             <div className="mt-4 rounded-2xl border border-[#2a2740] bg-[#1c1c2e] p-4">
               <p className="font-medium text-[#f0eeff]">
-                {item.post}
+                {item.post?.title}
               </p>
 
               <p className="mt-1 text-xs text-[#9490b8]">

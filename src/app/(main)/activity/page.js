@@ -1,44 +1,12 @@
 "use client"
-import React, { useState } from "react";
+import React, { useState, useEffect, } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/store/authstore";
 import { Home, User, Heart, BarChart3, LogOut, Eye, Search, PenSquare, Plus , FileText, BookOpen, Users, Table,} from 'lucide-react';
 
-const [data, setData] =
-  useState([]);
 
-useEffect(() => {
-  const fetchActivity =
-    async () => {
-      try {
-        const res = await fetch(
-          `${API_ROOT}/activity`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
 
-        const result =
-          await res.json();
-
-        setData([
-          {
-            section: "Recent",
-            items: result,
-          },
-        ]);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-  if (token) {
-    fetchActivity();
-  }
-}, [token]);
 const TYPE_META = {
   like: { label: "liked your post", icon: "❤️" },
   restack: { label: "restacked your post", icon: "🔁" },
@@ -102,6 +70,44 @@ export default function ActivityPage() {
   const [activeFilter, setActiveFilter] = useState("All");
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [data, setData] =
+  useState([]);
+
+const token = useAuthStore(
+  (state) => state.token
+);
+
+useEffect(() => {
+  const fetchActivity =
+    async () => {
+      try {
+        const res = await fetch(
+          `${API_ROOT}/activity`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const result =
+          await res.json();
+
+        setData([
+          {
+            section: "Recent",
+            items: result,
+          },
+        ]);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+  if (token) {
+    fetchActivity();
+  }
+}, [token]);
 
   const filters = [
     "All",

@@ -128,7 +128,7 @@ export default function Home() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [ user ]);
 
   const handleCreateClick = () => {
     const currentToken = token || (typeof window !== 'undefined' ? localStorage.getItem('token') : null);

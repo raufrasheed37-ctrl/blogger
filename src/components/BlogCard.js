@@ -320,7 +320,7 @@ const [subscribed, setSubscribed] =
       : "border-white/10 hover:border-orange-500/40 hover:text-orange-400"
   }`}
 >
-  <Repeat2 size={16} />
+  <Repeat2 size={16}  className={restacked ? "fill-current" : ""} />
   <span>{restacks}</span>
 </button>
 

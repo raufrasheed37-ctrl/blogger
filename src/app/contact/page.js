@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import Link from "next/link";
 import axios from "axios";
+import Image from "next/image";
 import { Eye, Check, Trash2, Upload, ChevronRight, IdCard } from "lucide-react";
 import useAuthStore from "@/store/authstore";
 import { authAPI } from "@/utils/api";
@@ -43,6 +44,10 @@ export default function ContactPage() {
   bio: "",
   website: "",
 });
+
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [selectedPhotoUrl, setSelectedPhotoUrl] = useState("");
+  const fileInputRef = useRef(null);
 
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
@@ -110,6 +115,39 @@ export default function ContactPage() {
 
     loadProfile();
   }, [hasLoadedProfile, user]);
+
+  useEffect(() => {
+    if (!selectedPhoto) {
+      setSelectedPhotoUrl("");
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(selectedPhoto);
+    setSelectedPhotoUrl(objectUrl);
+
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [selectedPhoto]);
+
+  const handlePhotoButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handlePhotoChange = (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    setSelectedPhoto(file);
+  };
+
+  const handleRemovePhoto = () => {
+    setSelectedPhoto(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -260,7 +298,7 @@ export default function ContactPage() {
           </div>
         </div>
 
-        <div className="flex min-h-[450px]">
+        <div className="flex min-h-112.5">
 
           {/* MAIN */}
           <main className="flex-1 overflow-y-auto px-9 py-8">
@@ -293,8 +331,18 @@ export default function ContactPage() {
             {/* AVATAR */}
             <div className="mb-6 flex items-center gap-5 rounded-xl border border-[#2a2740] bg-[#141420] p-5">
 
-              <div className="relative flex h-[72px] w-[72px] cursor-pointer items-center justify-center rounded-full border-[2.5px] border-[#7c6ff7] bg-[#2e2a5c] text-2xl font-semibold text-[#a89cf7]">
-                {profileData.name?.trim()?.charAt(0)?.toUpperCase() || "U"}
+              <div className="relative flex h-18 w-18 cursor-pointer items-center justify-center overflow-hidden rounded-full border-[2.5px] border-[#7c6ff7] bg-[#2e2a5c] text-2xl font-semibold text-[#a89cf7]">
+                {selectedPhotoUrl ? (
+                  <Image
+                    src={selectedPhotoUrl}
+                    alt="Profile photo"
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                ) : (
+                  profileData.name?.trim()?.charAt(0)?.toUpperCase() || "U"
+                )}
               </div>
 
               <div className="flex-1">
@@ -308,19 +356,39 @@ export default function ContactPage() {
                     : "@user"}
                 </div>
 
-                <div className="flex gap-2">
-
-                  <button className="flex items-center gap-1 rounded-full bg-[#7c6ff7] px-4 py-1.5 text-sm text-white">
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handlePhotoButtonClick}
+                    className="flex items-center gap-1 rounded-full bg-[#7c6ff7] px-4 py-1.5 text-sm text-white"
+                  >
                     <Upload size={14} />
                     Upload photo
                   </button>
 
-                  <button className="flex items-center gap-1 rounded-full border border-[#2a2740] px-4 py-1.5 text-sm text-[#9490b8] transition hover:border-[#f09595] hover:text-[#f09595]">
+                  <button
+                    type="button"
+                    onClick={handleRemovePhoto}
+                    className="flex items-center gap-1 rounded-full border border-[#2a2740] px-4 py-1.5 text-sm text-[#9490b8] transition hover:border-[#f09595] hover:text-[#f09595]"
+                  >
                     <Trash2 size={14} />
                     Remove
                   </button>
 
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoChange}
+                    className="hidden"
+                  />
                 </div>
+
+                {selectedPhoto && (
+                  <div className="mt-3 text-sm text-[#9490b8]">
+                    Selected file: {selectedPhoto.name}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -463,95 +531,7 @@ export default function ContactPage() {
       </div>
     </div>
 
-    // <main className="mx-auto max-w-2xl px-4 py-8 text-white">
-    //   <h1 className="mb-3 text-3xl font-bold text-orange-500">Contact Address</h1>
-    //   <p className="text-orange-500 mb-4">
-    //       Please fill in the details below to add a new address to your profile.
-    //   </p>
-
-    //   <form onSubmit={handleSubmit} className="space-y-5 rounded-2xl border border-zinc-700 bg-zinc-900 p-6">
-    //     <div>
-    //       <label className=" mb-3 block text-sm font-medium">Full Name <span className="text-orange-500">*</span></label>
-    //       <input
-    //         name="name"
-    //         value={formData.name}
-    //         onChange={handleChange}
-    //         className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 outline-none focus:border-orange-500"
-    //         placeholder="Your name"
-    //       />
-    //       {errors.name && <p className="mt-1 text-sm text-red-400">{errors.name}</p>}
-    //     </div>
-
-    //     <div>
-    //       <label className=" mb-3 block text-sm font-medium">Phone Number <span className="text-orange-500">*</span></label>
-    //       <input
-    //         name="phoneNo"
-    //         type="tel"
-    //         value={formData.phoneNo}
-    //         onChange={handleChange}
-    //         className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 outline-none focus:border-orange-500"
-    //         placeholder="Phone Number"
-    //       />
-    //       {errors.phoneNo && <p className="mt-1 text-sm text-red-400">{errors.phoneNo}</p>}
-    //     </div>
-
-    //     <div>
-    //       <label className="mb-2 block text-sm font-medium">Email Address <span className="text-orange-500">*</span></label>
-    //       <input
-    //         name="email"
-    //         type="email"
-    //         value={formData.email}
-    //         onChange={handleChange}
-    //         className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 outline-none focus:border-orange-500"
-    //         placeholder="you@example.com"
-    //       />
-    //       {errors.email && <p className="mt-1 text-sm text-red-400">{errors.email}</p>}
-    //     </div>
-    //     <hr className="mt-5"/>
-
-    //     <div>
-    //       {/* <label className="mb-2 block text-sm font-medium">Message</label> */}
-    //       {/* <textarea
-    //         name="message"
-    //         value={formData.message}
-    //         onChange={handleChange}
-    //         rows={8}
-    //         className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 outline-none focus:border-orange-500"
-    //         placeholder="Tell us what you need"
-    //       /> */}
-
-    //       {/* {errors.message && <p className="mt-1 text-sm text-red-400">{errors.message}</p>} */}
-          
-    //       <label className="mb-2 block text-sm font-medium">Address <span className="text-orange-500 text-sm">(Optional)</span></label>
-    //       <input
-    //         name="address"
-    //         value={formData.address}
-    //         onChange={handleChange}
-    //         className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 outline-none focus:border-orange-500"
-    //         placeholder="Ikeja, Lagos. Nigeria"
-    //       />
-    //     </div>
-
-    //     {errors.form && <p className="text-sm text-red-400">{errors.form}</p>}
-
-    //     <button
-    //       type="submit"
-    //       disabled={isSubmitting}
-    //       className="rounded-md bg-orange-500 px-4 py-2 font-semibold text-zinc-950 disabled:opacity-60"
-    //     >
-    //       {isSubmitting ? "Saving..." : "Save contact"}
-    //     </button>
-
-    //     <p className=" text-sm">
-    //       <Link
-    //         href="/dashboard"
-    //         className="font-medium text-orange-500 hover:text-orange-400"
-    //         >
-    //           Back to dashboard
-    //       </Link>
-    //     </p>
-    //   </form>
-    // </main>
+    
   );
 }
 

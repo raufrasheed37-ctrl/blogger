@@ -118,7 +118,7 @@ function RegisterFormContent() {
             </h1>
 
             <p className="text-sm text-[#9490b8]">
-              Join Pulse and start managing your dashboard.
+              Join Pulse and start managing your blog dashboard.
             </p>
           </div>
 

@@ -49,31 +49,22 @@ export default function BlogCard({
   const [restacked, setRestacked] =
     useState(false);
 
-  const [subscribed, setSubscribed] =
-    useState(false);
-
-  useEffect(() => {
-  if (!user || !post.author)
-    return;
-
   const subscribers =
-    post.author
-      ?.subscribersList || [];
+  post.author?.subscribersList || [];
 
-  const currentUserId =
-    user._id || user.id;
+const currentUserId =
+  user?._id || user?.id;
 
-  const alreadySubscribed =
+const [subscribed, setSubscribed] =
+  useState(
+    currentUserId &&
     subscribers.some(
       (id) =>
         id.toString() ===
-        currentUserId
-    );
-
-  setSubscribed(
-    alreadySubscribed
+        currentUserId.toString()
+    )
   );
-}, [post.author, user]);
+
 
   const requireAuth = () => {
     if (

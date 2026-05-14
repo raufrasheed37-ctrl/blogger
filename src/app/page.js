@@ -97,6 +97,11 @@ export default function Home() {
     likes: post.likes ?? 0,
     comments:
       post.commentCount ?? 0,
+    likes: post.likes ?? 0,
+restacks: post.restacks ?? 0,
+
+likedBy: post.likedBy || [],
+restackedBy: post.restackedBy || [],
     text: post.excerpt || "",
     avatarClass:
       "from-purple-400 to-pink-500",

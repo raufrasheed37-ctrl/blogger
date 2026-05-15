@@ -309,6 +309,17 @@ const [subscribed, setSubscribed] =
         ...prev,
         likes: data.likes,
       }));
+      setPosts((prevPosts) =>
+  prevPosts.map((p) =>
+    p._id === localPost._id
+      ? {
+          ...p,
+          likes: data.likes,
+        }
+      : p
+  )
+);
+            
     } catch (err) {
       console.log(err);
     }
@@ -381,6 +392,17 @@ const [subscribed, setSubscribed] =
         ...prev,
         restacks: data.restacks,
       }));
+     setPosts((prevPosts) =>
+  prevPosts.map((p) =>
+    p._id === localPost._id
+      ? {
+          ...p,
+          restacks: data.restacks,
+        }
+      : p
+  )
+);
+      
     } catch (err) {
       console.log(err);
     }
@@ -410,12 +432,28 @@ const [subscribed, setSubscribed] =
     postId={postId}
     requireAuth={requireAuth}
     onCommentAdded={() => {
-      setLocalPost((prev) => ({
-        ...prev,
-        comments:
-          (prev.comments || 0) + 1,
-      }));
-    }}
+  setLocalPost((prev) => ({
+    ...prev,
+    comments:
+      (prev.comments ||
+        prev.replyCount ||
+        0) + 1,
+  }));
+
+      setPosts((prevPosts) =>
+  prevPosts.map((p) =>
+    p._id === localPost._id
+      ? {
+          ...p,
+          comments:
+            ((p.comments ||
+              p.replyCount ||
+              0) + 1),
+        }
+      : p
+  )
+);
+}}
   />
 )}
         
@@ -598,12 +636,12 @@ const [subscribed, setSubscribed] =
     const aScore =
       (a.likes || 0) +
       (a.restacks || 0) +
-      (a.replyCount || 0);
+      (a.comments || a.replyCount || 0)
 
     const bScore =
       (b.likes || 0) +
       (b.restacks || 0) +
-      (b.replyCount || 0);
+      (b.comments || b.replyCount || 0)
 
     return bScore - aScore;
   })

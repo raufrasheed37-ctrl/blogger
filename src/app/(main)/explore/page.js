@@ -62,31 +62,49 @@ export default function ExplorePage() {
     fetchPosts();
   }, []);
 
-  const filteredPosts =
-  posts.filter((post) => {
+  const filteredPosts = posts.filter((post) => {
 
-    const matchesSearch =
-      post.title
-        ?.toLowerCase()
-        .includes(
-          search.toLowerCase()
-        );
+  const matchesSearch =
+    post.title
+      ?.toLowerCase()
+      .includes(
+        search.toLowerCase()
+      );
 
-    const matchesCategory =
-  activeCategory === "Explore"
-    ? true
-    : post.category
-        ?.toLowerCase()
-        .trim() ===
-      activeCategory
-        .toLowerCase()
-        .trim();
+  const matchesCategory =
+    activeCategory === "Explore"
+      ? true
+      : post.category
+          ?.toLowerCase()
+          .trim() ===
+        activeCategory
+          .toLowerCase()
+          .trim();
 
-    return (
-      matchesSearch &&
-      matchesCategory
-    );
-  });
+  return (
+    matchesSearch &&
+    matchesCategory
+  );
+});
+
+const sortedPosts = [...filteredPosts];
+
+if (activeTab === "Top") {
+  sortedPosts.sort(
+    (a, b) =>
+      (b.likes || 0) -
+      (a.likes || 0)
+  );
+}
+
+if (activeTab === "Recent") {
+  sortedPosts.sort(
+    (a, b) =>
+      new Date(b.createdAt) -
+      new Date(a.createdAt)
+  );
+}
+  
 
   const ExplorePostCard = ({ post }) => {
     const postId = post._id || post.id;

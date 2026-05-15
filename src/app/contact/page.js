@@ -25,7 +25,7 @@ const contactSchema = z.object({
     ),
   email: z.string().email("Invalid email address"),
   address: z.string().min(10, "Address must be at least 10 characters"),
-  bio: z.string().optional(),
+  bio: z.string().max(160, "Bio must be 160 characters or fewer").optional(),
   website: z.string().optional(),
 });
 
@@ -460,9 +460,21 @@ export default function ContactPage() {
                       name="bio"
                       value={formData.bio}
                       onChange={handleChange}
+                      maxLength={160}
                       className="w-full resize-none rounded-lg border border-[#2a2740] bg-[#1c1c2e] px-3 py-2 text-sm outline-none focus:border-[#7c6ff7]"
                       placeholder="A short bio"
                     />
+
+                    <div className="mt-2 flex items-center justify-between text-xs text-[#9490b8]">
+                      <span>Up to 160 characters</span>
+                      <span>{formData.bio.length}/160</span>
+                    </div>
+
+                    {errors.bio && (
+                      <p className="mt-2 text-xs text-[#f09595]">
+                        {errors.bio}
+                      </p>
+                    )}
 
                   </Field>
                 </div>

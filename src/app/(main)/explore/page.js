@@ -32,6 +32,8 @@ export default function ExplorePage() {
   useState("");
   const [activeCategory, setActiveCategory] =
   useState("Explore");
+  const [activeTab, setActiveTab] =
+  useState("Top");
 
   const handleLogout = () => {
     useAuthStore.getState().logout();
@@ -415,13 +417,14 @@ export default function ExplorePage() {
 
             {/* Tabs */}
             <div className="mt-6 flex justify-center gap-16 border-b border-[#2a2740] pb-4">
-              {tabs.map((tab, index) => (
+              {tabs.map((tab) => (
                 <button
-                  key={tab}
+  key={tab}
+  onClick={() => setActiveTab(tab)}
                   className={`text-sm font-semibold ${
-                    index === 0
-                      ? "border-b-2 border-[#7c6ff7] pb-2 text-[#7c6ff7]"
-                      : "text-[#9490b8]"
+                    activeTab === tab
+  ? "border-b-2 border-[#7c6ff7] pb-2 text-[#7c6ff7]"
+  : "text-[#9490b8]"
                   }`}
                 >
                   {tab}
@@ -442,7 +445,7 @@ export default function ExplorePage() {
                 </div>
               )}
 
-              {filteredPosts.map((post) => (
+                {sortedPosts.map((post) => (
                 <ExplorePostCard
                   key={post._id || post.id}
                   post={post}

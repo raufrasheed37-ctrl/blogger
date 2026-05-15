@@ -30,6 +30,8 @@ export default function ExplorePage() {
   const [posts, setPosts] = useState([]);
   const [search, setSearch] =
   useState("");
+  const [activeCategory, setActiveCategory] =
+  useState("Explore");
 
   const handleLogout = () => {
     useAuthStore.getState().logout();
@@ -59,13 +61,26 @@ export default function ExplorePage() {
   }, []);
 
   const filteredPosts =
-  posts.filter((post) =>
-    post.title
-      ?.toLowerCase()
-      .includes(
-        search.toLowerCase()
-      )
-  );
+  posts.filter((post) => {
+
+    const matchesSearch =
+      post.title
+        ?.toLowerCase()
+        .includes(
+          search.toLowerCase()
+        );
+
+    const matchesCategory =
+      activeCategory === "Explore"
+        ? true
+        : post.category ===
+          activeCategory;
+
+    return (
+      matchesSearch &&
+      matchesCategory
+    );
+  });
 
   const ExplorePostCard = ({ post }) => {
     const postId = post._id || post.id;
@@ -357,13 +372,17 @@ export default function ExplorePage() {
 
             {/* Categories */}
             <div className="flex gap-3 overflow-x-auto pb-4">
-              {categories.map((item, index) => (
+              {categories.map((item) => (
                 <button
-                  key={item}
+  key={item}
+  onClick={() =>
+    setActiveCategory(item)
+  }
+                
                   className={`whitespace-nowrap rounded-xl px-5 py-2 text-sm font-medium ${
-                    index === 0
-                      ? "bg-[#7c6ff7] text-white"
-                      : "bg-[#1c1c2e] text-[#9490b8] hover:text-[#f0eeff]"
+                    activeCategory === item
+  ? "bg-[#7c6ff7] text-white"
+  : "bg-[#1c1c2e] text-[#9490b8] hover:text-[#f0eeff]"
                   }`}
                 >
                   {item}

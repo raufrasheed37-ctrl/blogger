@@ -532,7 +532,6 @@ if (activeTab === "Top") {
           </p>
         </div>
       ))}
-      }
     </div>
   </div>
   </div>

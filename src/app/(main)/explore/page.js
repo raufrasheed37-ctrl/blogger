@@ -344,7 +344,8 @@ export default function ExplorePage() {
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-7xl mx-auto p-6 md:p-8">
-  <div className="flex gap-8">
+           <div className="flex gap-8">
+              <div className="flex-1">
             {/* Header with mobile menu toggle */}
             <div className="flex items-center justify-between mb-8">
               <button onClick={() => setSidebarOpen(true)} className="md:hidden text-[#7c6ff7]">
@@ -426,6 +427,39 @@ export default function ExplorePage() {
               ))}
             </div>
           </div>
+          </div>
+
+          {/* RIGHT SIDEBAR */}
+<div className="hidden xl:block w-[340px]">
+  <div className="rounded-3xl border border-[#2a2740] bg-[#141420] p-6">
+
+    <h2 className="text-lg font-bold text-[#f0eeff]">
+      Trending
+    </h2>
+
+    <div className="mt-5 space-y-5">
+
+      {[...posts]
+        .slice(0, 5)
+        .map((post) => (
+
+        <div
+          key={post._id}
+          className="border-b border-[#2a2740] pb-4"
+        >
+          <h3 className="font-semibold text-[#f0eeff]">
+            {post.title}
+          </h3>
+
+          <p className="text-sm text-[#9490b8]">
+            {(post.likes || 0)} likes
+          </p>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
+          
         </main>
       </div>
     </div>

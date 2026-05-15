@@ -25,7 +25,7 @@ export default function ExplorePage() {
     "Entertainment",
   ];
 
-  const tabs = ["Top", "Recent", "Posts"];
+  const tabs = ["Top", "Recent", "Trending"];
 
   const [posts, setPosts] = useState([]);
   const [search, setSearch] =
@@ -33,7 +33,7 @@ export default function ExplorePage() {
   const [activeCategory, setActiveCategory] =
   useState("Explore");
   const [activeTab, setActiveTab] =
-  useState("Top");
+  useState("Recent");
 
   const handleLogout = () => {
     useAuthStore.getState().logout();
@@ -97,13 +97,31 @@ if (activeTab === "Top") {
   );
 }
 
-if (activeTab === "Recent") {
+  if (activeTab === "Recent") {
   sortedPosts.sort(
     (a, b) =>
       new Date(b.createdAt) -
       new Date(a.createdAt)
   );
 }
+
+  if (activeTab === "Trending") {
+  sortedPosts.sort((a, b) => {
+
+    const aScore =
+      (a.likes || 0) +
+      (a.restacks || 0) +
+      (a.replyCount || 0);
+
+    const bScore =
+      (b.likes || 0) +
+      (b.restacks || 0) +
+      (b.replyCount || 0);
+
+    return bScore - aScore;
+  });
+}
+
   
 
   const ExplorePostCard = ({ post }) => {
@@ -452,7 +470,7 @@ if (activeTab === "Recent") {
 
             {/* FEED */}
             <div className="mt-8 space-y-8">
-              {posts.length === 0 && (
+              {sortedPosts.length === 0 && (
                 <div className="rounded-3xl border border-[#2a2740] bg-[#141420] p-10 text-center">
                   <h2 className="text-xl font-semibold text-[#f0eeff]">
                     No posts yet

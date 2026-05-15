@@ -120,12 +120,12 @@ if (activeTab === "Top") {
     const aScore =
       (a.likes || 0) +
       (a.restacks || 0) +
-      (a.replyCount || 0);
+      (a.comments || a.replyCount || 0)
 
     const bScore =
       (b.likes || 0) +
       (b.restacks || 0) +
-      (b.replyCount || 0);
+      (b.comments || b.replyCount || 0)
 
     return bScore - aScore;
   });
@@ -325,7 +325,9 @@ const [subscribed, setSubscribed] =
   />
 
   <span>
-    {localPost.likes || 0}
+    {localPost.likes ||
+ localPost.likeCount ||
+ 0}
   </span>
 </button>
 
@@ -344,7 +346,9 @@ const [subscribed, setSubscribed] =
   <MessageCircle size={18} />
 
   <span>
-    {localPost.comments || 0}
+    {localPost.comments ||
+ localPost.replyCount ||
+ 0}
   </span>
 </button>
 
@@ -392,7 +396,9 @@ const [subscribed, setSubscribed] =
   />
 
   <span>
-    {localPost.restacks || 0}
+    {localPost.restacks ||
+ localPost.restackCount ||
+ 0}
   </span>
 </button>
 
@@ -400,11 +406,19 @@ const [subscribed, setSubscribed] =
 
         {/* COMMENT SECTION */}
         {showComments && (
-          <CommentSection
-            postId={postId}
-            requireAuth={requireAuth}
-          />
-        )}
+  <CommentSection
+    postId={postId}
+    requireAuth={requireAuth}
+    onCommentAdded={() => {
+      setLocalPost((prev) => ({
+        ...prev,
+        comments:
+          (prev.comments || 0) + 1,
+      }));
+    }}
+  />
+)}
+        
 
       </article>
     );

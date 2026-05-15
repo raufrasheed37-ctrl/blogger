@@ -44,8 +44,8 @@ export default function ExplorePage() {
     const fetchPosts = async () => {
       try {
         const res = await fetch(
-          "http://localhost:5000/api/posts"
-        );
+  `${process.env.NEXT_PUBLIC_API_URL}/api/posts`
+);
 
         if (!res.ok) {
           throw new Error("Failed to fetch posts");

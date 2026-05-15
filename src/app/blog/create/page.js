@@ -14,7 +14,7 @@ export default function CreatePostPage() {
   const [content, setContent] = useState("");
   const [tags, setTags] = useState([]);
   const [newTag, setNewTag] = useState("");
-  const [category, setCategory] = useState("General");
+  const [category, setCategory] = useState("Explore");
   const [visibility, setVisibility] = useState("public");
   const [allowComments, setAllowComments] = useState(true);
   const [featureProfile, setFeatureProfile] = useState(false);
@@ -308,11 +308,12 @@ export default function CreatePostPage() {
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full px-3 py-2 bg-[#0d0d14] border border-[#2a2740] text-[#f0eeff] rounded-lg outline-none focus:border-[#7c6ff7] text-sm"
                 >
-                  <option>General</option>
-                  <option>Technology</option>
-                  <option>Business</option>
-                  <option>Personal</option>
-                  <option>Lifestyle</option>
+                  <option>Explore</option>
+                <option>Technology</option>
+                 <option>Business</option>
+                 <option>Culture</option>
+                  <option>Sports</option>
+                <option>Entertainment</option>
                 </select>
               </div>
 

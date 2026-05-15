@@ -2,6 +2,10 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import {
+  Heart,
+  MessageCircle,
+} from "lucide-react";
 import useAuthStore from "@/store/authstore";
 import { getClientAuthToken } from "@/store/authstore";
 import { useAuthRedirect } from "@/utils/auth";
@@ -392,7 +396,16 @@ export default function CommentSection({
   }}
   className="transition hover:text-orange-400"
 >
-  ❤️ {comment.likes || 0}
+  <div className="flex items-center gap-2">
+  <Heart
+    size={16}
+    className="text-orange-400"
+  />
+
+  <span>
+    {comment.likes || 0}
+  </span>
+</div>
 </button>
 
     <button
@@ -421,26 +434,39 @@ export default function CommentSection({
   }}
   className="transition hover:text-orange-400"
 >
-  💬 {comment.replyCount || 0} replies
+  <div className="flex items-center gap-2">
+  <MessageCircle
+    size={16}
+    className="text-orange-400"
+  />
+
+  <span>
+    {comment.replyCount || 0} replies
+  </span>
+</div>
 </button>
 
-  <button
-    onClick={() =>
-      handleEdit(comment)
-    }
-    className="transition hover:text-white"
-  >
-    Edit
-  </button>
+  {isCurrentUserComment && (
+  <>
+    <button
+      onClick={() =>
+        handleEdit(comment)
+      }
+      className="transition hover:text-white"
+    >
+      Edit
+    </button>
 
-  <button
-    onClick={() =>
-      handleDelete(comment._id)
-    }
-    className="transition hover:text-red-400"
-  >
-    Delete
-  </button>
+    <button
+      onClick={() =>
+        handleDelete(comment._id)
+      }
+      className="transition hover:text-red-400"
+    >
+      Delete
+    </button>
+  </>
+)}
 
 </div>
 

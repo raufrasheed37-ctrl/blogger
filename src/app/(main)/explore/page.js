@@ -501,9 +501,23 @@ if (activeTab === "Top") {
 
     <div className="mt-5 space-y-5">
 
-      {[...posts]
-        .slice(0, 5)
-        .map((post) => (
+    [...posts]
+  .sort((a, b) => {
+
+    const aScore =
+      (a.likes || 0) +
+      (a.restacks || 0) +
+      (a.replyCount || 0);
+
+    const bScore =
+      (b.likes || 0) +
+      (b.restacks || 0) +
+      (b.replyCount || 0);
+
+    return bScore - aScore;
+  })
+  .slice(0, 5)
+  .map((post) => (
 
         <div
           key={post._id}

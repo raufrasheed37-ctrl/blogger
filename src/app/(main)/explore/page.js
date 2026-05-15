@@ -501,7 +501,7 @@ if (activeTab === "Top") {
 
     <div className="mt-5 space-y-5">
 
-    [...posts]
+            {[...posts]
   .sort((a, b) => {
 
     const aScore =

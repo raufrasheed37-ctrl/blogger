@@ -427,7 +427,7 @@ export default function ExplorePage() {
               ))}
             </div>
           </div>
-          </div>
+          
 
           {/* RIGHT SIDEBAR */}
 <div className="hidden xl:block w-[340px]">
@@ -458,8 +458,8 @@ export default function ExplorePage() {
       ))}
     </div>
   </div>
-</div>
-          
+  </div>
+          </div>
         </main>
       </div>
     </div>

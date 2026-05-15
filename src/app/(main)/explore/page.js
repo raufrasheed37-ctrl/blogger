@@ -6,7 +6,16 @@ import useAuthStore from "@/store/authstore";
 import { getLoginRedirect } from "@/utils/auth";
 import { isClientAuthenticated } from "@/store/authstore";
 import CommentSection from "@/components/CommentSection";
-import { Home, User, Heart, BarChart3, LogOut, Eye, Search, PenSquare, Plus , FileText, BookOpen, Users, Table,} from 'lucide-react';
+import {
+  Home,
+  User,
+  Heart,
+  BarChart3,
+  LogOut,
+  Search,
+  MessageCircle,
+  Repeat2,
+} from "lucide-react";
 import Link from "next/link";
 
 export default function ExplorePage() {
@@ -127,11 +136,17 @@ if (activeTab === "Top") {
   const ExplorePostCard = ({ post }) => {
     const postId = post._id || post.id;
 
-    const [actions, setActions] = useState({
-      liked: false,
-      restacked: false,
-      subscribed: false,
-    });
+    const [liked, setLiked] =
+  useState(false);
+
+const [restacked, setRestacked] =
+  useState(false);
+
+const [localPost, setLocalPost] =
+  useState(post);
+
+const [subscribed, setSubscribed] =
+  useState(false);
 
     const [showComments, setShowComments] = useState(false);
 
@@ -156,22 +171,8 @@ if (activeTab === "Top") {
       return false;
     };
 
-    const toggleAction = (action) => {
-      if (!requireAuth()) return;
 
-      setActions((current) => ({
-        ...current,
-        [action]: !current[action],
-      }));
-    };
-
-    const likeCount =
-      (post.likes || 0) +
-      (actions.liked ? 1 : 0);
-
-    const restackCount =
-      (post.restacks || 0) +
-      (actions.restacked ? 1 : 0);
+    
 
     return (
       <article className="border-b border-[#2a2740] pb-10">
@@ -226,20 +227,21 @@ if (activeTab === "Top") {
           )}
 
           <button
-            type="button"
-            onClick={() =>
-              toggleAction("subscribed")
-            }
-            className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
-              actions.subscribed
-                ? "bg-[#7c6ff7]/20 text-[#a89cf7] border border-[#7c6ff7]/50"
-                : "bg-[#7c6ff7] text-white hover:bg-[#a89cf7]"
-            }`}
-          >
-            {actions.subscribed
-              ? "Subscribed"
-              : "Subscribe"}
-          </button>
+  type="button"
+  onClick={() =>
+    setSubscribed(!subscribed)
+  }
+  className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+    subscribed
+      ? "bg-[#7c6ff7]/20 text-[#a89cf7] border border-[#7c6ff7]/50"
+      : "bg-[#7c6ff7] text-white hover:bg-[#a89cf7]"
+  }`}
+>
+  {subscribed
+    ? "Subscribed"
+    : "Subscribe"}
+</button>
+          
 
         </div>
 
@@ -280,48 +282,119 @@ if (activeTab === "Top") {
 
           {/* LIKE */}
           <button
-            type="button"
-            onClick={() =>
-              toggleAction("liked")
-            }
-            className={`rounded-full border px-4 py-2 transition ${
-              actions.liked
-                ? "border-[#7c6ff7]/60 bg-[#7c6ff7]/10 text-[#a89cf7]"
-                : "border-[#2a2740] hover:border-[#7c6ff7]/40 hover:text-[#a89cf7]"
-            }`}
-          >
-            ❤️ {likeCount} Likes
-          </button>
+  type="button"
+  onClick={async () => {
+    if (!requireAuth()) return;
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/posts/${localPost._id}/like`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to like");
+      }
+
+      const data = await response.json();
+
+      setLiked(data.liked);
+
+      setLocalPost((prev) => ({
+        ...prev,
+        likes: data.likes,
+      }));
+    } catch (err) {
+      console.log(err);
+    }
+  }}
+  className={`flex items-center gap-2 rounded-full border px-4 py-2 transition ${
+    liked
+      ? "border-rose-500/60 bg-rose-500/15 text-rose-300"
+      : "border-[#2a2740] hover:border-rose-500/50 hover:text-rose-300"
+  }`}
+>
+  <Heart
+    size={18}
+    className={liked ? "fill-current" : ""}
+  />
+
+  <span>
+    {localPost.likes || 0}
+  </span>
+</button>
 
           {/* COMMENT */}
           <button
-            type="button"
-            onClick={() => {
-              if (!requireAuth()) return;
+  type="button"
+  onClick={() => {
+    if (!requireAuth()) return;
 
-              setShowComments(
-                (prev) => !prev
-              );
-            }}
-            className="rounded-full border border-[#2a2740] px-4 py-2 transition hover:border-[#7c6ff7]/40 hover:text-[#a89cf7]"
-          >
-            💬 {post.replyCount || 0} Replies
-          </button>
+    setShowComments(
+      (prev) => !prev
+    );
+  }}
+  className="flex items-center gap-2 rounded-full border border-[#2a2740] px-4 py-2 transition hover:border-[#7c6ff7]/40 hover:text-[#a89cf7]"
+>
+  <MessageCircle size={18} />
+
+  <span>
+    {localPost.comments || 0}
+  </span>
+</button>
 
           {/* RESTACK */}
           <button
-            type="button"
-            onClick={() =>
-              toggleAction("restacked")
-            }
-            className={`rounded-full border px-4 py-2 transition ${
-              actions.restacked
-                ? "border-[#7c6ff7]/60 bg-[#7c6ff7]/10 text-[#a89cf7]"
-                : "border-[#2a2740] hover:border-[#7c6ff7]/40 hover:text-[#a89cf7]"
-            }`}
-          >
-            🔁 {restackCount} Restacks
-          </button>
+  type="button"
+  onClick={async () => {
+    if (!requireAuth()) return;
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/posts/${localPost._id}/restack`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to restack");
+      }
+
+      const data = await response.json();
+
+      setRestacked(data.restacked);
+
+      setLocalPost((prev) => ({
+        ...prev,
+        restacks: data.restacks,
+      }));
+    } catch (err) {
+      console.log(err);
+    }
+  }}
+  className={`flex items-center gap-2 rounded-full border px-4 py-2 transition ${
+    restacked
+      ? "border-emerald-500/60 bg-emerald-500/15 text-emerald-300"
+      : "border-[#2a2740] hover:border-emerald-500/50 hover:text-emerald-300"
+  }`}
+>
+  <Repeat2
+    size={18}
+  />
+
+  <span>
+    {localPost.restacks || 0}
+  </span>
+</button>
 
         </div>
 

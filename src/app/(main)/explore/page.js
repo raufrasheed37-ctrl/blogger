@@ -71,10 +71,14 @@ export default function ExplorePage() {
         );
 
     const matchesCategory =
-      activeCategory === "Explore"
-        ? true
-        : post.category ===
-          activeCategory;
+  activeCategory === "Explore"
+    ? true
+    : post.category
+        ?.toLowerCase()
+        .trim() ===
+      activeCategory
+        .toLowerCase()
+        .trim();
 
     return (
       matchesSearch &&

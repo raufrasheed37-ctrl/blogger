@@ -28,6 +28,8 @@ export default function ExplorePage() {
   const tabs = ["Top", "Recent", "Posts"];
 
   const [posts, setPosts] = useState([]);
+  const [search, setSearch] =
+  useState("");
 
   const handleLogout = () => {
     useAuthStore.getState().logout();
@@ -55,6 +57,15 @@ export default function ExplorePage() {
 
     fetchPosts();
   }, []);
+
+  const filteredPosts =
+  posts.filter((post) =>
+    post.title
+      ?.toLowerCase()
+      .includes(
+        search.toLowerCase()
+      )
+  );
 
   const ExplorePostCard = ({ post }) => {
     const postId = post._id || post.id;
@@ -332,7 +343,8 @@ export default function ExplorePage() {
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto">
-          <div className="max-w-6xl mx-auto p-6 md:p-8">
+          <div className="max-w-7xl mx-auto p-6 md:p-8">
+  <div className="flex gap-8">
             {/* Header with mobile menu toggle */}
             <div className="flex items-center justify-between mb-8">
               <button onClick={() => setSidebarOpen(true)} className="md:hidden text-[#7c6ff7]">
@@ -357,6 +369,25 @@ export default function ExplorePage() {
                 </button>
               ))}
             </div>
+
+            {/* SEARCH */}
+<div className="mb-6">
+  <div className="flex items-center gap-3 rounded-2xl border border-[#2a2740] bg-[#141420] px-4 py-3">
+
+    <Search className="h-5 w-5 text-[#9490b8]" />
+
+    <input
+      type="text"
+      placeholder="Search Pulse..."
+      value={search}
+      onChange={(e) =>
+        setSearch(e.target.value)
+      }
+      className="w-full bg-transparent outline-none text-[#f0eeff] placeholder:text-[#666]"
+    />
+
+  </div>
+</div>
 
             {/* Tabs */}
             <div className="mt-6 flex justify-center gap-16 border-b border-[#2a2740] pb-4">
@@ -387,7 +418,7 @@ export default function ExplorePage() {
                 </div>
               )}
 
-              {posts.map((post) => (
+              {filteredPosts.map((post) => (
                 <ExplorePostCard
                   key={post._id || post.id}
                   post={post}

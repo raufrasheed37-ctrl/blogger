@@ -245,31 +245,35 @@ if (activeTab === "Top") {
 
         {/* CONTENT */}
         <div
-          className="mt-5 cursor-pointer"
-          onClick={() =>
-            router.push(
-              `/blog/${post.slug || post._id}`
-            )
-          }
-        >
+  className="mt-5 cursor-pointer"
+  onClick={() =>
+    router.push(
+      `/blog/${post.slug || post._id}`
+    )
+  }
+>
 
-          <h2 className="text-2xl font-bold text-[#f0eeff]">
-            {post.title}
-          </h2>
+  <h2 className="text-2xl font-bold text-[#f0eeff]">
+    {post.title}
+  </h2>
 
-          <p className="mt-4 text-lg leading-8 text-[#9490b8]">
-            {post.content}
-          </p>
+  <div
+    className="mt-4 text-lg leading-8 text-[#9490b8]"
+    dangerouslySetInnerHTML={{
+      __html: post.content,
+    }}
+  />
 
-          {post.coverImage && (
-            <img
-              src={post.coverImage}
-              alt={post.title}
-              className="mt-6 w-full rounded-3xl object-cover"
-            />
-          )}
+  {post.coverImage &&
+   !post.coverImage.startsWith("blob:") && (
+    <img
+      src={post.coverImage}
+      alt={post.title}
+      className="mt-6 w-full rounded-3xl object-cover"
+    />
+  )}
 
-        </div>
+</div>
 
         {/* ACTION BUTTONS */}
         <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-[#9490b8]">

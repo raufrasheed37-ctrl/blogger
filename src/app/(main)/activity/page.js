@@ -1,7 +1,7 @@
 "use client"
 import React, { useState, useEffect, } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import useAuthStore from "@/store/authstore";
 import { Home, User, Heart, BarChart3, LogOut, Eye, Search, PenSquare, Plus , FileText, BookOpen, Users, Table,} from 'lucide-react';
  
@@ -81,7 +81,7 @@ const NotificationItem = ({ item }) => {
 
 export default function ActivityPage() {
   const [activeFilter, setActiveFilter] = useState("All");
-  const router = useRouter();
+  const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [data, setData] =
   useState([]);
@@ -181,7 +181,7 @@ useEffect(() => {
   { label: "Home", icon: Home, href: "/" },
   { label: "Activity", icon: BarChart3, href: "/activity" },
   { label: "Explore", icon: Search, href: "/explore" },
-  { label: "Profile", icon: User, href: "/dashboard", active: true },
+  { label: "Profile", icon: User, href: "/dashboard" },
 ].map((item) => {
   const Icon = item.icon;
 
@@ -190,7 +190,7 @@ useEffect(() => {
       key={item.label}
       href={item.href}
       className={`flex items-center gap-3 px-4 py-3 rounded-xl transition ${
-        item.active
+        pathname === item.href
           ? 'bg-[#7c6ff7]/20 border border-[#7c6ff7]/50 text-[#a89cf7]'
           : 'text-[#9490b8] hover:text-[#f0eeff] hover:bg-[#1c1c2e]'
       }`}

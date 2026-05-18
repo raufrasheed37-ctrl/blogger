@@ -501,19 +501,116 @@ export default function CommentSection({
   <div className="mt-5 ml-10 space-y-4 border-l border-white/10 pl-5">
 
     {comment.replies?.map((reply) => (
-      <div
-        key={reply._id}
-        className="rounded-2xl border border-white/10 bg-[#111] p-4"
-      >
-        <p className="font-semibold text-white">
-          {reply.user?.name}
-        </p>
 
-        <p className="mt-2 text-sm text-zinc-300">
-          {reply.text}
-        </p>
+  <div
+    key={reply._id}
+    className="rounded-2xl border border-white/10 bg-[#111] p-4"
+  >
+
+    <p className="font-semibold text-white">
+      {reply.user?.name}
+    </p>
+
+    <p className="mt-2 text-sm text-zinc-300">
+      {reply.text}
+    </p>
+
+    <div className="mt-4 flex items-center gap-5 text-sm text-zinc-500">
+
+      <button
+        onClick={async () => {
+          if (!requireAuth()) return;
+
+          try {
+            const res = await fetch(
+              `${API_ROOT}/comments/${reply._id}/like`,
+              {
+                method: "PUT",
+                headers: {
+                  ...getAuthHeaders(),
+                },
+              }
+            );
+
+            const data = await res.json();
+
+            setComments((prev) =>
+              prev.map((c) => ({
+                ...c,
+                replies: c.replies?.map((r) =>
+                  r._id === reply._id
+                    ? {
+                        ...r,
+                        likes: data.likes,
+                      }
+                    : r
+                ),
+              }))
+            );
+
+          } catch (err) {
+            console.log(err);
+          }
+        }}
+        className="flex items-center gap-2 transition hover:text-orange-400"
+      >
+
+        <Heart
+          size={16}
+          className="text-orange-400"
+        />
+
+        <span>
+          {reply.likes || 0}
+        </span>
+
+      </button>
+
+      <button
+        onClick={() => {
+          if (!requireAuth()) return;
+
+          setReplyingTo(reply._id);
+        }}
+        className="transition hover:text-orange-400"
+      >
+        Reply
+      </button>
+
+    </div>
+
+    {replyingTo === reply._id && (
+
+      <div className="mt-4">
+
+        <textarea
+          value={replyText}
+          onChange={(e) =>
+            setReplyText(e.target.value)
+          }
+          placeholder="Write a reply..."
+          rows={3}
+          className="w-full rounded-2xl border border-white/10 bg-[#101010] p-3 text-sm text-white outline-none"
+        />
+
+        <div className="mt-3 flex justify-end">
+
+          <button
+            onClick={() =>
+              handleReply(reply._id)
+            }
+            className="rounded-full bg-orange-500 px-4 py-2 text-sm font-semibold text-black"
+          >
+            Reply
+          </button>
+
+        </div>
+
       </div>
-    ))}
+    )}
+
+  </div>
+))}
 
   </div>
 )}

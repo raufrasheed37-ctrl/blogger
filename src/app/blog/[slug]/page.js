@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { blogAPI } from "@/utils/api";
 import CommentSection from "@/components/CommentSection";
 import useAuthStore, { isClientAuthenticated } from "@/store/authstore";
@@ -101,6 +101,17 @@ function buildFallbackPost(slug) {
   };
 }
 
+function normalizeCounter(post, keys) {
+  for (const key of keys) {
+    const value = Number(post?.[key]);
+    if (!Number.isNaN(value)) {
+      return value;
+    }
+  }
+
+  return 0;
+}
+
 async function fetchPostFromBackend(slug) {
   const response = await fetch(`${API_ROOT}/posts/${encodeURIComponent(slug)}`, {
     cache: "no-store",
@@ -152,10 +163,10 @@ export default function PostDetailPage() {
   const [activeSection, setActiveSection] = useState("overview");
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [liveViews, setLiveViews] = useState(0);
   const [shareCopied, setShareCopied] = useState(false);
 
   const isLoggedIn = Boolean(token || isClientAuthenticated());
+  const viewsIncrementedRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -167,6 +178,7 @@ export default function PostDetailPage() {
         return;
       }
 
+      viewsIncrementedRef.current = false;
       setLoading(true);
       setError("");
 
@@ -203,6 +215,38 @@ export default function PostDetailPage() {
     };
   }, [slug]);
 
+  // Increment views and reads when post is loaded
+  useEffect(() => {
+    if (!post || !post._id || viewsIncrementedRef.current) {
+      return;
+    }
+
+    const incrementViews = async () => {
+      try {
+        viewsIncrementedRef.current = true;
+        const response = await fetch(`${API_ROOT}/posts/${post._id || post.id}/view`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setPost((prev) => ({
+            ...prev,
+            views: data.views ?? data.viewCount ?? data.totalViews ?? prev.views,
+            reads: data.reads ?? data.readCount ?? data.totalReads ?? prev.reads,
+          }));
+        }
+      } catch (err) {
+        console.error("Error incrementing views:", err);
+      }
+    };
+
+    incrementViews();
+  }, [post]);
+
   const normalizedPost = useMemo(() => {
     if (!post) return null;
 
@@ -211,8 +255,8 @@ export default function PostDetailPage() {
     const paragraphs = splitContent(content);
     const sections = buildSections({ ...post, content });
     const tags = Array.isArray(post.tags) && post.tags.length > 0 ? post.tags : [post.category || "Pulse"];
-    const views = 0;
-    const reads = 0;
+    const views = normalizeCounter(post, ["views", "viewCount", "totalViews", "viewsCount"]);
+    const reads = normalizeCounter(post, ["reads", "readCount", "totalReads", "readsCount"]);
     const likes = Number(post.likes ?? 0);
     const comments = Number(post.comments ?? 0);
     const restacks = Number(post.restacks ?? 0);
@@ -411,15 +455,6 @@ export default function PostDetailPage() {
                   </div>
                   <div>
                     <p className="text-xs uppercase tracking-[0.4em] text-[#a89cf7]">Editorial article</p>
-                    <h2
-                      className="mt-3 text-2xl font-semibold text-[#f0eeff] sm:text-3xl"
-                      style={{ fontFamily: "Fraunces, serif" }}
-                    >
-                      Premium reading surface
-                    </h2>
-                    <p className="mt-2 text-sm text-[#9490b8]">
-                      Focused layout, calm spacing, and a cinematic reading experience.
-                    </p>
                   </div>
                 </div>
               </div>
@@ -668,6 +703,12 @@ export default function PostDetailPage() {
       comments: (prev.comments || 0) + 1,
     }));
   }}
+  onCommentCountUpdated={(count) => {
+    setPost((prev) => ({
+      ...prev,
+      comments: count,
+    }));
+  }}
 />
               </div>
             </section>
@@ -676,8 +717,6 @@ export default function PostDetailPage() {
               <div className="rounded-3xl border border-[#2a2740] bg-[#141420]/80 p-5 shadow-[0_20px_70px_rgba(0,0,0,0.25)]">
                 <p className="text-xs uppercase tracking-[0.34em] text-[#9490b8]">Post stats</p>
                 <div className="mt-4 grid grid-cols-2 gap-3">
-                  <StatCard label="Views" value={liveViews.toLocaleString()} accent />
-                  <StatCard label="Reads" value={normalizedPost.reads.toLocaleString()} />
                   <StatCard label="Likes" value={normalizedPost.likes.toLocaleString()} />
                   <StatCard label="Comments" value={normalizedPost.comments.toLocaleString()} />
                 </div>

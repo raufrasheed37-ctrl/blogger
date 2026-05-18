@@ -114,7 +114,36 @@ export default function ProfilePage() {
 
         // Fetch posts by this user
         const postsData = await blogAPI.getByAuthor(author._id || author.id || authorId);
-        setUserPosts(Array.isArray(postsData?.posts) ? postsData.posts : []);
+        let posts = Array.isArray(postsData?.posts) ? postsData.posts : [];
+
+        // Fetch comment counts for each post
+        const postsWithCounts = await Promise.all(
+          posts.map(async (post) => {
+            try {
+              const response = await fetch(
+                `${API_ROOT}/comments/${post._id || post.id}`,
+                {
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                }
+              );
+              if (response.ok) {
+                const comments = await response.json();
+                return {
+                  ...post,
+                  comments: Array.isArray(comments) ? comments.length : post.comments || 0,
+                };
+              }
+              return post;
+            } catch (err) {
+              console.error("Error fetching comment count:", err);
+              return post;
+            }
+          })
+        );
+
+        setUserPosts(postsWithCounts);
       } catch (err) {
         console.error("Profile error:", err);
         setError(err?.message || "Failed to load profile");

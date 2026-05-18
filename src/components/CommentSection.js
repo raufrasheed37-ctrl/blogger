@@ -21,6 +21,7 @@ function getAuthHeaders() {
 export default function CommentSection({
   postId,
   requireAuth: requireAuthProp, onCommentAdded,
+  onCommentCountUpdated,
 }) {
   const currentUser = useAuthStore((state) => state.user);
   const [comments, setComments] = useState([]);
@@ -50,12 +51,17 @@ export default function CommentSection({
 
       const data = await res.json();
       setComments(data);
+      
+      // Notify parent of comments count
+      if (onCommentCountUpdated && Array.isArray(data)) {
+        onCommentCountUpdated(data.length);
+      }
     } catch (err) {
       console.log(err);
     } finally {
       setFetching(false);
     }
-  }, [postId]);
+  }, [postId, onCommentCountUpdated]);
 
   useEffect(() => {
     if (postId) {
@@ -94,7 +100,11 @@ export default function CommentSection({
       }
       const data = await res.json();
 
-      setComments((prev) => [data, ...prev]);
+      const nextComments = [data, ...comments];
+      setComments(nextComments);
+      if (onCommentCountUpdated) {
+        onCommentCountUpdated(nextComments.length);
+      }
       setCommentText("");
       if (onCommentAdded) {
         onCommentAdded();
@@ -160,9 +170,11 @@ export default function CommentSection({
         },
       });
 
-      setComments((prev) =>
-        prev.filter((c) => c._id !== id)
-      );
+      const nextComments = comments.filter((c) => c._id !== id);
+      setComments(nextComments);
+      if (onCommentCountUpdated) {
+        onCommentCountUpdated(nextComments.length);
+      }
     } catch (err) {
       console.log(err);
     }

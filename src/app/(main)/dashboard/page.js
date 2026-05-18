@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import useAuthStore from '@/store/authstore';
-import { authAPI, blogAPI } from '@/utils/api';
+import { authorsAPI, blogAPI } from '@/utils/api';
 import { useEffect } from 'react';
 import { Home, User, Heart, BarChart3, LogOut,  MessageCircle, Search, PenSquare, FileText,  Users, Table, Info} from 'lucide-react';
 import { Expletus_Sans } from "next/font/google";
@@ -27,22 +27,37 @@ export default function DashboardPage() {
 
   useEffect(() => {
     hydrate();
-
-    const currentToken = useAuthStore.getState().token || localStorage.getItem('token');
-    if (currentToken && !useAuthStore.getState().user) {
-      (async () => {
-        try {
-          const data = await authAPI.getMe();
-          if (data?.user) {
-            const userObj = { ...data.user, _id: data.user.id || data.user._id };
-            useAuthStore.getState().setUser(userObj);
-          }
-        } catch (err) {
-          console.debug('Failed to fetch current user', err?.message || err);
-        }
-      })();
-    }
   }, [hydrate]);
+
+  const authorId = user?._id || user?.id;
+
+  useEffect(() => {
+    if (!authorId) {
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const data = await authorsAPI.getById(authorId);
+        const author = data?.author || data;
+
+        if (!cancelled && author) {
+          useAuthStore.getState().setUser({
+            ...author,
+            _id: author._id || author.id || authorId,
+          });
+        }
+      } catch (err) {
+        console.debug('Failed to refresh dashboard user', err?.message || err);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authorId]);
 
   useEffect(() => {
     const authorId = user?._id || user?.id;

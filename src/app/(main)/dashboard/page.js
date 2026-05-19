@@ -332,11 +332,21 @@ export default function DashboardPage() {
 )}
                 
                             <h3 className="text-lg font-bold text-[#f0eeff] group-hover:text-[#7c6ff7] transition line-clamp-1">
-                              {post.title}
-                            </h3>
+  {post.isRestack ? (
+    <>
+      🔁 Restacked: {post.originalPost?.title || post.title}
+    </>
+  ) : (
+    post.title
+  )}
+</h3>
                             <p className="text-[#9490b8] text-sm mt-1 line-clamp-2">
-                              {post.excerpt || "No description"}
-                            </p>
+  {post.isRestack
+    ? `From ${
+        post.originalPost?.author?.name || "Unknown author"
+      }`
+    : post.excerpt || "No description"}
+</p>
                             <div className="flex items-center gap-4 mt-3 text-xs text-[#9490b8]">
                               <span>📅 {new Date(post.createdAt).toLocaleDateString()}</span>
                               <span>⏱️ 5 min read</span>

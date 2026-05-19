@@ -325,11 +325,12 @@ export default function DashboardPage() {
 </span>
                             </div>
                                
-)}                    
+                   
  {post.isRestack && (
   <p className="text-xs text-[#a89cf7] mb-1">
     🔁 Restacked from {post.restackedFrom?.name || "Unknown"}
   </p>
+  )}
 )}
                 
                             <h3 className="text-lg font-bold text-[#f0eeff] group-hover:text-[#7c6ff7] transition line-clamp-1">

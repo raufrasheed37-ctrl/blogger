@@ -303,7 +303,12 @@ export default function DashboardPage() {
                 ) : authorPosts.length > 0 ? (
                   <div className="space-y-4">
                     {authorPosts.map((post) => (
-                      <Link key={post._id || post.id || post.slug} href={`/blog/${post.slug}`} className="block rounded-xl bg-[#141420] border border-[#2a2740] p-6 hover:border-[#7c6ff7]/50 hover:bg-[#1c1c2e] transition group">
+  <Link
+    key={post._id || post.id || post.slug}
+    href={`/blog/${post.slug}`}
+    className="block rounded-xl bg-[#141420] border border-[#2a2740] p-6 hover:border-[#7c6ff7]/50 hover:bg-[#1c1c2e] transition group"
+  >
+                       
                         <div className="flex items-start gap-4">
                           {/* Icon */}
                           <div className="w-16 h-16 rounded-lg bg-linear-to-br from-[#7c6ff7]/20 to-[#a89cf7]/20 border border-[#2a2740] flex items-center justify-center text-2xl shrink-0 group-hover:from-[#7c6ff7]/30 group-hover:to-[#a89cf7]/30 transition">
@@ -315,8 +320,17 @@ export default function DashboardPage() {
                               <span className="px-2 py-1 bg-[#7c6ff7]/20 border border-[#7c6ff7]/50 text-[#a89cf7] text-xs font-semibold rounded">
                                 {post.tags?.[0] || "General"}
                               </span>
-                              <span className="text-xs text-[#9490b8]">{post.published ? "Published" : "Draft"}</span>
+                              <span className="text-xs text-[#9490b8]">
+  {post.isRestack ? "Restack" : post.published ? "Published" : "Draft"}
+</span>
                             </div>
+                               
+)}                             {post.isRestack && (
+  <p className="text-xs text-[#a89cf7] mb-1">
+    🔁 Restacked from {post.restackedFrom?.name || "Unknown"}
+  </p>
+)}
+                
                             <h3 className="text-lg font-bold text-[#f0eeff] group-hover:text-[#7c6ff7] transition line-clamp-1">
                               {post.title}
                             </h3>

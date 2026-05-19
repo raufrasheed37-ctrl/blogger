@@ -325,7 +325,8 @@ export default function DashboardPage() {
 </span>
                             </div>
                                
-)}                             {post.isRestack && (
+)}                    
+ {post.isRestack && (
   <p className="text-xs text-[#a89cf7] mb-1">
     🔁 Restacked from {post.restackedFrom?.name || "Unknown"}
   </p>

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import useAuthStore from '@/store/authstore';
 import { authorsAPI, blogAPI } from '@/utils/api';
 import { useEffect } from 'react';
-import { Home, User, Heart, BarChart3, LogOut,  MessageCircle, Search, PenSquare, FileText,  Users, Table, Info} from 'lucide-react';
+import { Home, User, Heart, BarChart3, Repeat2, LogOut,  MessageCircle, Search, PenSquare, FileText,  Users, Table, Info} from 'lucide-react';
 import { Expletus_Sans } from "next/font/google";
 
 export default function DashboardPage() {
@@ -321,21 +321,38 @@ export default function DashboardPage() {
                                 {post.tags?.[0] || "General"}
                               </span>
                               <span className="text-xs text-[#9490b8]">
-  {post.isRestack ? "Restack" : post.published ? "Published" : "Draft"}
-</span>
+
+                                {post.isRestack ? (
+  <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-300">
+    <Repeat2 size={14} />
+    Restack
+  </span>
+) : post.published ? (
+  "Published"
+) : (
+  "Draft"
+)}
+                     </span>
                             </div>
                                
                    
  {post.isRestack && (
   <p className="text-xs text-[#a89cf7] mb-1">
-    🔁 Restacked from {post.restackedFrom?.name || "Unknown"}
+    <span className="inline-flex items-center gap-1 text-xs text-emerald-300">
+  <Repeat2 size={14} />
+  Restacked from {post.restackedFrom?.name || "Unknown"}
+</span>
   </p>
   )}
                 
                             <h3 className="text-lg font-bold text-[#f0eeff] group-hover:text-[#7c6ff7] transition line-clamp-1">
   {post.isRestack ? (
     <>
-      🔁 Restacked: {post.originalPost?.title || post.title}
+      <span className="inline-flex items-center gap-2 text-[#a89cf7]">
+  <Repeat2 size={16} />
+  Restacked
+</span>
+{post.originalPost?.title || post.title}
     </>
   ) : (
     post.title

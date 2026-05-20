@@ -656,9 +656,6 @@ originalPostSlug:
         router.push(`/login?next=/blog/${normalizedPost.slug}`);
         return;
       }
-      if (post?.isRestack) {
-  return;
-}
 
       try {
         const response = await fetch(
@@ -677,22 +674,19 @@ originalPostSlug:
 
         const data = await response.json();
 
-        if (!post?.isRestack) {
-  setSaved(data.restacked);
+        setSaved(data.restacked);
 
-  setPost((prev) => ({
-    ...prev,
-    restacks: data.restacks,
-  }));
+setPost((prev) => ({
+  ...prev,
+  restacks: data.restacks,
+}));
 }
       } catch (err) {
         console.log(err);
       }
     }}
     className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${
-  post?.isRestack
-    ? "border-[#2a2740] bg-[#101018] text-[#55516e] cursor-not-allowed"
-    : saved
+  saved
     ? "border-emerald-500/60 bg-emerald-500/15 text-emerald-300"
     : "border-[#2a2740] bg-[#141420] text-[#f0eeff] hover:border-emerald-500/50 hover:text-emerald-300"
 }`}

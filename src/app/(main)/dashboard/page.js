@@ -14,6 +14,7 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("Activity");
   const [authorPosts, setAuthorPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(false);
+  const [subscriberCount, setSubscriberCount] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const user = useAuthStore((s) => s.user);
@@ -44,10 +45,19 @@ export default function DashboardPage() {
         const author = data?.author || data;
 
         if (!cancelled && author) {
+          const resolvedSubscribers =
+            typeof author.subscribers === "number"
+              ? author.subscribers
+              : typeof author.subscriberCount === "number"
+                ? author.subscriberCount
+                : null;
+
           useAuthStore.getState().setUser({
             ...author,
             _id: author._id || author.id || authorId,
           });
+
+          setSubscriberCount(resolvedSubscribers);
         }
       } catch (err) {
         console.debug('Failed to refresh dashboard user', err?.message || err);
@@ -139,7 +149,16 @@ export default function DashboardPage() {
   const stats = [
     { label: "Posts", value: authorPosts.length, icon: FileText },
     { label: "Likes Received", value: "0", icon: Heart },
-    { label: "Subscribers", value: user?.subscribers ?? 0, icon: Users },
+    {
+      label: "Subscribers",
+      value:
+        subscriberCount === null
+          ? typeof user?.subscribers === "number"
+            ? user.subscribers
+            : "Loading..."
+          : subscriberCount,
+      icon: Users,
+    },
   ];
 
   return (
@@ -229,7 +248,13 @@ export default function DashboardPage() {
                   <p className="mx-auto mb-6 max-w-2xl text-sm leading-6 text-[#d4d1ec] md:mx-0">
                     {user?.bio?.trim() || "Add a short bio in Edit Profile to personalize your dashboard."}
                   </p>
-                  <p className="text-[#9490b8] mb-6">{user?.subscribers ?? 0} subscribers</p>
+                  <p className="text-[#9490b8] mb-6">
+                    {subscriberCount === null
+                      ? typeof user?.subscribers === "number"
+                        ? `${user.subscribers} subscribers`
+                        : "Loading subscribers..."
+                      : `${subscriberCount} subscribers`}
+                  </p>
 
                   <div className="flex flex-col sm:flex-row gap-3">
                     <Link href="/blog/create" className="px-6 py-2 bg-linear-to-r from-[#7c6ff7] to-[#a89cf7] text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-[#7c6ff7]/30 transition">

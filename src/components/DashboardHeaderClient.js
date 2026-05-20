@@ -12,7 +12,7 @@ function AvatarMark({ initial = "D" }) {
   );
 }
 
-export default function DashboardHeaderClient({ displayName, username, initial, subscribersCount = 0, children }) {
+export default function DashboardHeaderClient({ displayName, username, initial, subscribersCount = null, children }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -34,7 +34,9 @@ export default function DashboardHeaderClient({ displayName, username, initial, 
             </div>
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{displayName}</h1>
             <p className="text-sm text-white/60">{username}</p>
-            <p className="text-sm text-white/70">{subscribersCount} subscribers</p>
+            <p className="text-sm text-white/70">
+              {subscribersCount === null ? "Loading subscribers..." : `${subscribersCount} subscribers`}
+            </p>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-3">{children}</div>

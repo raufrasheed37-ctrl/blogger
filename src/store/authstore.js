@@ -206,7 +206,20 @@ const useAuthStore = create((set) => ({
         throw new Error(data.message || "Failed to restore session");
       }
 
-      set({ user: data.user || data, isLoading: false, isHydrated: true });
+      const nextUser = data.user || data;
+
+      set((state) => {
+        const mergedUser = state.user
+          ? {
+              ...state.user,
+              ...nextUser,
+              subscribers: nextUser?.subscribers ?? state.user.subscribers,
+              subscribersList: nextUser?.subscribersList ?? state.user.subscribersList,
+            }
+          : nextUser;
+
+        return { user: mergedUser, isLoading: false, isHydrated: true };
+      });
     } catch (error) {
       localStorage.removeItem("token");
       clearAuthTokenCookie();

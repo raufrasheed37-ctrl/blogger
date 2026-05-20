@@ -9,9 +9,69 @@ import { useEffect } from 'react';
 import { Home, User, Heart, BarChart3, Repeat2, LogOut,  MessageCircle, Search, PenSquare, FileText,  Users, Table, Info} from 'lucide-react';
 import { Expletus_Sans } from "next/font/google";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_ROOT = `${API_BASE_URL}${API_BASE_URL.endsWith("/api") ? "" : "/api"}`;
+
+const TYPE_META = {
+  like: { label: "liked your post", icon: "❤️" },
+  comment: { label: "commented on your post", icon: "💬" },
+  restack: { label: "restacked your post", icon: "🔁" },
+  reply: { label: "replied to your post", icon: "💬" },
+  subscribe: { label: "subscribed to your blog", icon: "⭐" },
+};
+
+const ACTIVITY_FILTERS = ["All", "Likes", "Comments", "Replies", "Restacks", "Subscriptions"];
+
+const ACTIVITY_FILTER_MAP = {
+  Likes: "like",
+  Comments: "comment",
+  Replies: "reply",
+  Restacks: "restack",
+  Subscriptions: "subscribe",
+};
+
+function ActivityItem({ item }) {
+  return (
+    <article className="rounded-3xl border border-[#2a2740] bg-[#141420] p-6 transition hover:-translate-y-0.5 hover:shadow-[0_25px_70px_-30px_rgba(124,111,247,0.2)]">
+      <div className="flex items-start gap-4">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#2a2740] bg-[#1c1c2e] text-xl">
+          {TYPE_META[item.type]?.icon || "🔔"}
+        </div>
+
+        <div className="flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-semibold text-[#a89cf7]">{item.actor?.name}</span>
+            <span className="text-sm text-[#9490b8]">{TYPE_META[item.type]?.label}</span>
+          </div>
+
+          {item.content && (
+            <div className="mt-4 rounded-2xl border border-[#2a2740] bg-[#1c1c2e] p-4 text-sm leading-7 text-[#9490b8]">
+              {item.content}
+            </div>
+          )}
+
+          {item.post && (
+            <div className="mt-4 rounded-2xl border border-[#2a2740] bg-[#1c1c2e] p-4">
+              <p className="font-medium text-[#f0eeff]">{item.post?.title}</p>
+              <p className="mt-1 text-xs text-[#9490b8]">{item.meta}</p>
+            </div>
+          )}
+        </div>
+
+        <div className="whitespace-nowrap text-xs text-[#9490b8]">
+          {new Date(item.createdAt).toLocaleString()}
+        </div>
+      </div>
+    </article>
+  );
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("Activity");
+  const [activeFilter, setActiveFilter] = useState("All");
+  const [activityItems, setActivityItems] = useState([]);
+  const [activityLoading, setActivityLoading] = useState(false);
   const [authorPosts, setAuthorPosts] = useState([]);
   const [postsLoading, setPostsLoading] = useState(false);
   const [subscriberCount, setSubscriberCount] = useState(null);
@@ -29,6 +89,45 @@ export default function DashboardPage() {
   useEffect(() => {
     hydrate();
   }, [hydrate]);
+
+  useEffect(() => {
+    if (!token) {
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      setActivityLoading(true);
+
+      try {
+        const response = await fetch(`${API_ROOT}/activity`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const result = await response.json();
+
+        if (!cancelled) {
+          setActivityItems(Array.isArray(result) ? result : []);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.debug('Failed to load dashboard activity', error?.message || error);
+          setActivityItems([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setActivityLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
   const authorId = user?._id || user?.id;
 
@@ -145,6 +244,11 @@ export default function DashboardPage() {
     { label: "Posts", icon: PenSquare, count: authorPosts.length },
     { label: "About", icon: Info },
   ];
+
+  const filteredActivityItems =
+    activeFilter === "All"
+      ? activityItems
+      : activityItems.filter((item) => item.type === ACTIVITY_FILTER_MAP[activeFilter]);
 
   const stats = [
     { label: "Posts", value: authorPosts.length, icon: FileText },
@@ -304,18 +408,63 @@ export default function DashboardPage() {
               })}
             </div>
 
-            {/* Post Composer */}
+            {/* Activity Feed */}
             {activeTab === "Activity" && (
-              <section className="rounded-xl bg-[#141420] border border-[#2a2740] p-6">
-                <div className="flex gap-4">
-                  <div className="w-12 h-12 rounded-full bg-linear-to-br from-[#7c6ff7] to-[#a89cf7] flex items-center justify-center font-bold text-white shrink-0">
-                    {initial}
+              <section className="space-y-6">
+                <section className="rounded-3xl border border-[#2a2740] bg-[#141420] p-6 shadow-lg">
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#9490b8]">
+                    Notifications
+                  </p>
+
+                  <h2 className="mt-3 text-4xl font-bold">Activity</h2>
+
+                  <p className="mt-3 text-sm text-[#9490b8]">
+                    Stay updated with every interaction around your content.
+                  </p>
+
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    {ACTIVITY_FILTERS.map((filter) => (
+                      <button
+                        key={filter}
+                        onClick={() => setActiveFilter(filter)}
+                        className={`rounded-xl px-5 py-2 text-sm font-medium transition ${
+                          activeFilter === filter
+                            ? "bg-[#7c6ff7] text-white"
+                            : "border border-[#2a2740] text-[#9490b8] hover:bg-[#1c1c2e]"
+                        }`}
+                      >
+                        {filter}
+                      </button>
+                    ))}
                   </div>
-                  <textarea
-                    placeholder="What's on your mind?"
-                    rows={4}
-                    className="flex-1 bg-[#1c1c2e] border border-[#2a2740] rounded-lg px-4 py-3 text-[#f0eeff] placeholder-[#9490b8] outline-none focus:border-[#7c6ff7] focus:ring-1 focus:ring-[#7c6ff7]/50 resize-none transition"
-                  />
+                </section>
+
+                <div className="space-y-8">
+                  {activityLoading ? (
+                    <p className="mt-10 text-center text-[#9490b8]">Loading activity...</p>
+                  ) : filteredActivityItems.length === 0 ? (
+                    <p className="mt-10 text-center text-[#9490b8]">No activity in this category.</p>
+                  ) : (
+                    <div className="space-y-8">
+                      <div>
+                        <p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-[#9490b8]">
+                          Recent
+                        </p>
+
+                        <div className="space-y-5">
+                          {filteredActivityItems.map((item) => (
+                            <ActivityItem key={item._id} item={item} />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-10 flex justify-center">
+                  <button className="rounded-2xl border border-[#2a2740] px-6 py-3 text-sm font-medium text-[#9490b8] transition hover:bg-[#1c1c2e]">
+                    Load more
+                  </button>
                 </div>
               </section>
             )}

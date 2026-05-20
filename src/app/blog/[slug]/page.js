@@ -680,7 +680,7 @@ setPost((prev) => ({
   ...prev,
   restacks: data.restacks,
 }));
-}
+
       } catch (err) {
         console.log(err);
       }

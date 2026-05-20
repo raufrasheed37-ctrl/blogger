@@ -266,6 +266,15 @@ export default function PostDetailPage() {
     return {
       id: post._id || post.id || slug,
       slug: post.slug || slug,
+      isRestack: Boolean(post.isRestack),
+
+restackedFromName:
+  post?.restackedFrom?.name ||
+  post?.originalPost?.author?.name ||
+  "Unknown",
+
+originalPostSlug:
+  post?.originalPost?.slug || null,
       title: post.title || "Untitled article",
       subtitle: post.subtitle || post.excerpt || "A premium editorial reading experience from Pulse.",
       category: post.category || tags[0] || "Pulse",
@@ -292,21 +301,21 @@ export default function PostDetailPage() {
   }, [post, slug]);
 
   const isAuthor = useMemo(() => {
-    if (!normalizedPost || !user) return false;
+  if (!normalizedPost || !user || post?.isRestack) return false;
 
-    const author = post?.author || {};
-    const postAuthorId = author._id || author.id || post?.authorId || null;
-    const postAuthorEmail = author.email || null;
-    const postAuthorName = author.name || null;
-    const currentUserId = user?._id || user?.id || null;
+  const author = post?.author || {};
+  const postAuthorId = author._id || author.id || post?.authorId || null;
+  const postAuthorEmail = author.email || null;
+  const postAuthorName = author.name || null;
+  const currentUserId = user?._id || user?.id || null;
 
-    return Boolean(
-      (postAuthorId && currentUserId && postAuthorId === currentUserId) ||
-      (postAuthorEmail && user.email && postAuthorEmail === user.email) ||
-      (postAuthorName && user.name && postAuthorName === user.name)
-    );
-  }, [normalizedPost, post, user]);
-
+  return Boolean(
+    (postAuthorId && currentUserId && postAuthorId === currentUserId) ||
+    (postAuthorEmail && user.email && postAuthorEmail === user.email) ||
+    (postAuthorName && user.name && postAuthorName === user.name)
+  );
+}, [normalizedPost, post, user]);
+  
   const handleShare = async () => {
     if (!normalizedPost) return;
 
@@ -473,6 +482,15 @@ export default function PostDetailPage() {
                   {normalizedPost.subtitle}
                 </p>
 
+                  {normalizedPost.isRestack && (
+  <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-300">
+    <Repeat2 size={16} />
+    <span>
+      Restacked from {normalizedPost.restackedFromName}
+    </span>
+  </div>
+)}
+
                 <div className="mt-6 flex flex-wrap items-center gap-4 rounded-2xl border border-[#2a2740] bg-[#141420]/80 px-4 py-4">
                   {isAuthor ? (
                     <Link href="/dashboard" className="flex items-center gap-3 hover:opacity-80 transition">
@@ -638,6 +656,9 @@ export default function PostDetailPage() {
         router.push(`/login?next=/blog/${normalizedPost.slug}`);
         return;
       }
+      if (post?.isRestack) {
+  return;
+}
 
       try {
         const response = await fetch(
@@ -656,21 +677,25 @@ export default function PostDetailPage() {
 
         const data = await response.json();
 
-        setSaved(data.restacked);
+        if (!post?.isRestack) {
+  setSaved(data.restacked);
 
-        setPost((prev) => ({
-          ...prev,
-          restacks: data.restacks,
-        }));
+  setPost((prev) => ({
+    ...prev,
+    restacks: data.restacks,
+  }));
+}
       } catch (err) {
         console.log(err);
       }
     }}
     className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${
-      saved
-        ? "border-emerald-500/60 bg-emerald-500/15 text-emerald-300"
-        : "border-[#2a2740] bg-[#141420] text-[#f0eeff] hover:border-emerald-500/50 hover:text-emerald-300"
-    }`}
+  post?.isRestack
+    ? "border-[#2a2740] bg-[#101018] text-[#55516e] cursor-not-allowed"
+    : saved
+    ? "border-emerald-500/60 bg-emerald-500/15 text-emerald-300"
+    : "border-[#2a2740] bg-[#141420] text-[#f0eeff] hover:border-emerald-500/50 hover:text-emerald-300"
+}`}
   >
     <Repeat2 size={18} />
     <span>{normalizedPost.restacks}</span>

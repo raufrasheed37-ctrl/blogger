@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 
 export default function ResetPasswordPage() {
   const params = useParams();
+  const router = useRouter();
+
   const token = params?.token;
 
   const [password, setPassword] = useState("");
@@ -27,7 +29,12 @@ export default function ResetPasswordPage() {
       );
 
       setMessage(res.data?.message || "Password reset successful");
-      setPassword("");
+
+      // Redirect after 2 seconds
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
+
     } catch (err) {
       const msg =
         err?.response?.data?.message ||
@@ -43,7 +50,7 @@ export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0d0d14] px-4 py-10">
       <div className="w-full max-w-md rounded-3xl border border-[#26263a] bg-[#141420] p-8 shadow-2xl">
-        {/* HEADER */}
+
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-white">
             Reset Password
@@ -54,7 +61,6 @@ export default function ResetPasswordPage() {
           </p>
         </div>
 
-        {/* FORM */}
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-300">
@@ -62,9 +68,7 @@ export default function ResetPasswordPage() {
             </label>
 
             <input
-              id="password"
               type="password"
-              autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your new password"

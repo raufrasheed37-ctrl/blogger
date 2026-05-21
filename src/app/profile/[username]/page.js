@@ -312,9 +312,6 @@ export default function ProfilePage() {
             <Link href="/explore" className={styles.navLink}>
               Explore
             </Link>
-            <Link href="/categories" className={styles.navLink}>
-              Categories
-            </Link>
           </div>
           <div className={styles.navButtons} />
         </div>

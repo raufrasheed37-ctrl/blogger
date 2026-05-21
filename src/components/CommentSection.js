@@ -441,11 +441,13 @@ setReplyingTo(null);
       </div>
 
       {/* LOADING */}
-      {fetching && (
-        <p className="mt-5 text-sm text-zinc-500">
-          Loading comments...
-        </p>
-      )}
+      <div className="mt-5 relative min-h-[24px]">
+  {fetching && (
+    <div className="absolute inset-0 flex items-center">
+      <div className="h-4 w-32 bg-zinc-800 rounded animate-pulse" />
+    </div>
+  )}
+</div>
 
       {/* COMMENTS */}
       <div className="mt-6 space-y-5">

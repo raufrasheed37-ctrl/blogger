@@ -43,6 +43,7 @@ export default function ExplorePage() {
   useState("Explore");
   const [activeTab, setActiveTab] =
   useState("Recent");
+  const [loading, setLoading] = useState(true);
 
   const handleLogout = () => {
     useAuthStore.getState().logout();
@@ -50,26 +51,30 @@ export default function ExplorePage() {
   };
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const res = await fetch(
-  `${process.env.NEXT_PUBLIC_API_URL}/api/posts`
-);
+  const fetchPosts = async () => {
+    try {
+      setLoading(true);
 
-        if (!res.ok) {
-          throw new Error("Failed to fetch posts");
-        }
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/posts`
+      );
 
-        const data = await res.json();
-
-        setPosts(data.posts || []);
-      } catch (err) {
-        console.log(err);
+      if (!res.ok) {
+        throw new Error("Failed to fetch posts");
       }
-    };
 
-    fetchPosts();
-  }, []);
+      const data = await res.json();
+
+      setPosts(data.posts || []);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchPosts();
+}, []);
 
   const filteredPosts = posts.filter((post) => {
 
@@ -599,23 +604,47 @@ const [subscribed, setSubscribed] =
 
             {/* FEED */}
             <div className="mt-8 space-y-8">
-              {sortedPosts.length === 0 && (
-                <div className="rounded-3xl border border-[#2a2740] bg-[#141420] p-10 text-center">
-                  <h2 className="text-xl font-semibold text-[#f0eeff]">
-                    No posts yet
-                  </h2>
-                  <p className="mt-3 text-[#9490b8]">
-                    Be the first person to create a post.
-                  </p>
-                </div>
-              )}
+              {loading ? (
+  <div className="space-y-6">
+    {[1, 2, 3, 4].map((i) => (
+      <div
+        key={i}
+        className="rounded-3xl border border-[#2a2740] bg-[#141420] p-6 animate-pulse"
+      >
+        <div className="flex items-center gap-4">
+          <div className="h-12 w-12 rounded-full bg-[#2a2740]" />
+          <div className="space-y-2">
+            <div className="h-4 w-32 bg-[#2a2740] rounded" />
+            <div className="h-3 w-20 bg-[#2a2740] rounded" />
+          </div>
+        </div>
 
-                {sortedPosts.map((post) => (
-                <ExplorePostCard
-                  key={post._id || post.id}
-                  post={post}
-                />
-              ))}
+        <div className="mt-6 space-y-3">
+          <div className="h-5 w-3/4 bg-[#2a2740] rounded" />
+          <div className="h-4 w-full bg-[#2a2740] rounded" />
+          <div className="h-4 w-5/6 bg-[#2a2740] rounded" />
+        </div>
+      </div>
+    ))}
+  </div>
+) : sortedPosts.length === 0 ? (
+  <div className="rounded-3xl border border-[#2a2740] bg-[#141420] p-10 text-center">
+    <h2 className="text-xl font-semibold text-[#f0eeff]">
+      No posts yet
+    </h2>
+    <p className="mt-3 text-[#9490b8]">
+      Be the first person to create a post.
+    </p>
+  </div>
+) : (
+  sortedPosts.map((post) => (
+    <ExplorePostCard
+      key={post._id || post.id}
+      post={post}
+    />
+  ))
+)}
+              
             </div>
           </div>
           

@@ -202,6 +202,7 @@ export default function CommentSection({
   const [expandedReplies, setExpandedReplies] = useState({});
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState("");
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   
 
   // edit states
@@ -224,6 +225,7 @@ export default function CommentSection({
 
       const data = await res.json();
       setComments(data);
+      setHasLoadedOnce(true);
       
       // Notify parent of comments count
       if (onCommentCountUpdated && Array.isArray(data)) {
@@ -444,7 +446,7 @@ setReplyingTo(null);
 
       {/* LOADING */}
       <div className="mt-5 relative min-h-[24px]">
-  {fetching && (
+      {fetching && !hasLoadedOnce && (
   <div className="mt-5 space-y-2">
     <div className="h-4 w-32 bg-zinc-800 rounded animate-pulse" />
     <div className="h-4 w-48 bg-zinc-800 rounded animate-pulse" />

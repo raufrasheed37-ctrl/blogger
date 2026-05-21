@@ -160,32 +160,30 @@ function ReplyItem({
         </div>
       )}
 
-         {Array.isArray(reply.replies) &&
- reply.replies.length > 0 && (
-        <div className="mt-3 text-xs text-orange-400">
-  {reply.replies.length} repl{reply.replies.length > 1 ? "ies" : "y"}
-</div>
+        {Array.isArray(reply.replies) && reply.replies.length > 0 && (
+  <>
+    <div className="mt-3 text-xs text-orange-400">
+      {reply.replies.length} repl
+      {reply.replies.length > 1 ? "ies" : "y"}
+    </div>
 
-        <div className="mt-5 ml-6 space-y-4 border-l border-white/10 pl-5">
-
-          {reply.replies.map((nestedReply) => (
-
-            <ReplyItem
-              key={nestedReply._id}
-              reply={nestedReply}
-              requireAuth={requireAuth}
-              replyText={replyText}
-              setReplyText={setReplyText}
-              replyingTo={replyingTo}
-              setReplyingTo={setReplyingTo}
-              handleReply={handleReply}
-              setComments={setComments}
-            />
-
-          ))}
-
-        </div>
-      )}
+    <div className="mt-5 ml-6 space-y-4 border-l border-white/10 pl-5">
+      {reply.replies.map((nestedReply) => (
+        <ReplyItem
+          key={nestedReply._id}
+          reply={nestedReply}
+          requireAuth={requireAuth}
+          replyText={replyText}
+          setReplyText={setReplyText}
+          replyingTo={replyingTo}
+          setReplyingTo={setReplyingTo}
+          handleReply={handleReply}
+          setComments={setComments}
+        />
+      ))}
+    </div>
+  </>
+)} 
 
     </div>
   );

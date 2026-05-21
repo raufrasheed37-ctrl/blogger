@@ -83,6 +83,7 @@ function buildDraft(post) {
   const { tags, bodyHtml } = splitContentAndTags(post?.content || '', fallbackTags)
 
   return {
+    _id: post?._id || post?.id || '',
     title: post?.title || fallback.title,
     subtitle: post?.excerpt || fallback.subtitle,
     contentHtml: bodyHtml || fallback.contentHtml,
@@ -116,6 +117,7 @@ function EditorDashboardContent() {
   const lastSyncedHtmlRef = useRef('')
 
   const [draft, setDraft] = useState(() => createDefaultDraft())
+  const [postId, setPostId] = useState('')
   const [loading, setLoading] = useState(true)
   const [previewMode, setPreviewMode] = useState(false)
   const [isDirty, setIsDirty] = useState(false)
@@ -152,6 +154,7 @@ function EditorDashboardContent() {
         const fallbackDraft = createDefaultDraft()
         originalDraftRef.current = fallbackDraft
         setDraft(fallbackDraft)
+        setPostId('')
         setIsDirty(false)
         setLoading(false)
         return
@@ -166,6 +169,7 @@ function EditorDashboardContent() {
 
         originalDraftRef.current = loadedDraft
         setDraft(loadedDraft)
+        setPostId(loadedDraft._id || resolvedPost?._id || resolvedPost?.id || slugParam)
         setIsDirty(false)
         setPreviewMode(false)
         setStatusMessage('Loaded post')
@@ -175,6 +179,7 @@ function EditorDashboardContent() {
           const fallbackDraft = createDefaultDraft()
           originalDraftRef.current = fallbackDraft
           setDraft(fallbackDraft)
+          setPostId('')
         }
       } finally {
         if (!cancelled) setLoading(false)
@@ -187,7 +192,6 @@ function EditorDashboardContent() {
       cancelled = true
     }
   }, [slugParam])
-
   useEffect(() => {
     if (!previewMode && editorRef.current && draft.contentHtml !== lastSyncedHtmlRef.current) {
       editorRef.current.innerHTML = draft.contentHtml
@@ -276,8 +280,8 @@ function EditorDashboardContent() {
   }, [router, slugParam])
 
   const handleSave = useCallback(async () => {
-    if (!slugParam) {
-      setError('Unable to save without a post slug.')
+    if (!postId) {
+      setError('Unable to save without a post ID.')
       return
     }
 
@@ -287,7 +291,7 @@ function EditorDashboardContent() {
     setError('')
 
     try {
-      await blogAPI.update(slugParam, draft.title.trim() || 'Untitled', contentHtml, draft.subtitle.trim())
+      await blogAPI.update(postId, draft.title.trim() || 'Untitled', contentHtml, draft.subtitle.trim())
       const savedDraft = { ...draft, contentHtml }
       originalDraftRef.current = savedDraft
       lastSyncedHtmlRef.current = contentHtml
@@ -299,7 +303,7 @@ function EditorDashboardContent() {
     } finally {
       setIsSaving(false)
     }
-  }, [draft, slugParam])
+  }, [draft, postId])
 
   const canEdit = !previewMode && !loading
   const statusText = isDirty ? 'Unsaved changes' : 'Saved'

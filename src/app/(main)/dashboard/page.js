@@ -408,63 +408,18 @@ export default function DashboardPage() {
               })}
             </div>
 
-            {/* Activity Feed */}
+            {/* Post Composer (dashboard only) */}
             {activeTab === "Activity" && (
-              <section className="space-y-6">
-                <section className="rounded-3xl border border-[#2a2740] bg-[#141420] p-6 shadow-lg">
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#9490b8]">
-                    Notifications
-                  </p>
-
-                  <h2 className="mt-3 text-4xl font-bold">Activity</h2>
-
-                  <p className="mt-3 text-sm text-[#9490b8]">
-                    Stay updated with every interaction around your content.
-                  </p>
-
-                  <div className="mt-6 flex flex-wrap gap-3">
-                    {ACTIVITY_FILTERS.map((filter) => (
-                      <button
-                        key={filter}
-                        onClick={() => setActiveFilter(filter)}
-                        className={`rounded-xl px-5 py-2 text-sm font-medium transition ${
-                          activeFilter === filter
-                            ? "bg-[#7c6ff7] text-white"
-                            : "border border-[#2a2740] text-[#9490b8] hover:bg-[#1c1c2e]"
-                        }`}
-                      >
-                        {filter}
-                      </button>
-                    ))}
+              <section className="rounded-xl bg-[#141420] border border-[#2a2740] p-6">
+                <div className="flex gap-4">
+                  <div className="w-12 h-12 rounded-full bg-linear-to-br from-[#7c6ff7] to-[#a89cf7] flex items-center justify-center font-bold text-white shrink-0">
+                    {initial}
                   </div>
-                </section>
-
-                <div className="space-y-8">
-                  {activityLoading ? (
-                    <p className="mt-10 text-center text-[#9490b8]">Loading activity...</p>
-                  ) : filteredActivityItems.length === 0 ? (
-                    <p className="mt-10 text-center text-[#9490b8]">No activity in this category.</p>
-                  ) : (
-                    <div className="space-y-8">
-                      <div>
-                        <p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-[#9490b8]">
-                          Recent
-                        </p>
-
-                        <div className="space-y-5">
-                          {filteredActivityItems.map((item) => (
-                            <ActivityItem key={item._id} item={item} />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="mt-10 flex justify-center">
-                  <button className="rounded-2xl border border-[#2a2740] px-6 py-3 text-sm font-medium text-[#9490b8] transition hover:bg-[#1c1c2e]">
-                    Load more
-                  </button>
+                  <textarea
+                    placeholder="What's on your mind?"
+                    rows={4}
+                    className="flex-1 bg-[#1c1c2e] border border-[#2a2740] rounded-lg px-4 py-3 text-[#f0eeff] placeholder-[#9490b8] outline-none focus:border-[#7c6ff7] focus:ring-1 focus:ring-[#7c6ff7]/50 resize-none transition"
+                  />
                 </div>
               </section>
             )}

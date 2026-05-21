@@ -160,7 +160,11 @@ function ReplyItem({
         </div>
       )}
 
-      {reply.replies?.length > 0 && (
+         {Array.isArray(reply.replies) &&
+ reply.replies.length > 0 && (
+        <div className="mt-3 text-xs text-orange-400">
+  {reply.replies.length} repl{reply.replies.length > 1 ? "ies" : "y"}
+</div>
 
         <div className="mt-5 ml-6 space-y-4 border-l border-white/10 pl-5">
 
@@ -319,11 +323,14 @@ export default function CommentSection({
 
     await fetchComments();
 
-    setExpandedReplies((prev) => ({
-      ...prev,
-      [parentCommentId]: true,
-    }));
 
+setExpandedReplies((prev) => ({
+  ...prev,
+  [parentCommentId]: true,
+}));
+
+setReplyingTo(null);
+    
   } catch (err) {
     console.log(err);
   }

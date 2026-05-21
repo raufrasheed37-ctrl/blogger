@@ -1,6 +1,7 @@
 "use client"
 import { useState } from "react";
 import Link from "next/link";
+import axios from "axios";
 
 
 export default function ForgetPasswordPage() {
@@ -18,12 +19,16 @@ export default function ForgetPasswordPage() {
     setMessage("");
 
     try {
-      // API CALL HERE
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const res = await axios.post(
+        // "http://localhost:5000/api/auth/forgot-password", 
+        "https://blog-backend-3p8r.onrender.com/api/auth/forgot-password",
+        { email }
+      );
 
-      setMessage("Password reset link sent to your email.");
+      setMessage(res.data?.message || "Password reset link sent to your email.");
     } catch (err) {
-      setError("Something went wrong.");
+      const msg = err?.response?.data?.message || err.message || "Something went wrong.";
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -67,12 +72,14 @@ export default function ForgetPasswordPage() {
               Email Address
             </label>
 
-            <div className="relative">
+            <div className="">
               <input
+                id="email"
                 type="email"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
+                placeholder="Enter your registered email"
                 className="w-full rounded-2xl border border-[#2f2f46] bg-[#1b1b2d] px-4 py-3 text-white outline-none transition focus:border-[#7c3aed]"
                 required
               />
@@ -94,7 +101,7 @@ export default function ForgetPasswordPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-2xl bg-[#7c3aed] py-3 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-2xl bg-[#7c6ff7] py-3 font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? "Sending Link..." : "Send Reset Link"}
           </button>

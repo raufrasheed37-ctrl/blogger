@@ -7,6 +7,53 @@ import Image from "next/image";
 import { blogAPI } from "@/utils/api";
 import useAuthStore from "@/store/authstore";
 
+function Icon({ name, className = "h-4 w-4" }) {
+  const icons = {
+    bold: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+        <path d="M15.6 10.79A3.5 3.5 0 0 0 13 3H7v18h8a4 4 0 0 0 .6-7.21zM9 5h4a2 2 0 0 1 0 4H9V5zm5 14H9v-6h5a3 3 0 0 1 0 6z" />
+      </svg>
+    ),
+    italic: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+        <path d="M10 4v3h2.21l-3.42 10H6v3h8v-3h-2.21l3.42-10H18V4z" />
+      </svg>
+    ),
+    underline: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+        <path d="M5 3v6a7 7 0 0 0 14 0V3h-2v6a5 5 0 0 1-10 0V3H5zM5 19v2h14v-2H5z" />
+      </svg>
+    ),
+    strike: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+        <path d="M10 5h4a2 2 0 0 1 2 2v1h2V7a4 4 0 0 0-4-4h-4a4 4 0 0 0-4 4c0 2.21 1.79 4 4 4h2c1.1 0 2 .9 2 2s-.9 2-2 2H8v2h2a4 4 0 0 0 4-4c0-2.21-1.79-4-4-4H8a2 2 0 0 1 0-4zM4 11h16v2H4v-2z" />
+      </svg>
+    ),
+    left: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+        <path d="M3 3h18v2H3V3zm0 8h12v2H3v-2zm0 8h18v2H3v-2z" />
+      </svg>
+    ),
+    center: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+        <path d="M3 3h18v2H3V3zm3 8h12v2H6v-2zm-3 8h18v2H3v-2z" />
+      </svg>
+    ),
+    right: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+        <path d="M3 3h18v2H3V3zm6 8h12v2H9v-2zm-6 8h18v2H3v-2z" />
+      </svg>
+    ),
+    justify: (
+      <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+        <path d="M3 3h18v2H3V3zm0 5h18v2H3V8zm0 5h18v2H3v-2zm0 5h18v2H3v-2z" />
+      </svg>
+    ),
+  };
+
+  return icons[name] || null;
+}
+
 export default function CreatePostPage() {
   const router = useRouter();
   const [title, setTitle] = useState("");
@@ -25,6 +72,7 @@ export default function CreatePostPage() {
   const [error, setError] = useState("");
   const { user, isHydrated, hydrate } = useAuthStore();
   const coverInputRef = useRef(null);
+  const editorRef = useRef(null);
 
   // Hydrate on mount
   useEffect(() => {
@@ -37,6 +85,13 @@ export default function CreatePostPage() {
       router.push("/login");
     }
   }, [isHydrated, user, router]);
+
+  useEffect(() => {
+    if (!editorRef.current) return;
+    if (!editorRef.current.innerHTML && content) {
+      editorRef.current.innerHTML = content;
+    }
+  }, [content]);
 
   const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
   const readingTime = Math.ceil(wordCount / 200);
@@ -51,6 +106,18 @@ export default function CreatePostPage() {
 
   const removeTag = (index) => {
     setTags(tags.filter((_, i) => i !== index));
+  };
+
+  const execFormat = (command, value = null) => {
+    if (!editorRef.current) return;
+    editorRef.current.focus();
+    document.execCommand(command, false, value);
+    setContent(editorRef.current.innerHTML || "");
+  };
+
+  const handleEditorInput = () => {
+    if (!editorRef.current) return;
+    setContent(editorRef.current.innerHTML || "");
   };
 
   const handleCoverUpload = (e) => {
@@ -180,6 +247,55 @@ export default function CreatePostPage() {
           </div>
         </div>
 
+        {/* Rich Text Toolbar */}
+        <div className="flex flex-wrap items-center gap-3 px-6 sm:px-8 py-4 border-b border-[#2a2740] bg-[#10101a]/95 backdrop-blur-md shrink-0">
+          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-[#2a2740] bg-[#141420] px-3 py-2 shadow-[0_0_0_1px_rgba(124,111,247,0.06)]">
+            {[
+              { name: "bold", label: "Bold", command: "bold" },
+              { name: "italic", label: "Italic", command: "italic" },
+              { name: "underline", label: "Underline", command: "underline" },
+              { name: "strike", label: "Strikethrough", command: "strikeThrough" },
+            ].map((item) => (
+              <button
+                key={item.name}
+                type="button"
+                title={item.label}
+                aria-label={item.label}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => execFormat(item.command)}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#7c6ff7]/35 bg-transparent text-[#d9d2ff] transition hover:border-[#a89cf7]/80 hover:bg-[#7c6ff7]/10 hover:text-white hover:shadow-[0_0_0_1px_rgba(124,111,247,0.08),0_0_18px_rgba(124,111,247,0.18)]"
+              >
+                <Icon name={item.name} />
+              </button>
+            ))}
+
+            <div className="mx-1 h-8 w-px bg-[#2a2740]" />
+
+            {[
+              { name: "left", label: "Align left", command: "justifyLeft" },
+              { name: "center", label: "Align center", command: "justifyCenter" },
+              { name: "right", label: "Align right", command: "justifyRight" },
+              { name: "justify", label: "Justify", command: "justifyFull" },
+            ].map((item) => (
+              <button
+                key={item.name}
+                type="button"
+                title={item.label}
+                aria-label={item.label}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => execFormat(item.command)}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#7c6ff7]/25 bg-transparent text-[#d9d2ff] transition hover:border-[#a89cf7]/80 hover:bg-[#7c6ff7]/10 hover:text-white hover:shadow-[0_0_0_1px_rgba(124,111,247,0.08),0_0_18px_rgba(124,111,247,0.18)]"
+              >
+                <Icon name={item.name} />
+              </button>
+            ))}
+          </div>
+
+          <p className="text-xs text-[#9490b8]">
+            Rich text tools for formatting your draft.
+          </p>
+        </div>
+
         {/* Main Editor Container - Full height */}
         <div className="flex-1 overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 h-full w-full">
@@ -236,12 +352,15 @@ export default function CreatePostPage() {
                   />
                 </div>
 
-                {/* Content Textarea */}
-                <textarea
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="Start writing your article..."
-                  className="w-full flex-1 bg-transparent text-base text-[#f0eeff] placeholder-[#9490b8]/30 outline-none resize-none leading-relaxed min-h-96"
+                {/* Content Editor */}
+                <div
+                  ref={editorRef}
+                  contentEditable
+                  suppressContentEditableWarning
+                  onInput={handleEditorInput}
+                  data-placeholder="Start writing your article..."
+                  className="min-h-96 w-full rounded-xl border border-transparent bg-transparent text-base leading-relaxed text-[#f0eeff] outline-none placeholder-[#9490b8]/30 focus:border-[#7c6ff7]/40 focus:bg-[#141420]/40"
+                  style={{ whiteSpace: "pre-wrap" }}
                 />
               </div>
 

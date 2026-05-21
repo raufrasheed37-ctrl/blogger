@@ -202,7 +202,7 @@ export default function CommentSection({
   const [expandedReplies, setExpandedReplies] = useState({});
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState("");
-  const [showLoading, setShowLoading] = useState(false);
+  
 
   // edit states
   const [editingId, setEditingId] = useState(null);
@@ -212,11 +212,7 @@ export default function CommentSection({
   const fetchComments = useCallback(async () => {
     try {
       setFetching(true);
-setShowLoading(true);
 
-setTimeout(() => {
-  setShowLoading(false);
-}, 3000);
 
       const res = await fetch(`${API_ROOT}/comments/${postId}`, {
         headers: {
@@ -448,11 +444,12 @@ setReplyingTo(null);
 
       {/* LOADING */}
       <div className="mt-5 relative min-h-[24px]">
-  {showLoading && (
-    <div className="absolute inset-0 flex items-center">
-      <div className="h-4 w-32 bg-zinc-800 rounded animate-pulse" />
-    </div>
-  )}
+  {fetching && (
+  <div className="mt-5 space-y-2">
+    <div className="h-4 w-32 bg-zinc-800 rounded animate-pulse" />
+    <div className="h-4 w-48 bg-zinc-800 rounded animate-pulse" />
+  </div>
+)}
 </div>
 
       {/* COMMENTS */}

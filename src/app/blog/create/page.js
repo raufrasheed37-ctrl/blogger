@@ -86,6 +86,13 @@ export default function CreatePostPage() {
     }
   }, [isHydrated, user, router]);
 
+  useEffect(() => {
+    if (!editorRef.current) return;
+    if (!editorRef.current.innerHTML && content) {
+      editorRef.current.innerHTML = content;
+    }
+  }, [content]);
+
   const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
   const readingTime = Math.ceil(wordCount / 200);
   const charCount = content.length;
@@ -351,7 +358,6 @@ export default function CreatePostPage() {
                   contentEditable
                   suppressContentEditableWarning
                   onInput={handleEditorInput}
-                  dangerouslySetInnerHTML={{ __html: content }}
                   data-placeholder="Start writing your article..."
                   className="min-h-96 w-full rounded-xl border border-transparent bg-transparent text-base leading-relaxed text-[#f0eeff] outline-none placeholder-[#9490b8]/30 focus:border-[#7c6ff7]/40 focus:bg-[#141420]/40"
                   style={{ whiteSpace: "pre-wrap" }}

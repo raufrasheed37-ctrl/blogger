@@ -18,6 +18,175 @@ function getAuthHeaders() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+function updateNestedComment(comments, targetId, updater) {
+  return comments.map((comment) => {
+
+    if (comment._id === targetId) {
+      return updater(comment);
+    }
+
+    if (comment.replies?.length) {
+      return {
+        ...comment,
+        replies: updateNestedComment(
+          comment.replies,
+          targetId,
+          updater
+        ),
+      };
+    }
+
+    return comment;
+  });
+}
+
+function ReplyItem({
+  reply,
+  requireAuth,
+  replyText,
+  setReplyText,
+  replyingTo,
+  setReplyingTo,
+  handleReply,
+  setComments,
+}) {
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-[#111] p-4">
+
+      <p className="font-semibold text-white">
+        {reply.user?.name}
+      </p>
+
+      <p className="mt-2 text-sm text-zinc-300">
+        {reply.text}
+      </p>
+
+      <div className="mt-4 flex items-center gap-5 text-sm text-zinc-500">
+
+        <button
+          onClick={async () => {
+
+            if (!requireAuth()) return;
+
+            try {
+
+              const res = await fetch(
+                `${API_ROOT}/comments/${reply._id}/like`,
+                {
+                  method: "PUT",
+                  headers: {
+                    ...getAuthHeaders(),
+                  },
+                }
+              );
+
+              const data = await res.json();
+
+              setComments((prev) =>
+                updateNestedComment(
+                  prev,
+                  reply._id,
+                  (target) => ({
+                    ...target,
+                    likes: data.likes,
+                  })
+                )
+              );
+
+            } catch (err) {
+              console.log(err);
+            }
+          }}
+          className="flex items-center gap-2 transition hover:text-orange-400"
+        >
+
+          <Heart
+            size={16}
+            className="text-orange-400"
+          />
+
+          <span>
+            {reply.likes || 0}
+          </span>
+
+        </button>
+
+        <button
+          onClick={() => {
+
+            if (!requireAuth()) return;
+
+            setReplyingTo(
+              replyingTo === reply._id
+                ? null
+                : reply._id
+            );
+          }}
+          className="transition hover:text-orange-400"
+        >
+          Reply
+        </button>
+
+      </div>
+
+      {replyingTo === reply._id && (
+
+        <div className="mt-4">
+
+          <textarea
+            value={replyText}
+            onChange={(e) =>
+              setReplyText(e.target.value)
+            }
+            placeholder="Write a reply..."
+            rows={3}
+            className="w-full rounded-2xl border border-white/10 bg-[#101010] p-3 text-sm text-white outline-none"
+          />
+
+          <div className="mt-3 flex justify-end">
+
+            <button
+              onClick={() =>
+                handleReply(reply._id)
+              }
+              className="rounded-full bg-orange-500 px-4 py-2 text-sm font-semibold text-black"
+            >
+              Reply
+            </button>
+
+          </div>
+
+        </div>
+      )}
+
+      {reply.replies?.length > 0 && (
+
+        <div className="mt-5 ml-6 space-y-4 border-l border-white/10 pl-5">
+
+          {reply.replies.map((nestedReply) => (
+
+            <ReplyItem
+              key={nestedReply._id}
+              reply={nestedReply}
+              requireAuth={requireAuth}
+              replyText={replyText}
+              setReplyText={setReplyText}
+              replyingTo={replyingTo}
+              setReplyingTo={setReplyingTo}
+              handleReply={handleReply}
+              setComments={setComments}
+            />
+
+          ))}
+
+        </div>
+      )}
+
+    </div>
+  );
+}
+
 export default function CommentSection({
   postId,
   requireAuth: requireAuthProp, onCommentAdded,

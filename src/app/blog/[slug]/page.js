@@ -298,6 +298,7 @@ originalPostSlug:
     (postAuthorName && user.name && postAuthorName === user.name)
   );
 }, [normalizedPost, post, user]);
+  const showSidebar = isAuthor;
   
   const handleShare = async () => {
     if (!normalizedPost) return;
@@ -438,8 +439,8 @@ originalPostSlug:
             </div>
           </header>
 
-          <main className="grid min-h-0 flex-1 gap-0 lg:grid-cols-[1.6fr_0.82fr]">
-            <section className="min-h-0 overflow-y-auto border-r border-[#2a2740] px-5 py-6 sm:px-6 lg:px-8">
+          <main className={`grid min-h-0 flex-1 gap-0 ${showSidebar ? "lg:grid-cols-[1.6fr_0.82fr]" : "lg:grid-cols-1"}`}>
+            <section className={`min-h-0 overflow-y-auto px-5 py-6 sm:px-6 ${showSidebar ? "border-r border-[#2a2740] lg:px-8" : "lg:px-10 xl:px-14"}`}>
               <div className="rounded-[1.75rem] border border-[#2a2740] bg-[linear-gradient(180deg,rgba(124,111,247,0.12),rgba(20,20,32,0.88))] px-6 py-10 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:px-8">
                 <div className="flex min-h-56 flex-col items-center justify-center gap-5 text-center">
                   <div className="flex h-24 w-24 items-center justify-center rounded-full border border-[#7c6ff7]/30 bg-[#0d0d14] text-4xl shadow-[0_0_45px_rgba(124,111,247,0.25)]">
@@ -456,12 +457,12 @@ originalPostSlug:
                   {normalizedPost.category}
                 </span>
                 <h1
-                  className="mt-4 max-w-4xl text-4xl font-semibold leading-tight text-[#f0eeff] sm:text-5xl"
+                  className={`mt-4 font-semibold leading-tight text-[#f0eeff] ${showSidebar ? "max-w-4xl text-4xl sm:text-5xl" : "max-w-5xl text-5xl sm:text-6xl"}`}
                   style={{ fontFamily: "Fraunces, serif" }}
                 >
                   {normalizedPost.title}
                 </h1>
-                <p className="mt-4 max-w-3xl text-base leading-7 text-[#9490b8] sm:text-lg">
+                <p className={`mt-4 leading-7 text-[#9490b8] ${showSidebar ? "max-w-3xl text-base sm:text-lg" : "max-w-5xl text-lg sm:text-xl"}`}>
                   {normalizedPost.subtitle}
                 </p>
 
@@ -511,8 +512,8 @@ originalPostSlug:
                 </div>
               </div>
 
-              <article className="mt-10">
-                <section className="prose prose-invert max-w-none text-[#d4d1ec] leading-8">
+              <article className={`mt-10 ${showSidebar ? "" : "max-w-5xl"}`}>
+                <section className={`prose prose-invert max-w-none text-[#d4d1ec] ${showSidebar ? "leading-8" : "text-[1.08rem] leading-9 sm:text-[1.12rem]"}`}>
                   <div dangerouslySetInnerHTML={{ __html: post?.content || post?.body || post?.excerpt || normalizedPost.content }} />
                 </section>
               </article>
@@ -530,114 +531,86 @@ originalPostSlug:
                 </div>
 
                 <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-                   <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!isLoggedIn) {
+                          router.push(`/login?next=/blog/${normalizedPost.slug}`);
+                          return;
+                        }
 
-  {/* LIKE */}
-  <button
-    type="button"
-    onClick={async () => {
-      if (!isLoggedIn) {
-        router.push(`/login?next=/blog/${normalizedPost.slug}`);
-        return;
-      }
+                        try {
+                          const response = await fetch(`${API_ROOT}/posts/${normalizedPost.id}/like`, {
+                            method: "PUT",
+                            headers: { Authorization: `Bearer ${token}` },
+                          });
 
-      try {
-        const response = await fetch(
-          `${API_ROOT}/posts/${normalizedPost.id}/like`,
-          {
-            method: "PUT",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+                          if (!response.ok) {
+                            throw new Error("Failed to like");
+                          }
 
-        if (!response.ok) {
-          throw new Error("Failed to like");
-        }
+                          const data = await response.json();
 
-        const data = await response.json();
+                          setLiked(data.liked);
+                          setPost((prev) => ({
+                            ...prev,
+                            likes: data.likes,
+                          }));
+                        } catch (err) {
+                          console.log(err);
+                        }
+                      }}
+                      className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${liked ? "border-rose-500/60 bg-rose-500/15 text-rose-300" : "border-[#2a2740] bg-[#141420] text-[#f0eeff] hover:border-rose-500/50 hover:text-rose-300"}`}
+                    >
+                      <Heart size={18} className={liked ? "fill-current" : ""} />
+                      <span>{post.likes}</span>
+                    </button>
 
-        setLiked(data.liked);
+                    <button
+                      type="button"
+                      className="flex items-center gap-2 rounded-full border border-[#2a2740] bg-[#141420] px-4 py-2 text-sm font-medium text-[#f0eeff] transition hover:border-[#7c6ff7]/60 hover:text-[#a89cf7]"
+                    >
+                      <MessageCircle size={18} />
+                      <span>{post.comments}</span>
+                    </button>
 
-        setPost((prev) => ({
-          ...prev,
-          likes: data.likes,
-        }));
-      } catch (err) {
-        console.log(err);
-      }
-    }}
-    className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${
-      liked
-        ? "border-rose-500/60 bg-rose-500/15 text-rose-300"
-        : "border-[#2a2740] bg-[#141420] text-[#f0eeff] hover:border-rose-500/50 hover:text-rose-300"
-    }`}
-  >
-    <Heart
-      size={18}
-      className={liked ? "fill-current" : ""}
-    />
-    <span>{post.likes}</span>
-  </button>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!isLoggedIn) {
+                          router.push(`/login?next=/blog/${normalizedPost.slug}`);
+                          return;
+                        }
 
-  {/* COMMENT */}
-  <button
-    type="button"
-    className="flex items-center gap-2 rounded-full border border-[#2a2740] bg-[#141420] px-4 py-2 text-sm font-medium text-[#f0eeff] transition hover:border-[#7c6ff7]/60 hover:text-[#a89cf7]"
-  >
-    <MessageCircle size={18} />
-    <span>{post.comments}</span>
-  </button>
+                        try {
+                          const response = await fetch(`${API_ROOT}/posts/${normalizedPost.id}/restack`, {
+                            method: "PUT",
+                            headers: { Authorization: `Bearer ${token}` },
+                          });
 
-  {/* RESTACK */}
-  <button
-    type="button"
-    onClick={async () => {
-      if (!isLoggedIn) {
-        router.push(`/login?next=/blog/${normalizedPost.slug}`);
-        return;
-      }
+                          if (!response.ok) {
+                            throw new Error("Failed to restack");
+                          }
 
-      try {
-        const response = await fetch(
-          `${API_ROOT}/posts/${normalizedPost.id}/restack`,
-          {
-            method: "PUT",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+                          const data = await response.json();
 
-        if (!response.ok) {
-          throw new Error("Failed to restack");
-        }
+                          setSaved(data.restacked);
 
-        const data = await response.json();
-
-        setSaved(data.restacked);
-
-setPost((prev) => ({
-  ...prev,
-  restacks: data.restacks,
-}));
-
-      } catch (err) {
-        console.log(err);
-      }
-    }}
-    className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${
-  saved
-    ? "border-emerald-500/60 bg-emerald-500/15 text-emerald-300"
-    : "border-[#2a2740] bg-[#141420] text-[#f0eeff] hover:border-emerald-500/50 hover:text-emerald-300"
-}`}
-  >
-    <Repeat2 size={18} />
-    <span>{normalizedPost.restacks}</span>
-  </button>
-
-</div>
+                          setPost((prev) => ({
+                            ...prev,
+                            restacks: data.restacks,
+                          }));
+                        } catch (err) {
+                          console.log(err);
+                        }
+                      }}
+                      className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${saved ? "border-emerald-500/60 bg-emerald-500/15 text-emerald-300" : "border-[#2a2740] bg-[#141420] text-[#f0eeff] hover:border-emerald-500/50 hover:text-emerald-300"}`}
+                    >
+                      <Repeat2 size={18} />
+                      <span>{normalizedPost.restacks}</span>
+                    </button>
+                  </div>
 
                   <div className="flex items-center gap-2">
                     <ShareIconButton label="Share on X" onClick={handleShare}>
@@ -657,33 +630,33 @@ setPost((prev) => ({
 
               <div className="mt-10">
                 <CommentSection
-  postId={post._id}
-  onCommentAdded={() => {
-    setPost((prev) => ({
-      ...prev,
-      comments: (prev.comments || 0) + 1,
-    }));
-  }}
-  onCommentCountUpdated={(count) => {
-    setPost((prev) => ({
-      ...prev,
-      comments: count,
-    }));
-  }}
-/>
+                  postId={post._id}
+                  onCommentAdded={() => {
+                    setPost((prev) => ({
+                      ...prev,
+                      comments: (prev.comments || 0) + 1,
+                    }));
+                  }}
+                  onCommentCountUpdated={(count) => {
+                    setPost((prev) => ({
+                      ...prev,
+                      comments: count,
+                    }));
+                  }}
+                />
               </div>
             </section>
 
-            <aside className="space-y-6 bg-[#0f0f17]/55 px-5 py-6 sm:px-6 lg:border-l lg:border-[#2a2740] lg:px-6 lg:sticky lg:top-0 lg:h-full lg:self-start lg:overflow-hidden">
-              <div className="rounded-3xl border border-[#2a2740] bg-[#141420]/80 p-5 shadow-[0_20px_70px_rgba(0,0,0,0.25)]">
-                <p className="text-xs uppercase tracking-[0.34em] text-[#9490b8]">Post stats</p>
-                <div className="mt-4 grid grid-cols-2 gap-3">
-                  <StatCard label="Likes" value={normalizedPost.likes.toLocaleString()} />
-                  <StatCard label="Comments" value={normalizedPost.comments.toLocaleString()} />
+            {showSidebar ? (
+              <aside className="space-y-6 bg-[#0f0f17]/55 px-5 py-6 sm:px-6 lg:border-l lg:border-[#2a2740] lg:px-6 lg:sticky lg:top-0 lg:h-full lg:self-start lg:overflow-hidden">
+                <div className="rounded-3xl border border-[#2a2740] bg-[#141420]/80 p-5 shadow-[0_20px_70px_rgba(0,0,0,0.25)]">
+                  <p className="text-xs uppercase tracking-[0.34em] text-[#9490b8]">Post stats</p>
+                  <div className="mt-4 grid grid-cols-2 gap-3">
+                    <StatCard label="Likes" value={normalizedPost.likes.toLocaleString()} />
+                    <StatCard label="Comments" value={normalizedPost.comments.toLocaleString()} />
+                  </div>
                 </div>
-              </div>
 
-              {isAuthor ? (
                 <div className="rounded-3xl border border-[#2a2740] bg-[#141420]/80 p-5 shadow-[0_20px_70px_rgba(0,0,0,0.25)]">
                   <p className="text-xs uppercase tracking-[0.34em] text-[#9490b8]">Manage post</p>
                   <div className="mt-4 space-y-3">
@@ -702,8 +675,8 @@ setPost((prev) => ({
                     </button>
                   </div>
                 </div>
-              ) : null}
-            </aside>
+              </aside>
+            ) : null}
           </main>
         </div>
       </div>

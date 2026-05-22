@@ -461,7 +461,7 @@ export default function CreatePostPage() {
               </div>
 
               {/* Visibility */}
-              <div className="bg-[#141420] border border-[#2a2740] rounded-xl p-4">
+              {/* <div className="bg-[#141420] border border-[#2a2740] rounded-xl p-4">
                 <p className="text-xs uppercase tracking-wider text-[#9490b8] font-semibold mb-3">Visibility</p>
                 <select
                   value={visibility}
@@ -472,11 +472,11 @@ export default function CreatePostPage() {
                   <option value="private">Private</option>
                   <option value="draft">Draft</option>
                 </select>
-              </div>
+              </div> */}
 
               {/* Toggles */}
-              <div className="bg-[#141420] border border-[#2a2740] rounded-xl p-4 space-y-4">
-                {/*
+              {/* <div className="bg-[#141420] border border-[#2a2740] rounded-xl p-4 space-y-4">
+                
                 <label className="flex items-center justify-between cursor-pointer group">
                   <span className="text-sm text-[#9490b8] group-hover:text-[#f0eeff] transition">Allow comments</span>
                   <input
@@ -495,8 +495,8 @@ export default function CreatePostPage() {
                     className="w-5 h-5"
                   />
                 </label>
-                */}
-              </div>
+               
+              </div> */}
 
               {/* Meta Info
               <div className="bg-[#141420] border border-[#2a2740] rounded-xl p-4 space-y-4">

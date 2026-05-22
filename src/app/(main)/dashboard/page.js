@@ -408,7 +408,7 @@ export default function DashboardPage() {
               })}
             </div>
 
-            {/* Post Composer (dashboard only) */}
+          /*  Post Composer (dashboard only) 
             {activeTab === "Activity" && (
               <section className="rounded-xl bg-[#141420] border border-[#2a2740] p-6">
                 <div className="flex gap-4">
@@ -422,7 +422,7 @@ export default function DashboardPage() {
                   />
                 </div>
               </section>
-            )}
+            )} */
 
             {/* Posts Section */}
             {activeTab === "Posts" && (

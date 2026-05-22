@@ -15,16 +15,24 @@ const contactSchema = z.object({
   phoneNo: z
     .string()
     .trim()
-    .min(1, "Enter your phone number")
     .refine(
-      (value) => /^\+[0-9]{1,14}$/.test(value),
+      (value) =>
+        value === "" || /^\+[0-9]{1,14}$/.test(value),
       {
         message:
           "Number must not be longer than 15 characters and it must start with +",
       }
-    ),
+    ).optional(),
   email: z.string().email("Invalid email address"),
-  address: z.string().min(10, "Address must be at least 10 characters"),
+  address: z.string().trim()
+    .refine(
+      (value) =>
+        value === "" || value.length >= 10,
+      {
+        message: "Address must be at least 10 characters",
+      }
+    )
+    .optional(),
   bio: z.string().max(160, "Bio must be 160 characters or fewer").optional(),
   website: z.string().optional(),
 });
@@ -317,7 +325,7 @@ export default function ContactPage() {
               </h1>
 
               <p className="text-sm text-[#9490b8]">
-                Update your public profile details and appearance.
+                Update your public profile details.
               </p>
             </div>
 

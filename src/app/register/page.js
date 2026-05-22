@@ -30,6 +30,7 @@ function RegisterFormContent() {
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const { register } = useAuthStore();
 
@@ -85,7 +86,11 @@ function RegisterFormContent() {
       );
 
       if (useAuthStore.getState().token) {
+        setSuccessMessage("Account created successfully!");
+
+        setTimeout(() => {
         router.push(nextPath);
+        }, 1500);
       } else {
         setErrors({
           form: useAuthStore.getState().error || "Registration failed",
@@ -242,6 +247,13 @@ function RegisterFormContent() {
               <div className="rounded-xl border border-[#4a1414] bg-[#2a1414] px-4 py-3 text-sm text-[#f09595]">
                 {errors.form}
               </div>
+            )}
+
+            {/* SUCCESS MESSAGE */}
+            {successMessage && (
+            <div className="rounded-xl border border-green-700 bg-green-900/30 px-4 py-3 text-sm text-green-300">
+            {successMessage}
+            </div>
             )}
 
             {/* BUTTON */}

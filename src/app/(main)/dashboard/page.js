@@ -240,7 +240,7 @@ export default function DashboardPage() {
   const initial = (displayName?.[0] || 'U').toUpperCase();
 
   const tabs = [
-    { label: "Activity", icon: BarChart3 },
+   // { label: "Activity", icon: BarChart3 },
     { label: "Posts", icon: PenSquare, count: authorPosts.length },
     { label: "About", icon: Info },
   ];

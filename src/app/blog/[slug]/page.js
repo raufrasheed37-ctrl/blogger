@@ -392,14 +392,24 @@ originalPostSlug:
         <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-4xl border border-[#2a2740] bg-[#11111a]/95 shadow-[0_30px_120px_rgba(0,0,0,0.55)] backdrop-blur-xl">
           <header className="flex flex-col gap-4 border-b border-[#2a2740] bg-[#0f0f17]/90 px-5 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-4">
-              <button
-                type="button"
-                onClick={() => router.back()}
-                className="inline-flex items-center gap-2 rounded-full border border-[#2a2740] bg-[#141420] px-4 py-2 text-sm text-[#f0eeff] transition hover:border-[#7c6ff7]/60 hover:bg-[#1c1c2e]"
-              >
-                <span aria-hidden>←</span>
-                Back
-              </button>
+              {isAuthor ? (
+                <Link
+                  href="/"
+                  className="inline-flex items-center gap-2 rounded-full border border-[#2a2740] bg-[#141420] px-4 py-2 text-sm text-[#f0eeff] transition hover:border-[#7c6ff7]/60 hover:bg-[#1c1c2e]"
+                >
+                  <span aria-hidden>←</span>
+                  Back to homepage
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => router.back()}
+                  className="inline-flex items-center gap-2 rounded-full border border-[#2a2740] bg-[#141420] px-4 py-2 text-sm text-[#f0eeff] transition hover:border-[#7c6ff7]/60 hover:bg-[#1c1c2e]"
+                >
+                  <span aria-hidden>←</span>
+                  Back
+                </button>
+              )}
 
               <Link href="/" className="flex items-center gap-2">
                 <span

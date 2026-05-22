@@ -69,7 +69,7 @@ function ActivityItem({ item }) {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("Activity");
+  const [activeTab, setActiveTab] = useState("Posts");
   const [activeFilter, setActiveFilter] = useState("All");
   const [activityItems, setActivityItems] = useState([]);
   const [activityLoading, setActivityLoading] = useState(false);

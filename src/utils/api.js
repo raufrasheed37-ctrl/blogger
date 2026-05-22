@@ -32,7 +32,6 @@ api.interceptors.request.use((config) => {
 
   // Debug: log token presence (do not log full token in production)
   try {
-    // eslint-disable-next-line no-console
     console.debug('[api] request', { url: config.url, hasToken: Boolean(token) });
   } catch (e) {}
 
@@ -40,7 +39,6 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   } else {
     try {
-      // eslint-disable-next-line no-console
       console.debug('[api] no auth token available for request', { url: config.url });
     } catch (e) {}
   }

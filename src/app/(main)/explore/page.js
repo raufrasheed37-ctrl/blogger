@@ -2,10 +2,12 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import useAuthStore from "@/store/authstore";
 import { getLoginRedirect } from "@/utils/auth";
 import { isClientAuthenticated } from "@/store/authstore";
 import CommentSection from "@/components/CommentSection";
+import BrandMark from "@/components/BrandMark";
 import {
   Home,
   User,
@@ -37,13 +39,13 @@ export default function ExplorePage() {
   const tabs = ["Top", "Recent", "Trending"];
 
   const [posts, setPosts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] =
   useState("");
   const [activeCategory, setActiveCategory] =
   useState("Explore");
   const [activeTab, setActiveTab] =
   useState("Recent");
-  const [loading, setLoading] = useState(true);
 
   const handleLogout = () => {
     useAuthStore.getState().logout();
@@ -51,30 +53,29 @@ export default function ExplorePage() {
   };
 
   useEffect(() => {
-  const fetchPosts = async () => {
-    try {
-      setLoading(true);
+    const fetchPosts = async () => {
+      try {
+        setIsLoading(true);
+        const res = await fetch(
+  `${process.env.NEXT_PUBLIC_API_URL}/api/posts`
+);
 
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/posts`
-      );
+        if (!res.ok) {
+          throw new Error("Failed to fetch posts");
+        }
 
-      if (!res.ok) {
-        throw new Error("Failed to fetch posts");
+        const data = await res.json();
+
+        setPosts(data.posts || []);
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setIsLoading(false);
       }
+    };
 
-      const data = await res.json();
-
-      setPosts(data.posts || []);
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchPosts();
-}, []);
+    fetchPosts();
+  }, []);
 
   const filteredPosts = posts.filter((post) => {
 
@@ -273,9 +274,11 @@ const [subscribed, setSubscribed] =
 
   {post.coverImage &&
    !post.coverImage.startsWith("blob:") && (
-    <img
+    <Image
       src={post.coverImage}
       alt={post.title}
+      width={1200}
+      height={630}
       className="mt-6 w-full rounded-3xl object-cover"
     />
   )}
@@ -480,9 +483,9 @@ const [subscribed, setSubscribed] =
         <aside className={`fixed md:sticky top-0 left-0 h-screen w-64 bg-[#141420] border-r border-[#2a2740] p-6 flex flex-col transition-transform md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 mb-12">
-            <div className="w-10 h-10 bg-linear-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center">
-  <PulseIcon className="w-6 h-6" />
-</div>
+            <div className="w-10 h-10 rounded-lg bg-linear-to-br from-[#7c6ff7] to-[#a89cf7] flex items-center justify-center text-xl font-bold">
+              <BrandMark className="w-6 h-6 text-white" />
+            </div>
             <span className="text-2xl font-bold">Pulse<span className="text-[#7c6ff7]">.</span></span>
           </Link>
 
@@ -604,53 +607,29 @@ const [subscribed, setSubscribed] =
 
             {/* FEED */}
             <div className="mt-8 space-y-8">
-              {loading ? (
-  <div className="space-y-6">
-    {[1, 2, 3, 4].map((i) => (
-      <div
-        key={i}
-        className="rounded-3xl border border-[#2a2740] bg-[#141420] p-6 animate-pulse"
-      >
-        <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-full bg-[#2a2740]" />
-          <div className="space-y-2">
-            <div className="h-4 w-32 bg-[#2a2740] rounded" />
-            <div className="h-3 w-20 bg-[#2a2740] rounded" />
-          </div>
-        </div>
+              {!isLoading && sortedPosts.length === 0 && (
+                <div className="rounded-3xl border border-[#2a2740] bg-[#141420] p-10 text-center">
+                  <h2 className="text-xl font-semibold text-[#f0eeff]">
+                    No posts yet
+                  </h2>
+                  <p className="mt-3 text-[#9490b8]">
+                    Be the first person to create a post.
+                  </p>
+                </div>
+              )}
 
-        <div className="mt-6 space-y-3">
-          <div className="h-5 w-3/4 bg-[#2a2740] rounded" />
-          <div className="h-4 w-full bg-[#2a2740] rounded" />
-          <div className="h-4 w-5/6 bg-[#2a2740] rounded" />
-        </div>
-      </div>
-    ))}
-  </div>
-) : sortedPosts.length === 0 ? (
-  <div className="rounded-3xl border border-[#2a2740] bg-[#141420] p-10 text-center">
-    <h2 className="text-xl font-semibold text-[#f0eeff]">
-      No posts yet
-    </h2>
-    <p className="mt-3 text-[#9490b8]">
-      Be the first person to create a post.
-    </p>
-  </div>
-) : (
-  sortedPosts.map((post) => (
-    <ExplorePostCard
-      key={post._id || post.id}
-      post={post}
-    />
-  ))
-)}
-              
+              {!isLoading && sortedPosts.map((post) => (
+                <ExplorePostCard
+                  key={post._id || post.id}
+                  post={post}
+                />
+              ))}
             </div>
           </div>
           
 
           {/* RIGHT SIDEBAR */}
-<div className="hidden xl:block w-[340px]">
+<div className="hidden xl:block w-85">
   <div className="rounded-3xl border border-[#2a2740] bg-[#141420] p-6">
 
     <h2 className="text-lg font-bold text-[#f0eeff]">
@@ -698,13 +677,5 @@ const [subscribed, setSubscribed] =
         </main>
       </div>
     </div>
-  );
-}
-
-function PulseIcon({ className = "w-5 h-5" }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" />
-    </svg>
   );
 }

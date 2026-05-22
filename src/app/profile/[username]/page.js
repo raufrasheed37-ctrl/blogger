@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import Link from "next/link";
@@ -5,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
 import useAuthStore from "@/store/authstore";
 import { authorsAPI, blogAPI } from "@/utils/api";
+import { resolveAuthorIdentity } from "@/utils/auth";
 import styles from "./styles.module.css";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
@@ -242,13 +244,11 @@ export default function ProfilePage() {
   }, [userPosts]);
 
   const stats = useMemo(() => {
-    const totalReads = userPosts.reduce((sum, p) => sum + (p.reads || 0), 0);
-    const avgReadTime = userPosts.length > 0 ? Math.ceil(totalReads / userPosts.length / 200) : 1;
+    const totalLikes = userPosts.reduce((sum, p) => sum + (p.likes || 0), 0);
     return {
       posts: userPosts.length,
       subscribers: profileUser?.subscribers || 0,
-      reads: totalReads.toLocaleString(),
-      avgReadTime: `${avgReadTime} min`,
+      likes: totalLikes.toLocaleString(),
     };
   }, [userPosts, profileUser]);
 
@@ -289,6 +289,7 @@ export default function ProfilePage() {
   }
 
   const avatar = initialsFromName(profileUser.name || profileUser.username || "User");
+  const authorIdentity = resolveAuthorIdentity(profileUser, "Creator", "@creator");
 
   return (
     <div className={styles.shell}>
@@ -327,11 +328,11 @@ export default function ProfilePage() {
           </div>
 
           <h1 className={styles.username} style={{ fontFamily: "Fraunces, serif" }}>
-            {profileUser.name || profileUser.username || "Creator"}
+            {authorIdentity.name}
           </h1>
 
           <p className={styles.handle}>
-            @{profileUser.username || profileUser.name || profileUser.email?.split("@")[0] || "creator"} 
+            {authorIdentity.handle} 
             {profileUser.location && ` · ${profileUser.location}`}
           </p>
 
@@ -420,9 +421,7 @@ export default function ProfilePage() {
           <div className={styles.statsDivider} />
           <StatCard label="Subscribers" value={stats.subscribers} />
           <div className={styles.statsDivider} />
-          <StatCard label="Total reads" value={stats.reads} />
-          <div className={styles.statsDivider} />
-          <StatCard label="Avg read time" value={stats.avgReadTime} />
+          <StatCard label="Total likes" value={stats.likes} />
         </div>
       </section>
 
@@ -495,7 +494,7 @@ export default function ProfilePage() {
           <div className={`${styles.widget} ${styles.newsletterWidget}`}>
             <p className={styles.newsletterTitle}>Never miss a story</p>
             <p className={styles.newsletterText}>
-              Get notified whenever {profileUser.name || "this creator"} publishes new articles.
+              Get notified whenever {authorIdentity.name} publishes new articles.
             </p>
             <button
   className={`${styles.primary} ${styles.subscribeBtn}`}

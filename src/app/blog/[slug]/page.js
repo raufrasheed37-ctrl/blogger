@@ -15,13 +15,6 @@ import {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 const API_ROOT = `${API_BASE_URL}${API_BASE_URL.endsWith("/api") ? "" : "/api"}`;
 
-const SECTION_TEMPLATES = [
-  { id: "overview", title: "Overview" },
-  { id: "insights", title: "Core insights" },
-  { id: "takeaways", title: "Takeaways" },
-  { id: "closing", title: "Closing note" },
-];
-
 function sanitizeText(value) {
   if (!value) return "";
   return String(value)
@@ -57,16 +50,6 @@ function splitContent(content) {
   }
 
   return clean ? [clean] : [];
-}
-
-function buildSections(post) {
-  const paragraphs = splitContent(post?.content || post?.body || post?.excerpt || "");
-  const chunkSize = Math.max(1, Math.ceil(Math.max(paragraphs.length, 1) / SECTION_TEMPLATES.length));
-
-  return SECTION_TEMPLATES.map((section, index) => ({
-    ...section,
-    paragraphs: paragraphs.slice(index * chunkSize, index * chunkSize + chunkSize),
-  })).filter((section) => section.paragraphs.length > 0);
 }
 
 function initialsFromName(name) {
@@ -252,8 +235,8 @@ export default function PostDetailPage() {
 
     const author = post.author || {};
     const content = sanitizeText(post.content || post.body || post.excerpt || "");
+    const htmlContent = post.content || post.body || post.excerpt || "";
     const paragraphs = splitContent(content);
-    const sections = buildSections({ ...post, content });
     const tags = Array.isArray(post.tags) && post.tags.length > 0 ? post.tags : [post.category || "Pulse"];
     const views = normalizeCounter(post, ["views", "viewCount", "totalViews", "viewsCount"]);
     const reads = normalizeCounter(post, ["reads", "readCount", "totalReads", "readsCount"]);
@@ -290,7 +273,7 @@ originalPostSlug:
       readTime,
       content,
       paragraphs,
-      sections,
+      htmlContent,
       views,
       reads,
       likes,
@@ -528,51 +511,10 @@ originalPostSlug:
                 </div>
               </div>
 
-              <article className="mt-10 space-y-10">
-                {normalizedPost.sections.length > 0 ? (
-                  normalizedPost.sections.map((section, index) => (
-                    <section key={section.id} id={section.id} className="scroll-mt-28">
-                      <div className="mb-4 flex items-center gap-3">
-                        <span className="flex h-10 w-10 items-center justify-center rounded-full border border-[#2a2740] bg-[#141420] text-sm text-[#a89cf7]">
-                          0{index + 1}
-                        </span>
-                        <h2
-                          className="text-2xl font-semibold text-[#f0eeff]"
-                          style={{ fontFamily: "Fraunces, serif" }}
-                        >
-                          {section.title}
-                        </h2>
-                      </div>
-
-                      <div className="space-y-5 text-base leading-8 text-[#d4d1ec]">
-                        {section.paragraphs.map((paragraph, paragraphIndex) => {
-                          const isQuote = index === 1 && paragraphIndex === 0;
-                          if (isQuote) {
-                            return (
-                              <blockquote
-                                key={`${section.id}-${paragraphIndex}`}
-                                className="border-l-4 border-[#7c6ff7] bg-[#141420] px-5 py-4 text-[1.05rem] italic text-[#f0eeff] shadow-[0_10px_30px_rgba(124,111,247,0.1)]"
-                                style={{ fontFamily: "Fraunces, serif" }}
-                              >
-                                {paragraph}
-                              </blockquote>
-                            );
-                          }
-
-                          return (
-                            <p key={`${section.id}-${paragraphIndex}`}>
-                              {paragraph}
-                            </p>
-                          );
-                        })}
-                      </div>
-                    </section>
-                  ))
-                ) : (
-                  <section className="rounded-3xl border border-[#2a2740] bg-[#141420]/80 p-6 text-[#d4d1ec]">
-                    <p>{normalizedPost.subtitle}</p>
-                  </section>
-                )}
+              <article className="mt-10">
+                <section className="prose prose-invert max-w-none text-[#d4d1ec] leading-8">
+                  <div dangerouslySetInnerHTML={{ __html: post?.content || post?.body || post?.excerpt || normalizedPost.content }} />
+                </section>
               </article>
 
               <footer className="mt-12 border-t border-[#2a2740] pt-6">
@@ -738,27 +680,6 @@ setPost((prev) => ({
                 <div className="mt-4 grid grid-cols-2 gap-3">
                   <StatCard label="Likes" value={normalizedPost.likes.toLocaleString()} />
                   <StatCard label="Comments" value={normalizedPost.comments.toLocaleString()} />
-                </div>
-              </div>
-
-              <div className="rounded-3xl border border-[#2a2740] bg-[#141420]/80 p-5 shadow-[0_20px_70px_rgba(0,0,0,0.25)]">
-                <p className="text-xs uppercase tracking-[0.34em] text-[#9490b8]">In this post</p>
-                <div className="mt-4 space-y-2">
-                  {normalizedPost.sections.map((section) => (
-                    <button
-                      key={section.id}
-                      type="button"
-                      onClick={() => scrollToSection(section.id)}
-                      className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left text-sm transition ${
-                        activeSection === section.id
-                          ? "border-[#7c6ff7]/60 bg-[#7c6ff7]/15 text-[#f0eeff]"
-                          : "border-[#2a2740] bg-[#0f0f17] text-[#9490b8] hover:border-[#7c6ff7]/40 hover:bg-[#1c1c2e] hover:text-[#f0eeff]"
-                      }`}
-                    >
-                      <span>{section.title}</span>
-                      <span className="text-xs text-[#a89cf7]">{String(section.paragraphs.length).padStart(2, "0")}</span>
-                    </button>
-                  ))}
                 </div>
               </div>
 

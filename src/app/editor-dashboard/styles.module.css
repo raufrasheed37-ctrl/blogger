@@ -47,12 +47,6 @@
 
 .warning{background:linear-gradient(90deg,rgba(255,213,74,0.08),rgba(255,213,74,0.02));border-left:3px solid var(--yellow);color:var(--yellow);padding:10px 14px;border-radius:8px;margin-bottom:14px;font-weight:600}
 
-.coverPlaceholder{height:220px;border-radius:12px;background:linear-gradient(180deg,#160a25,rgba(60,20,120,0.06));display:flex;align-items:center;justify-content:center;margin-bottom:20px;border:1px solid rgba(255,255,255,0.02);position:relative;overflow:hidden}
-.coverImage{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(1.05) contrast(1.05)}
-.coverInner{width:90%;height:80%;display:flex;align-items:center;justify-content:center;border-radius:10px;background:linear-gradient(90deg,rgba(107,78,255,0.12),rgba(164,92,255,0.06));box-shadow:inset 0 1px 0 rgba(255,255,255,0.02)}
-.coverText{color:rgba(255,255,255,0.28);font-weight:600}
-.coverUploadButton{position:absolute;right:14px;bottom:14px;background:rgba(5,4,10,0.72);border:1px solid rgba(164,92,255,0.2);color:#f1ebff;padding:8px 12px;border-radius:999px;font-size:12px;backdrop-filter:blur(10px)}
-
 .titleCard{margin-top:18px;margin-bottom:22px;padding:20px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);border:1px solid rgba(164,92,255,0.04)}
 .titleInput{width:100%;border:none;background:transparent;outline:none;font-family:"Playfair Display", Georgia, serif;font-size:36px;line-height:1.15;color:var(--accent-2);margin:0 0 10px;padding:0}
 .titleInput::placeholder{color:rgba(168,156,247,0.45)}
@@ -69,8 +63,6 @@
 .sidebar{display:flex;flex-direction:column;gap:12px}
 .sideCard{background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.02)}
 .sideTitle{color:var(--muted);font-weight:700;margin-bottom:8px}
-.sidePlaceholder{height:88px;border-radius:8px;background:linear-gradient(90deg,rgba(107,78,255,0.06),rgba(164,92,255,0.02));display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.14)}
-
 .tagsRow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 .tag{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.02);padding:6px 10px;border-radius:999px;border:1px solid rgba(164,92,255,0.08);color:var(--muted);font-weight:600}
 .tagRemove{width:18px;height:18px;border-radius:50%;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.03);color:#d9d4ff;line-height:1;padding:0;font-size:12px}

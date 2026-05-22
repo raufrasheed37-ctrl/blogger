@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { blogAPI } from "@/utils/api";
 import useAuthStore from "@/store/authstore";
+import BrandMark from "@/components/BrandMark";
 
 function Icon({ name, className = "h-4 w-4" }) {
   const icons = {
@@ -70,6 +71,7 @@ export default function CreatePostPage() {
   const [coverImage, setCoverImage] = useState(null);
   const [isPublishing, setIsPublishing] = useState(false);
   const [error, setError] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
   const { user, isHydrated, hydrate } = useAuthStore();
   const coverInputRef = useRef(null);
   const editorRef = useRef(null);
@@ -150,9 +152,19 @@ export default function CreatePostPage() {
     setError("");
 
     try {
+      // derive a plain-text excerpt/description so saved subtitle/excerpt doesn't contain HTML tags
+      const plainText = (editorRef.current && editorRef.current.innerText) ? editorRef.current.innerText : content.replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+      const authorName = user?.name?.trim() || user?.username?.trim() || user?.email?.split("@")[0] || "Pulse Author";
+      const authorId = user?._id || user?.id || "";
+      const authorHandle = user?.username?.trim()
+        ? `@${user.username.trim().replace(/^@/, "")}`
+        : user?.email?.split("@")[0]
+          ? `@${user.email.split("@")[0]}`
+          : "@pulse";
+
       const payload = {
         title: title.trim(),
-        description: subtitle.trim() || content.slice(0, 180),
+        description: subtitle.trim() || plainText.slice(0, 180),
         content: content.trim(),
         author: user._id,
         tags: tags.length > 0 ? tags : ["general"],
@@ -174,7 +186,7 @@ export default function CreatePostPage() {
 
       if (slug) {
         router.push(
-          `/blog/published?slug=${slug}&title=${encodeURIComponent(postTitle)}&excerpt=${encodeURIComponent(postDesc)}`
+          `/blog/published?slug=${slug}&title=${encodeURIComponent(postTitle)}&excerpt=${encodeURIComponent(postDesc)}&authorName=${encodeURIComponent(authorName)}&authorHandle=${encodeURIComponent(authorHandle)}&authorId=${encodeURIComponent(authorId)}`
         );
       } else {
         setError("Post created but could not get post ID");
@@ -219,7 +231,7 @@ export default function CreatePostPage() {
         <div className="flex items-center justify-between px-6 sm:px-8 py-4 border-b border-[#2a2740] bg-[#0d0d14] shrink-0">
           <Link href="/blog" className="flex items-center gap-2 group">
             <div className="w-8 h-8 rounded-lg bg-linear-to-br from-[#7c6ff7] to-[#a89cf7] flex items-center justify-center">
-              ⚡
+              <BrandMark className="w-4 h-4 text-white" />
             </div>
             <span className="text-lg font-bold">Pulse<span className="text-[#7c6ff7]">.</span></span>
           </Link>
@@ -232,7 +244,7 @@ export default function CreatePostPage() {
             </div>
 
             {/* Preview Button */}
-            <button className="px-4 py-2 text-sm font-medium text-[#9490b8] hover:text-[#f0eeff] hover:bg-[#1c1c2e] rounded-lg transition border border-transparent hover:border-[#2a2740]">
+            <button onClick={() => setShowPreview(true)} className="px-4 py-2 text-sm font-medium text-[#9490b8] hover:text-[#f0eeff] hover:bg-[#1c1c2e] rounded-lg transition border border-transparent hover:border-[#2a2740]">
               Preview
             </button>
 
@@ -302,7 +314,8 @@ export default function CreatePostPage() {
             {/* Left Editor Area */}
             <div className="lg:col-span-2 border-r border-[#2a2740] overflow-y-auto flex flex-col bg-[#0d0d14]">
               <div className="flex-1 p-8 space-y-6 overflow-y-auto">
-                {/* Cover Image Upload */}
+                {/*
+                Cover Image Upload
                 <div
                   onClick={() => coverInputRef.current?.click()}
                   className="relative w-full h-48 rounded-xl border-2 border-dashed border-[#2a2740] hover:border-[#7c6ff7] bg-[#1c1c2e] flex items-center justify-center cursor-pointer group transition shrink-0"
@@ -328,7 +341,8 @@ export default function CreatePostPage() {
                     onChange={handleCoverUpload}
                     className="hidden"
                   />
-                </div>
+                </div
+                */}
 
                 {/* Title Input */}
                 <div>
@@ -353,15 +367,21 @@ export default function CreatePostPage() {
                 </div>
 
                 {/* Content Editor */}
-                <div
-                  ref={editorRef}
-                  contentEditable
-                  suppressContentEditableWarning
-                  onInput={handleEditorInput}
-                  data-placeholder="Start writing your article..."
-                  className="min-h-96 w-full rounded-xl border border-transparent bg-transparent text-base leading-relaxed text-[#f0eeff] outline-none placeholder-[#9490b8]/30 focus:border-[#7c6ff7]/40 focus:bg-[#141420]/40"
-                  style={{ whiteSpace: "pre-wrap" }}
-                />
+                <div className="relative">
+                  {(!content || content.trim().length === 0) && (
+                    <div className="absolute top-8 left-8 right-8 text-[#9490b8] pointer-events-none text-base leading-relaxed">
+                      Start writing your article...
+                    </div>
+                  )}
+                  <div
+                    ref={editorRef}
+                    contentEditable
+                    suppressContentEditableWarning
+                    onInput={handleEditorInput}
+                    className="min-h-96 w-full rounded-xl border border-transparent bg-transparent text-base leading-relaxed text-[#f0eeff] outline-none focus:border-[#7c6ff7]/40 focus:bg-[#141420]/40"
+                    style={{ whiteSpace: "pre-wrap" }}
+                  />
+                </div>
               </div>
 
               {/* Bottom Stats Bar */}
@@ -374,7 +394,8 @@ export default function CreatePostPage() {
 
             {/* Right Settings Panel */}
             <div className="border-l border-[#2a2740] overflow-y-auto bg-[#1c1c2e] p-6 space-y-6">
-              {/* Cover Image Card */}
+              {/*
+              Cover Image Card
               <div className="bg-[#141420] border border-[#2a2740] rounded-xl p-4">
                 <p className="text-xs uppercase tracking-wider text-[#9490b8] font-semibold mb-3">Cover Image</p>
                 <button
@@ -384,6 +405,7 @@ export default function CreatePostPage() {
                   {coverImage ? "Change cover" : "Upload cover"}
                 </button>
               </div>
+              */}
 
               {/* Tags Section */}
               <div className="bg-[#141420] border border-[#2a2740] rounded-xl p-4">
@@ -452,6 +474,7 @@ export default function CreatePostPage() {
 
               {/* Toggles */}
               <div className="bg-[#141420] border border-[#2a2740] rounded-xl p-4 space-y-4">
+                {/*
                 <label className="flex items-center justify-between cursor-pointer group">
                   <span className="text-sm text-[#9490b8] group-hover:text-[#f0eeff] transition">Allow comments</span>
                   <input
@@ -470,9 +493,10 @@ export default function CreatePostPage() {
                     className="w-5 h-5"
                   />
                 </label>
+                */}
               </div>
 
-              {/* Meta Info */}
+              {/* Meta Info
               <div className="bg-[#141420] border border-[#2a2740] rounded-xl p-4 space-y-4">
                 <div>
                   <p className="text-xs uppercase tracking-wider text-[#9490b8] font-semibold mb-2">Meta title</p>
@@ -495,6 +519,7 @@ export default function CreatePostPage() {
                   />
                 </div>
               </div>
+              */}
 
               {/* Error Message */}
               {error && (
@@ -512,14 +537,57 @@ export default function CreatePostPage() {
                 >
                   {isPublishing ? "Publishing..." : "Publish now"}
                 </button>
+                {/*
                 <button className="w-full py-2 border border-[#2a2740] text-[#9490b8] hover:text-[#f0eeff] hover:bg-[#141420] font-medium rounded-lg transition">
                   Save as draft
                 </button>
+                */}
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Preview Modal */}
+      {showPreview && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center p-6">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setShowPreview(false)} />
+          <div className="relative max-w-4xl w-full bg-[#0b0b12] rounded-2xl border border-[#2a2740] shadow-2xl overflow-auto" style={{maxHeight: '90vh'}}>
+            <div className="flex items-center justify-between p-6 border-b border-[#2a2740]">
+              <div>
+                <h2 className="text-xl font-bold">Preview</h2>
+                <p className="text-sm text-[#9490b8]">How your post will appear</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button onClick={() => setShowPreview(false)} className="px-3 py-2 rounded-lg border border-[#2a2740] text-sm hover:bg-[#141420]">Close</button>
+              </div>
+            </div>
+
+            <article className="p-8">
+              { /* cover image if present */ }
+              {coverImage && (
+                <div className="mb-6 rounded-lg overflow-hidden">
+                  <Image
+                    src={coverImage}
+                    alt="Cover"
+                    width={1200}
+                    height={630}
+                    className="w-full object-cover"
+                  />
+                </div>
+              )}
+
+              <header className="mb-6">
+                <h1 className="text-4xl font-extrabold text-[#f0eeff] mb-3">{title || "Untitled"}</h1>
+                {subtitle && <p className="text-lg text-[#9490b8]">{subtitle}</p>}
+                <div className="mt-4 text-sm text-[#9490b8]">By {user?.name || user?.email || 'You'}</div>
+              </header>
+
+              <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: content || '<p><em>Empty content</em></p>' }} />
+            </article>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

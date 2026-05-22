@@ -15,18 +15,18 @@ const DEFAULT_CONTENT = `
   <p>Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra.</p>
 `
 
+const CATEGORY_OPTIONS = ['Explore', 'Technology', 'Business', 'Culture', 'Sports', 'Entertainment']
+
 function createDefaultDraft() {
   return {
     title: DEFAULT_TITLE,
     subtitle: DEFAULT_SUBTITLE,
     contentHtml: DEFAULT_CONTENT,
     tags: ['Writing', 'Mindfulness', 'Creativity'],
-    category: 'Mindfulness',
+    category: 'Explore',
     visibility: 'Public — everyone',
     allowComments: true,
     featureOnProfile: false,
-    coverUrl: '',
-    coverLabel: 'Cover image placeholder',
   }
 }
 
@@ -92,8 +92,6 @@ function buildDraft(post) {
     visibility: post?.visibility || fallback.visibility,
     allowComments: typeof post?.allowComments === 'boolean' ? post.allowComments : fallback.allowComments,
     featureOnProfile: typeof post?.featureOnProfile === 'boolean' ? post.featureOnProfile : fallback.featureOnProfile,
-    coverUrl: post?.coverImage || post?.image || post?.cover || '',
-    coverLabel: post?.coverImage || post?.image || post?.cover ? 'Current cover image' : fallback.coverLabel,
   }
 }
 
@@ -112,7 +110,6 @@ function EditorDashboardContent() {
   const slugParam = searchParams?.get?.('slug') || ''
 
   const editorRef = useRef(null)
-  const coverInputRef = useRef(null)
   const originalDraftRef = useRef(createDefaultDraft())
   const lastSyncedHtmlRef = useRef('')
 
@@ -235,16 +232,6 @@ function EditorDashboardContent() {
     setStatusMessage('Unsaved changes')
   }, [])
 
-  const handleCoverUpload = useCallback((event) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    const nextCoverUrl = URL.createObjectURL(file)
-    updateField('coverUrl', nextCoverUrl)
-    updateField('coverLabel', file.name)
-    event.target.value = ''
-  }, [updateField])
-
   const handlePreview = useCallback(() => {
     if (!editorRef.current) {
       setPreviewMode((current) => !current)
@@ -263,21 +250,15 @@ function EditorDashboardContent() {
 
     const resetDraft = originalDraftRef.current || createDefaultDraft()
     lastSyncedHtmlRef.current = resetDraft.contentHtml
+    if (editorRef.current) {
+      editorRef.current.innerHTML = resetDraft.contentHtml
+    }
     setDraft(resetDraft)
     setPreviewMode(false)
     setIsDirty(false)
     setStatusMessage('Changes discarded')
     setError('')
   }, [])
-
-  const handleBackToPost = useCallback(() => {
-    if (slugParam) {
-      router.push(`/blog/${slugParam}`)
-      return
-    }
-
-    router.push('/blog')
-  }, [router, slugParam])
 
   const handleSave = useCallback(async () => {
     if (!postId) {
@@ -298,6 +279,7 @@ function EditorDashboardContent() {
       setDraft(savedDraft)
       setIsDirty(false)
       setStatusMessage('Changes saved')
+      router.push(`/blog/${slugParam || postId}`)
     } catch (saveError) {
       setError(saveError?.message || 'Failed to save changes')
     } finally {
@@ -322,7 +304,6 @@ function EditorDashboardContent() {
         </div>
 
         <div className={styles.rightGroup}>
-          <button type="button" className={styles.ghost} onClick={handleBackToPost}>Back to post</button>
           <button type="button" className={styles.ghost} onClick={handlePreview}>{previewMode ? 'Exit preview' : 'Preview'}</button>
           <button type="button" className={styles.warn} onClick={handleDiscard}>Discard</button>
           <button type="button" className={styles.primary} onClick={handleSave} disabled={isSaving}>
@@ -379,20 +360,6 @@ function EditorDashboardContent() {
           {error && <div className={styles.warning}>{error}</div>}
           {isDirty && !loading && <div className={styles.warning}>You have unsaved changes to this post.</div>}
 
-          <div className={styles.coverPlaceholder}>
-            {draft.coverUrl ? (
-              <img src={draft.coverUrl} alt={draft.coverLabel} className={styles.coverImage} />
-            ) : (
-              <div className={styles.coverInner}>
-                <div className={styles.coverText}>Cover image placeholder</div>
-              </div>
-            )}
-            <button type="button" className={styles.coverUploadButton} onClick={() => coverInputRef.current?.click()}>
-              Upload cover
-            </button>
-            <input ref={coverInputRef} type="file" accept="image/*" hidden onChange={handleCoverUpload} />
-          </div>
-
           <article className={styles.titleCard}>
             <input
               className={styles.titleInput}
@@ -425,11 +392,6 @@ function EditorDashboardContent() {
 
         <aside className={styles.sidebar}>
           <div className={styles.sideCard}>
-            <div className={styles.sideTitle}>Cover image</div>
-            <div className={styles.sidePlaceholder}>{draft.coverLabel}</div>
-          </div>
-
-          <div className={styles.sideCard}>
             <div className={styles.sideTitle}>Tags</div>
             <div className={styles.tagsRow}>
               {draft.tags.map((tag) => (
@@ -449,9 +411,11 @@ function EditorDashboardContent() {
             <label className={styles.field}>
               Category
               <select className={styles.select} value={draft.category} onChange={(event) => updateField('category', event.target.value)} disabled={previewMode}>
-                <option>Mindfulness</option>
-                <option>Writing</option>
-                <option>Creativity</option>
+                {CATEGORY_OPTIONS.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
               </select>
             </label>
             <label className={styles.field}>
@@ -463,6 +427,7 @@ function EditorDashboardContent() {
               </select>
             </label>
             <div className={styles.toggles}>
+              {/*
               <label className={styles.toggleRow}>
                 <span>Allow comments</span>
                 <input
@@ -472,15 +437,18 @@ function EditorDashboardContent() {
                   disabled={previewMode}
                 />
               </label>
-              <label className={styles.toggleRow}>
-                <span>Feature on profile</span>
-                <input
-                  type="checkbox"
-                  checked={draft.featureOnProfile}
-                  onChange={(event) => updateField('featureOnProfile', event.target.checked)}
-                  disabled={previewMode}
-                />
-              </label>
+              */}
+                {/*
+                <label className={styles.toggleRow}>
+                  <span>Feature on profile</span>
+                  <input
+                    type="checkbox"
+                    checked={draft.featureOnProfile}
+                    onChange={(event) => updateField('featureOnProfile', event.target.checked)}
+                    disabled={previewMode}
+                  />
+                </label>
+                */}
             </div>
           </div>
 

@@ -21,3 +21,14 @@ export function useAuthRedirect() {
 
   return { requireAuth };
 }
+
+export function resolveAuthorIdentity(user, fallbackName = "Pulse Author", fallbackHandle = "@pulse") {
+  const name = user?.name?.trim() || user?.username?.trim() || user?.email?.split("@")[0] || fallbackName;
+  const handle = user?.username?.trim()
+    ? `@${user.username.trim().replace(/^@/, "")}`
+    : user?.email?.split("@")[0]
+      ? `@${user.email.split("@")[0]}`
+      : fallbackHandle;
+
+  return { name, handle };
+}

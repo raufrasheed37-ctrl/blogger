@@ -241,7 +241,7 @@ export default function DashboardPage() {
   const initial = (displayName?.[0] || 'U').toUpperCase();
 
   const tabs = [
-    { label: "Activity", icon: BarChart3 },
+    // { label: "Activity", icon: BarChart3 },
     { label: "Posts", icon: PenSquare, count: authorPosts.length },
     { label: "About", icon: Info },
   ];
@@ -410,7 +410,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Post Composer (dashboard only) */}
-            {activeTab === "Activity" && (
+            {/* {activeTab === "Activity" && (
               <section className="rounded-xl bg-[#141420] border border-[#2a2740] p-6">
                 <div className="flex gap-4">
                   <div className="w-12 h-12 rounded-full bg-linear-to-br from-[#7c6ff7] to-[#a89cf7] flex items-center justify-center font-bold text-white shrink-0">
@@ -423,7 +423,7 @@ export default function DashboardPage() {
                   />
                 </div>
               </section>
-            )}
+            )} */}
 
             {/* Posts Section */}
             {activeTab === "Posts" && (

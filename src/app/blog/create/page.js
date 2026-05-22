@@ -164,6 +164,8 @@ export default function CreatePostPage() {
 
       const payload = {
         title: title.trim(),
+        subtitle: subtitle.trim() || plainText.slice(0, 180),
+        excerpt: subtitle.trim() || plainText.slice(0, 180),
         description: subtitle.trim() || plainText.slice(0, 180),
         content: content.trim(),
         author: user._id,
@@ -182,7 +184,7 @@ export default function CreatePostPage() {
 
       const slug = response?.slug || response?._id;
       const postTitle = response?.title || title;
-      const postDesc = response?.description || subtitle || content.slice(0, 150);
+      const postDesc = response?.excerpt || response?.subtitle || response?.description || subtitle || content.slice(0, 150);
 
       if (slug) {
         router.push(

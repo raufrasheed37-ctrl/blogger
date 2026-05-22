@@ -613,12 +613,12 @@ originalPostSlug:
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <ShareIconButton label="Share on X" onClick={handleShare}>
+                    {/* <ShareIconButton label="Share on X" onClick={handleShare}>
                       <span className="text-sm font-semibold">X</span>
                     </ShareIconButton>
                     <ShareIconButton label="Share on LinkedIn" onClick={handleShare}>
                       <span className="text-sm font-semibold">in</span>
-                    </ShareIconButton>
+                    </ShareIconButton> */}
                     <ShareIconButton label="Copy link" onClick={handleShare}>
                       <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current">
                         <path d="M10 13a5 5 0 0 1 0-7.07l2.12-2.12a5 5 0 1 1 7.07 7.07l-1.41 1.41-1.41-1.41 1.41-1.41a3 3 0 1 0-4.24-4.24L11.41 8.41A3 3 0 0 0 15.66 12.66l-1.41 1.41A5 5 0 0 1 10 13zm4 1a5 5 0 0 1 0 7.07l-2.12 2.12a5 5 0 1 1-7.07-7.07l1.41-1.41 1.41 1.41-1.41 1.41a3 3 0 1 0 4.24 4.24l2.12-2.12A3 3 0 0 0 10.34 12l1.41-1.41A5 5 0 0 1 14 14z" />

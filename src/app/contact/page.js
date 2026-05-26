@@ -37,6 +37,46 @@ const contactSchema = z.object({
   website: z.string().optional(),
 });
 
+const nigeriaStates = [
+  "Abia, Nigeria",
+  "Adamawa, Nigeria",
+  "Akwa Ibom, Nigeria",
+  "Anambra, Nigeria",
+  "Bauchi, Nigeria",
+  "Bayelsa, Nigeria",
+  "Benue, Nigeria",
+  "Borno, Nigeria",
+  "Cross River, Nigeria",
+  "Delta, Nigeria",
+  "Ebonyi, Nigeria",
+  "Edo, Nigeria",
+  "Ekiti, Nigeria",
+  "Enugu, Nigeria",
+  "FCT Abuja, Nigeria",
+  "Gombe, Nigeria",
+  "Imo, Nigeria",
+  "Jigawa, Nigeria",
+  "Kaduna, Nigeria",
+  "Kano, Nigeria",
+  "Katsina, Nigeria",
+  "Kebbi, Nigeria",
+  "Kogi, Nigeria",
+  "Kwara, Nigeria",
+  "Lagos, Nigeria",
+  "Nasarawa, Nigeria",
+  "Niger, Nigeria",
+  "Ogun, Nigeria",
+  "Ondo, Nigeria",
+  "Osun, Nigeria",
+  "Oyo, Nigeria",
+  "Plateau, Nigeria",
+  "Rivers, Nigeria",
+  "Sokoto, Nigeria",
+  "Taraba, Nigeria",
+  "Yobe, Nigeria",
+  "Zamfara, Nigeria",
+];
+
 export default function ContactPage() {
   const router = useRouter();
 
@@ -63,6 +103,12 @@ export default function ContactPage() {
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [selectedPhotoUrl, setSelectedPhotoUrl] = useState("");
   const fileInputRef = useRef(null);
+
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const filteredStates = nigeriaStates.filter((state) =>
+    state.toLowerCase().includes(formData.address.toLowerCase())
+  );
 
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
@@ -505,7 +551,7 @@ export default function ContactPage() {
                 </Field>
 
                 {/* ADDRESS */}
-                <Field label="Address">
+                {/* <Field label="Address">
                   <Input
                     name="address"
                     value={formData.address}
@@ -518,10 +564,71 @@ export default function ContactPage() {
                       {errors.address}
                     </p>
                   )}
+                </Field> */} 
+
+
+                {/* ADDRESS */}
+                <Field label="Address">
+
+                  <div className="relative">
+
+                    <input
+                      type="text"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleChange}
+                      onFocus={() => setShowSuggestions(true)}
+                      onBlur={() => {
+                        setTimeout(() => {
+                          setShowSuggestions(false);
+                        }, 200);
+                      }}
+                      placeholder="Search state..."
+                      className="w-full px-3 py-2 bg-[#1c1c2e] border border-[#2a2740] text-[#f0eeff] rounded-lg outline-none focus:border-[#7c6ff7] text-sm"
+                    />
+
+                    {showSuggestions && formData.address && (
+                      <div className="absolute z-50 mt-1 max-h-52 w-full overflow-y-auto rounded-lg border border-[#2a2740] bg-[#141420] shadow-lg">
+
+                        {filteredStates.length > 0 ? (
+                          filteredStates.map((state) => (
+                            <button
+                              key={state}
+                              type="button"
+                              onClick={() => {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  address: state,
+                                }));
+
+                                setShowSuggestions(false);
+                              }}
+                              className="w-full border-b border-[#2a2740] px-3 py-2 text-left text-sm text-[#f0eeff] transition hover:bg-[#1f1f35]"
+                            >
+                              {state}
+                            </button>
+                          ))
+                        ) : (
+                          <div className="px-3 py-2 text-sm text-[#9490b8]">
+                            No state found
+                          </div>
+                        )}
+
+                      </div>
+                    )}
+                  </div>
+
+                  {errors.address && (
+                    <p className="mt-2 text-xs text-[#f09595]">
+                      {errors.address}
+                    </p>
+                  )}
+
                 </Field>
+                
 
                 {/* WEBSITE */}
-                <Field label="Website">
+                <Field label="Personal Website">
                   <Input
                     name="website"
                     value={formData.website}

@@ -241,7 +241,7 @@ export default function DashboardPage() {
   const initial = (displayName?.[0] || 'U').toUpperCase();
 
   const tabs = [
-    // { label: "Activity", icon: BarChart3 },
+   { label: "Activity", icon: BarChart3 },
     { label: "Posts", icon: PenSquare, count: authorPosts.length },
     { label: "About", icon: Info },
   ];
@@ -409,21 +409,30 @@ export default function DashboardPage() {
               })}
             </div>
 
-            {/* Post Composer (dashboard only) */}
-            {/* {activeTab === "Activity" && (
-              <section className="rounded-xl bg-[#141420] border border-[#2a2740] p-6">
-                <div className="flex gap-4">
-                  <div className="w-12 h-12 rounded-full bg-linear-to-br from-[#7c6ff7] to-[#a89cf7] flex items-center justify-center font-bold text-white shrink-0">
-                    {initial}
-                  </div>
-                  <textarea
-                    placeholder="What's on your mind?"
-                    rows={4}
-                    className="flex-1 bg-[#1c1c2e] border border-[#2a2740] rounded-lg px-4 py-3 text-[#f0eeff] placeholder-[#9490b8] outline-none focus:border-[#7c6ff7] focus:ring-1 focus:ring-[#7c6ff7]/50 resize-none transition"
-                  />
-                </div>
-              </section>
-            )} */}
+                
+            {/* Activity Section */}
+            {activeTab === "Activity" && (
+  <section className="space-y-4">
+    {activityLoading ? (
+      <div className="text-center py-12 text-[#9490b8]">
+        Loading activity...
+      </div>
+    ) : activityItems.length > 0 ? (
+      <div className="space-y-4">
+        {activityItems.map((item) => (
+          <ActivityItem
+            key={item._id}
+            item={item}
+          />
+        ))}
+      </div>
+    ) : (
+      <div className="text-center py-12 text-[#9490b8]">
+        No activity yet
+      </div>
+    )}
+  </section>
+)}
 
             {/* Posts Section */}
             {activeTab === "Posts" && (

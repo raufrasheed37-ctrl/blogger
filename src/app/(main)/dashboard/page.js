@@ -19,6 +19,30 @@ const TYPE_META = {
   restack: { label: "restacked your post", icon: "🔁" },
   reply: { label: "replied to your post", icon: "💬" },
   subscribe: { label: "subscribed to your blog", icon: "⭐" },
+  my_like: {
+  label: "You liked a post",
+  icon: "❤️",
+},
+
+my_comment: {
+  label: "You commented on a post",
+  icon: "💬",
+},
+
+my_reply: {
+  label: "You replied to a comment",
+  icon: "↩️",
+},
+
+my_restack: {
+  label: "You restacked a post",
+  icon: "🔁",
+},
+
+my_subscribe: {
+  label: "You subscribed to an author",
+  icon: "⭐",
+},
 };
 
 const ACTIVITY_FILTERS = ["All", "Likes", "Comments", "Replies", "Restacks", "Subscriptions"];
@@ -246,10 +270,18 @@ export default function DashboardPage() {
     { label: "About", icon: Info },
   ];
 
-  const filteredActivityItems =
-    activeFilter === "All"
-      ? activityItems
-      : activityItems.filter((item) => item.type === ACTIVITY_FILTER_MAP[activeFilter]);
+  const personalActivityTypes = [
+  "my_like",
+  "my_comment",
+  "my_reply",
+  "my_restack",
+  "my_subscribe",
+];
+
+const filteredActivityItems =
+  activityItems.filter((item) =>
+    personalActivityTypes.includes(item.type)
+  );
 
   const stats = [
     { label: "Posts", value: authorPosts.length, icon: FileText },

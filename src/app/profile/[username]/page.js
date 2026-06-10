@@ -8,6 +8,8 @@ import useAuthStore from "@/store/authstore";
 import { authorsAPI, blogAPI } from "@/utils/api";
 import { resolveAuthorIdentity } from "@/utils/auth";
 import styles from "./styles.module.css";
+import { Info } from 'lucide-react';
+
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 const API_ROOT = `${API_BASE_URL}${API_BASE_URL.endsWith("/api") ? "" : "/api"}`;
@@ -218,12 +220,12 @@ export default function ProfilePage() {
         .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
         .join(" ");
 
-      if (!map[key]) map[key] = { name: display || "General", count: 0 };
+      if (!map[key]) map[key] = { id: key, name: display || "General", count: 0 };
       map[key].count += 1;
     });
 
-    const categoriesArr = [{ name: "All posts", count: userPosts.length }];
-    Object.values(map).forEach((c) => categoriesArr.push({ name: c.name, count: c.count }));
+    const categoriesArr = [{ id: "all", name: "All posts", count: userPosts.length }];
+    Object.values(map).forEach((c) => categoriesArr.push({ id: c.id, name: c.name, count: c.count }));
     return categoriesArr;
   }, [userPosts]);
 
@@ -232,10 +234,11 @@ export default function ProfilePage() {
       { id: "all", label: "All posts", count: userPosts.length },
       { id: "popular", label: "Popular", count: userPosts.length },
       ...categories.slice(1).map((cat) => ({
-        id: cat.name.toLowerCase(),
+        id: cat.id,
         label: cat.name,
         count: cat.count,
       })),
+      { id: "details", label: "About", icon: Info },
     ];
   }, [userPosts, categories]);
 
@@ -340,7 +343,7 @@ export default function ProfilePage() {
             {profileUser.bio || "A creator on Pulse sharing their thoughts and stories."}
           </p>
 
-          {(profileUser.email || profileUser.phoneNo || profileUser.address || profileUser.website) && (
+          {/* {(profileUser.email || profileUser.phoneNo || profileUser.address || profileUser.website) && (
             <div className={styles.contactDetails}>
               {profileUser.email && (
                 <div className={styles.detailRow}>
@@ -374,7 +377,7 @@ export default function ProfilePage() {
                 </div>
               )}
             </div>
-          )}
+          )} */}
 
           <div className={styles.socialLinks}>
             {profileUser.socialLinks?.twitter && <SocialButton icon="X" url={profileUser.socialLinks.twitter} />}
@@ -463,7 +466,7 @@ export default function ProfilePage() {
 
       {/* Tabs */}
       <section className={styles.tabsSection}>
-        <div className={styles.tabsContainer}>
+         <div className={styles.tabsContainer}>
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -471,7 +474,9 @@ export default function ProfilePage() {
               className={`${styles.tab} ${activeTab === tab.id ? styles.tabActive : ""}`}
             >
               <span className={styles.tabLabel}>{tab.label}</span>
-              {activeTab === tab.id && <span className={styles.tabBadge}>{tab.count}</span>}
+              {activeTab === tab.id && tab.count != null && (
+                <span className={styles.tabBadge}>{tab.count}</span>
+              )}
             </button>
           ))}
         </div>
@@ -480,9 +485,77 @@ export default function ProfilePage() {
       {/* Main content area */}
       <main className={styles.mainContent}>
         <div className={styles.postsColumn}>
-          {filteredPosts.length > 0 ? (
+          {activeTab === "details" ? (
+            <div className={styles.detailsCard}>
+              <h2>User Details</h2>
+
+              <div className={styles.detailsGrid}>
+                <div className={styles.detailItem}>
+                  <strong>Name</strong>
+                  <span>{authorIdentity.name}</span>
+                </div>
+
+                <div className={styles.detailItem}>
+                  <strong>Username</strong>
+                  <span>{authorIdentity.handle}</span>
+                </div>
+
+                {profileUser.location && (
+                  <div className={styles.detailItem}>
+                    <strong>Location</strong>
+                    <span>{profileUser.location}</span>
+                  </div>
+                )}
+
+                {profileUser.email && (
+                  <div className={styles.detailItem}>
+                    <strong>Email</strong>
+                    <span>{profileUser.email}</span>
+                  </div>
+                )}
+
+                {profileUser.phoneNo && (
+                  <div className={styles.detailItem}>
+                    <strong>Phone</strong>
+                    <span>{profileUser.phoneNo}</span>
+                  </div>
+                )}
+
+                {profileUser.address && (
+                  <div className={styles.detailItem}>
+                    <strong>Address</strong>
+                    <span>{profileUser.address}</span>
+                  </div>
+                )}
+
+                {profileUser.website && (
+                  <div className={styles.detailItem}>
+                    <strong>Website</strong>
+                    <a
+                      href={profileUser.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {profileUser.website}
+                    </a>
+                  </div>
+                )}
+              </div>
+
+              {profileUser.bio && (
+                <div className={styles.bioSection}>
+                  <h3>Bio</h3>
+                  <p>{profileUser.bio}</p>
+                </div>
+              )}
+            </div>
+          ) : filteredPosts.length > 0 ? (
             filteredPosts.map((post) => (
-              <BlogCard key={post._id || post.id} post={post} featured={filteredPosts.indexOf(post) === 0} />
+              <BlogCard
+                key={post._id || post.id}
+                post={post}
+                featured={filteredPosts.indexOf(post) === 0}
+              />
             ))
           ) : (
             <div className={styles.emptyState}>
@@ -498,9 +571,9 @@ export default function ProfilePage() {
             <div className={styles.categoriesList}>
               {categories.map((cat) => (
                 <button
-                  key={cat.name}
-                  onClick={() => setActiveTab(cat.name.toLowerCase())}
-                  className={`${styles.categoryLink} ${activeTab === cat.name.toLowerCase() ? styles.categoryActive : ""}`}
+                  key={cat.id}
+                  onClick={() => setActiveTab(cat.id)}
+                  className={`${styles.categoryLink} ${activeTab === cat.id ? styles.categoryActive : ""}`}
                 >
                   <span>{cat.name}</span>
                   <span className={styles.categoryCount}>{cat.count}</span>

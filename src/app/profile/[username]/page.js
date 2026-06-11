@@ -343,42 +343,6 @@ export default function ProfilePage() {
             {profileUser.bio || "A creator on Pulse sharing their thoughts and stories."}
           </p>
 
-          {/* {(profileUser.email || profileUser.phoneNo || profileUser.address || profileUser.website) && (
-            <div className={styles.contactDetails}>
-              {profileUser.email && (
-                <div className={styles.detailRow}>
-                  <span className={styles.detailLabel}>Email</span>
-                  <span className={styles.detailValue}>{profileUser.email}</span>
-                </div>
-              )}
-              {profileUser.phoneNo && (
-                <div className={styles.detailRow}>
-                  <span className={styles.detailLabel}>Phone</span>
-                  <span className={styles.detailValue}>{profileUser.phoneNo}</span>
-                </div>
-              )}
-              {profileUser.address && (
-                <div className={styles.detailRow}>
-                  <span className={styles.detailLabel}>Location</span>
-                  <span className={styles.detailValue}>{profileUser.address}</span>
-                </div>
-              )}
-              {profileUser.website && (
-                <div className={styles.detailRow}>
-                  <span className={styles.detailLabel}>Website</span>
-                  <a
-                    href={profileUser.website.startsWith("http") ? profileUser.website : `https://${profileUser.website}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={styles.websiteLink}
-                  >
-                    {profileUser.website}
-                  </a>
-                </div>
-              )}
-            </div>
-          )} */}
-
           <div className={styles.socialLinks}>
             {profileUser.socialLinks?.twitter && <SocialButton icon="X" url={profileUser.socialLinks.twitter} />}
             {profileUser.socialLinks?.linkedin && <SocialButton icon="LinkedIn" url={profileUser.socialLinks.linkedin} />}
@@ -467,18 +431,22 @@ export default function ProfilePage() {
       {/* Tabs */}
       <section className={styles.tabsSection}>
          <div className={styles.tabsContainer}>
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`${styles.tab} ${activeTab === tab.id ? styles.tabActive : ""}`}
-            >
-              <span className={styles.tabLabel}>{tab.label}</span>
-              {activeTab === tab.id && tab.count != null && (
-                <span className={styles.tabBadge}>{tab.count}</span>
-              )}
-            </button>
-          ))}
+          {tabs.map((tab) => {
+            const IconComponent = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`${styles.tab} ${activeTab === tab.id ? styles.tabActive : ""}`}
+              >
+                {IconComponent && <IconComponent size={18} style={{ marginRight: '6px' }} />}
+                <span className={styles.tabLabel}>{tab.label}</span>
+                {activeTab === tab.id && tab.count != null && (
+                  <span className={styles.tabBadge}>{tab.count}</span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </section>
 
@@ -542,12 +510,12 @@ export default function ProfilePage() {
                 )}
               </div>
 
-              {profileUser.bio && (
+              {/* {profileUser.bio && (
                 <div className={styles.bioSection}>
                   <h3>Bio</h3>
                   <p>{profileUser.bio}</p>
                 </div>
-              )}
+              )} */}
             </div>
           ) : filteredPosts.length > 0 ? (
             filteredPosts.map((post) => (

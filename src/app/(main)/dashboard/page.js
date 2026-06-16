@@ -449,9 +449,9 @@ const filteredActivityItems =
       <div className="text-center py-12 text-[#9490b8]">
         Loading activity...
       </div>
-    ) : activityItems.length > 0 ? (
+    ) : filteredActivityItems.length > 0 ? (
       <div className="space-y-4">
-        {activityItems.map((item) => (
+        {filteredActivityItems.map((item) => (
           <ActivityItem
             key={item._id}
             item={item}

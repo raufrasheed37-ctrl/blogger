@@ -126,7 +126,7 @@ export default function DashboardPage() {
       setActivityLoading(true);
 
       try {
-        const response = await fetch(`${API_ROOT}/activity`, {
+        const response = await fetch(`${API_ROOT}/activity/personal`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

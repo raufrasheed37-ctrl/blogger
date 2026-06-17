@@ -35,6 +35,48 @@ const contactSchema = z.object({
     .optional(),
   bio: z.string().max(160, "Bio must be 160 characters or fewer").optional(),
   website: z.string().optional(),
+occupation: z.string().optional(),
+company: z.string().optional(),
+
+socialLinks: z.object({
+  twitter: z.string().optional(),
+  instagram: z.string().optional(),
+  facebook: z.string().optional(),
+  linkedin: z.string().optional(),
+  github: z.string().optional(),
+  youtube: z.string().optional(),
+}),
+
+privacy: z.object({
+  phoneNo: z.enum([
+    "only_me",
+    "mutuals",
+    "subscribers",
+    "everyone",
+  ]),
+
+  email: z.enum([
+    "only_me",
+    "mutuals",
+    "subscribers",
+    "everyone",
+  ]),
+
+  address: z.enum([
+    "only_me",
+    "mutuals",
+    "subscribers",
+    "everyone",
+  ]),
+
+  website: z.enum([
+    "only_me",
+    "mutuals",
+    "subscribers",
+    "everyone",
+  ]),
+}),
+  
 });
 
 const nigeriaStates = [
@@ -83,13 +125,34 @@ export default function ContactPage() {
   const user = useAuthStore((s) => s.user);
 
   const [formData, setFormData] = useState({
-    name: "",
-    phoneNo: "",
-    email: "",
-    address: "",
-    bio: "",
-    website: "",
-  });
+  name: "",
+  phoneNo: "",
+  email: "",
+  address: "",
+  bio: "",
+  website: "",
+
+  occupation: "",
+  company: "",
+
+  socialLinks: {
+    twitter: "",
+    instagram: "",
+    facebook: "",
+    linkedin: "",
+    github: "",
+    youtube: "",
+  },
+
+  privacy: {
+    phoneNo: "only_me",
+    email: "only_me",
+    address: "subscribers",
+    website: "everyone",
+    followersList: "everyone",
+    subscriptionsList: "everyone",
+  },
+});
 
   const [profileData, setProfileData] = useState({
   name: "",
@@ -217,6 +280,18 @@ export default function ContactPage() {
       ...prev,
       [name]: value,
     }));
+
+    const handleNestedChange = (e, parent) => {
+  const { name, value } = e.target;
+
+  setFormData((prev) => ({
+    ...prev,
+    [parent]: {
+      ...prev[parent],
+      [name]: value,
+    },
+  }));
+};
 
     // Clear error on typing
     if (errors[name]) {
@@ -460,7 +535,7 @@ export default function ContactPage() {
                 icon={<IdCard size={15} />}
                 title="Basic details"
               />
-
+                  
               <div className="mb-8 grid grid-cols-2 gap-4">
 
                 {/* NAME */}
@@ -636,6 +711,96 @@ export default function ContactPage() {
                     placeholder="https://yoursite.com"
                   />
                 </Field>
+
+                     <SectionTitle
+  icon={<IdCard size={15} />}
+  title="Professional"
+/>
+
+<div className="mb-8 grid grid-cols-2 gap-4">
+
+<Field label="Occupation">
+  <Input
+    name="occupation"
+    value={formData.occupation}
+    onChange={handleChange}
+    placeholder="Software Engineer"
+/>
+</Field>
+
+<Field label="Company">
+  <Input
+    name="company"
+    value={formData.company}
+    onChange={handleChange}
+    placeholder="OpenAI"
+/>
+</Field>
+
+</div>
+
+      <SectionTitle
+  icon={<IdCard size={15} />}
+  title="Social links"
+/>
+
+<div className="mb-8 grid grid-cols-2 gap-4">
+
+  <Field label="Twitter">
+    <Input
+      name="twitter"
+      value={formData.socialLinks.twitter}
+      onChange={(e) => handleNestedChange(e, "socialLinks")}
+      placeholder="https://twitter.com/username"
+    />
+  </Field>
+
+  <Field label="Instagram">
+    <Input
+      name="instagram"
+      value={formData.socialLinks.instagram}
+      onChange={(e) => handleNestedChange(e, "socialLinks")}
+      placeholder="https://instagram.com/username"
+    />
+  </Field>
+
+  <Field label="Facebook">
+    <Input
+      name="facebook"
+      value={formData.socialLinks.facebook}
+      onChange={(e) => handleNestedChange(e, "socialLinks")}
+      placeholder="https://facebook.com/username"
+    />
+  </Field>
+
+  <Field label="LinkedIn">
+    <Input
+      name="linkedin"
+      value={formData.socialLinks.linkedin}
+      onChange={(e) => handleNestedChange(e, "socialLinks")}
+      placeholder="https://linkedin.com/in/username"
+    />
+  </Field>
+
+  <Field label="Github">
+    <Input
+      name="github"
+      value={formData.socialLinks.github}
+      onChange={(e) => handleNestedChange(e, "socialLinks")}
+      placeholder="https://github.com/username"
+    />
+  </Field>
+
+  <Field label="YouTube">
+    <Input
+      name="youtube"
+      value={formData.socialLinks.youtube}
+      onChange={(e) => handleNestedChange(e, "socialLinks")}
+      placeholder="https://youtube.com/@username"
+    />
+  </Field>
+
+</div>
 
               </div>
             </form>

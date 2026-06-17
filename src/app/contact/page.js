@@ -316,6 +316,39 @@ export default function ContactPage() {
       currentUser.privacy?.subscriptionsList || "everyone",
   },
 });
+
+     setProfileData({
+  name: currentUser.name || "",
+  phoneNo: currentUser.phoneNo || "",
+  email: currentUser.email || "",
+  address: currentUser.address || "",
+  bio: currentUser.bio || "",
+  website: currentUser.website || "",
+
+  occupation: currentUser.occupation || "",
+  company: currentUser.company || "",
+
+  socialLinks: {
+    twitter: currentUser.socialLinks?.twitter || "",
+    instagram: currentUser.socialLinks?.instagram || "",
+    facebook: currentUser.socialLinks?.facebook || "",
+    linkedin: currentUser.socialLinks?.linkedin || "",
+    github: currentUser.socialLinks?.github || "",
+    youtube: currentUser.socialLinks?.youtube || "",
+  },
+
+  privacy: {
+    phoneNo: currentUser.privacy?.phoneNo || "only_me",
+    email: currentUser.privacy?.email || "only_me",
+    address: currentUser.privacy?.address || "subscribers",
+    website: currentUser.privacy?.website || "everyone",
+    followersList:
+      currentUser.privacy?.followersList || "everyone",
+    subscriptionsList:
+      currentUser.privacy?.subscriptionsList || "everyone",
+  },
+});
+
         }
       } catch (error) {
         console.log("Profile load error:", error);
@@ -394,6 +427,12 @@ const handleNestedChange = (e, parent) => {
       [name]: value,
     },
   }));
+
+  setErrors((prev) => {
+    const copy = { ...prev };
+    delete copy[`${parent}.${name}`];
+    return copy;
+  });
 };
 
   const handleSubmit = async (e) => {
@@ -445,8 +484,38 @@ const handleNestedChange = (e, parent) => {
       );
 
       // UPDATED USER FROM BACKEND
-      const updatedUser = response.data.user;
-      setProfileData(updatedUser);
+   const updatedUser = response.data.user;
+     setProfileData({
+        name: updatedUser.name || "",
+         phoneNo: updatedUser.phoneNo || "",
+         email: updatedUser.email || "",
+         address: updatedUser.address || "",
+         bio: updatedUser.bio || "",
+          website: updatedUser.website || "",
+
+           occupation: updatedUser.occupation || "",
+           company: updatedUser.company || "",
+
+           socialLinks: {
+          twitter: updatedUser.socialLinks?.twitter || "",
+          instagram: updatedUser.socialLinks?.instagram || "",
+          facebook: updatedUser.socialLinks?.facebook || "",
+          linkedin: updatedUser.socialLinks?.linkedin || "",
+          github: updatedUser.socialLinks?.github || "",
+          youtube: updatedUser.socialLinks?.youtube || "",
+          },
+
+  privacy: {
+    phoneNo: updatedUser.privacy?.phoneNo || "only_me",
+    email: updatedUser.privacy?.email || "only_me",
+    address: updatedUser.privacy?.address || "subscribers",
+    website: updatedUser.privacy?.website || "everyone",
+    followersList:
+      updatedUser.privacy?.followersList || "everyone",
+    subscriptionsList:
+      updatedUser.privacy?.subscriptionsList || "everyone",
+  },
+      });
 
       // UPDATE ZUSTAND STORE
       useAuthStore.getState().setUser(updatedUser);
@@ -844,6 +913,12 @@ const handleNestedChange = (e, parent) => {
       onChange={(e) => handleNestedChange(e, "socialLinks")}
       placeholder="https://twitter.com/username"
     />
+        
+        {error["socialLinks.twitter"] && (
+          <p className="mt-2 text-xs text-[#f09595]">
+            {error["socialLinks.twitter"]}
+            </p>
+        )}
   </Field>
 
   <Field label="Instagram">
@@ -853,6 +928,13 @@ const handleNestedChange = (e, parent) => {
       onChange={(e) => handleNestedChange(e, "socialLinks")}
       placeholder="https://instagram.com/username"
     />
+
+       {error["socialLinks.instagram"] && (
+          <p className="mt-2 text-xs text-[#f09595]">
+            {error["socialLinks.instagram"]}
+            </p>
+        )}
+
   </Field>
 
   <Field label="Facebook">
@@ -862,6 +944,13 @@ const handleNestedChange = (e, parent) => {
       onChange={(e) => handleNestedChange(e, "socialLinks")}
       placeholder="https://facebook.com/username"
     />
+
+      {error["socialLinks.facebook"] && (
+          <p className="mt-2 text-xs text-[#f09595]">
+            {error["socialLinks.facebook"]}
+            </p>
+        )}
+
   </Field>
 
   <Field label="LinkedIn">
@@ -871,6 +960,13 @@ const handleNestedChange = (e, parent) => {
       onChange={(e) => handleNestedChange(e, "socialLinks")}
       placeholder="https://linkedin.com/in/username"
     />
+
+       {error["socialLinks.linkedin"] && (
+          <p className="mt-2 text-xs text-[#f09595]">
+            {error["socialLinks.linkedin"]}
+            </p>
+        )}
+
   </Field>
 
   <Field label="Github">
@@ -880,6 +976,13 @@ const handleNestedChange = (e, parent) => {
       onChange={(e) => handleNestedChange(e, "socialLinks")}
       placeholder="https://github.com/username"
     />
+
+      {error["socialLinks.github"] && (
+          <p className="mt-2 text-xs text-[#f09595]">
+            {error["socialLinks.github"]}
+            </p>
+        )}
+
   </Field>
 
   <Field label="YouTube">
@@ -889,6 +992,13 @@ const handleNestedChange = (e, parent) => {
       onChange={(e) => handleNestedChange(e, "socialLinks")}
       placeholder="https://youtube.com/@username"
     />
+ 
+       {error["socialLinks.youtube"] && (
+          <p className="mt-2 text-xs text-[#f09595]">
+            {error["socialLinks.youtube"]}
+            </p>
+        )}
+
   </Field>
 
 </div>

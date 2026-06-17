@@ -720,7 +720,7 @@ const handleNestedChange = (e, parent) => {
                   <div className="flex overflow-hidden rounded-lg border border-[#2a2740] bg-[#1c1c2e]">
 
                     <span className="border-r border-[#2a2740] px-3 py-2 text-sm text-[#9490b8]">
-                      Phone
+                      +234
                     </span>
 
                     <input
@@ -756,7 +756,9 @@ const handleNestedChange = (e, parent) => {
 
                     <div className="mt-2 flex items-center justify-between text-xs text-[#9490b8]">
                       <span>Up to 160 characters</span>
-                     <span>{formData.bio?.length || 0}/160</span>
+                     <span className={formData.bio?.length > 140 ? "text-yellow-400" : ""}>
+                    {formData.bio?.length || 0}/160
+                     </span>
                     </div>
 
                     {errors.bio && (
@@ -803,6 +805,7 @@ const handleNestedChange = (e, parent) => {
 
 
                 {/* ADDRESS */}
+                 <div className="col-span-2">
                 <Field label="Address">
 
                   <div className="relative">
@@ -860,6 +863,7 @@ const handleNestedChange = (e, parent) => {
                   )}
 
                 </Field>
+                  </div>
                 
 
                 {/* WEBSITE */}

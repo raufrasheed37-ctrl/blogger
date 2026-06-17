@@ -231,13 +231,34 @@ export default function ContactPage() {
         // FIRST: use Zustand user
         if (user) {
           const userProfile = {
-            name: user.name || "",
-            phoneNo: user.phoneNo || user.phone || "",
-            email: user.email || "",
-            address: user.address || "",
-            bio: user.bio || "",
-            website: user.website || "",
-          };
+  name: user.name || "",
+  phoneNo: user.phoneNo || user.phone || "",
+  email: user.email || "",
+  address: user.address || "",
+  bio: user.bio || "",
+  website: user.website || "",
+
+  occupation: user.occupation || "",
+  company: user.company || "",
+
+  socialLinks: {
+    twitter: user.socialLinks?.twitter || "",
+    instagram: user.socialLinks?.instagram || "",
+    facebook: user.socialLinks?.facebook || "",
+    linkedin: user.socialLinks?.linkedin || "",
+    github: user.socialLinks?.github || "",
+    youtube: user.socialLinks?.youtube || "",
+  },
+
+  privacy: {
+    phoneNo: user.privacy?.phoneNo || "only_me",
+    email: user.privacy?.email || "only_me",
+    address: user.privacy?.address || "subscribers",
+    website: user.privacy?.website || "everyone",
+    followersList: user.privacy?.followersList || "everyone",
+    subscriptionsList: user.privacy?.subscriptionsList || "everyone",
+  },
+};
 
           setFormData(userProfile);
           setProfileData(userProfile);
@@ -347,13 +368,18 @@ export default function ContactPage() {
     [name]: value,
   }));
 
-  if (errors[name]) {
-    setErrors((prev) => ({
-      ...prev,
-      [name]: null,
-    }));
-  }
+  // clear normal + nested errors safely
+  setErrors((prev) => {
+    const copy = { ...prev };
+
+    delete copy[name];
+    delete copy[`socialLinks.${name}`];
+    delete copy[`privacy.${name}`];
+
+    return copy;
+  });
 };
+  
 
 const handleNestedChange = (e, parent) => {
   const { name, value } = e.target;

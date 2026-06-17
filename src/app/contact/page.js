@@ -45,7 +45,7 @@ socialLinks: z.object({
   linkedin: z.string().optional(),
   github: z.string().optional(),
   youtube: z.string().optional(),
-}),
+}).default({}),
 
 privacy: z.object({
   phoneNo: z.enum([
@@ -90,6 +90,13 @@ subscriptionsList: z.enum([
   "everyone",
 ]),
   
+}).default({
+  phoneNo: "only_me",
+  email: "only_me",
+  address: "subscribers",
+  website: "everyone",
+  followersList: "everyone",
+  subscriptionsList: "everyone",
 }),
   
 });
@@ -654,7 +661,7 @@ const handleNestedChange = (e, parent) => {
 
                     <div className="mt-2 flex items-center justify-between text-xs text-[#9490b8]">
                       <span>Up to 160 characters</span>
-                      <span>{formData.bio.length}/160</span>
+                     <span>{formData.bio?.length || 0}/160</span>
                     </div>
 
                     {errors.bio && (

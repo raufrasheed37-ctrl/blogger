@@ -914,9 +914,9 @@ const handleNestedChange = (e, parent) => {
       placeholder="https://twitter.com/username"
     />
         
-        {error["socialLinks.twitter"] && (
+        {errors["socialLinks.twitter"] && (
           <p className="mt-2 text-xs text-[#f09595]">
-            {error["socialLinks.twitter"]}
+            {errors["socialLinks.twitter"]}
             </p>
         )}
   </Field>
@@ -929,9 +929,9 @@ const handleNestedChange = (e, parent) => {
       placeholder="https://instagram.com/username"
     />
 
-       {error["socialLinks.instagram"] && (
+       {errors["socialLinks.instagram"] && (
           <p className="mt-2 text-xs text-[#f09595]">
-            {error["socialLinks.instagram"]}
+            {errors["socialLinks.instagram"]}
             </p>
         )}
 
@@ -945,9 +945,9 @@ const handleNestedChange = (e, parent) => {
       placeholder="https://facebook.com/username"
     />
 
-      {error["socialLinks.facebook"] && (
+      {errors["socialLinks.facebook"] && (
           <p className="mt-2 text-xs text-[#f09595]">
-            {error["socialLinks.facebook"]}
+            {errors["socialLinks.facebook"]}
             </p>
         )}
 
@@ -961,9 +961,9 @@ const handleNestedChange = (e, parent) => {
       placeholder="https://linkedin.com/in/username"
     />
 
-       {error["socialLinks.linkedin"] && (
+       {errors["socialLinks.linkedin"] && (
           <p className="mt-2 text-xs text-[#f09595]">
-            {error["socialLinks.linkedin"]}
+            {errors["socialLinks.linkedin"]}
             </p>
         )}
 
@@ -977,9 +977,9 @@ const handleNestedChange = (e, parent) => {
       placeholder="https://github.com/username"
     />
 
-      {error["socialLinks.github"] && (
+      {errors["socialLinks.github"] && (
           <p className="mt-2 text-xs text-[#f09595]">
-            {error["socialLinks.github"]}
+            {errors["socialLinks.github"]}
             </p>
         )}
 
@@ -993,9 +993,9 @@ const handleNestedChange = (e, parent) => {
       placeholder="https://youtube.com/@username"
     />
  
-       {error["socialLinks.youtube"] && (
+       {errors["socialLinks.youtube"] && (
           <p className="mt-2 text-xs text-[#f09595]">
-            {error["socialLinks.youtube"]}
+            {errors["socialLinks.youtube"]}
             </p>
         )}
 

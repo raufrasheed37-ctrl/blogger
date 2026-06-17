@@ -39,12 +39,12 @@ occupation: z.string().optional(),
 company: z.string().optional(),
 
 socialLinks: z.object({
-  twitter: z.string().optional(),
-  instagram: z.string().optional(),
-  facebook: z.string().optional(),
-  linkedin: z.string().optional(),
-  github: z.string().optional(),
-  youtube: z.string().optional(),
+  twitter: z.string().url().optional().or(z.literal("")),
+instagram: z.string().url().optional().or(z.literal("")),
+facebook: z.string().url().optional().or(z.literal("")),
+linkedin: z.string().url().optional().or(z.literal("")),
+github: z.string().url().optional().or(z.literal("")),
+youtube: z.string().url().optional().or(z.literal("")),
 }).default({}),
 
 privacy: z.object({
@@ -370,14 +370,17 @@ export default function ContactPage() {
 
   // clear normal + nested errors safely
   setErrors((prev) => {
-    const copy = { ...prev };
+  const copy = { ...prev };
 
-    delete copy[name];
-    delete copy[`socialLinks.${name}`];
-    delete copy[`privacy.${name}`];
+  // remove direct field error
+  delete copy[name];
 
-    return copy;
-  });
+  // remove nested errors properly
+  delete copy[`socialLinks.${name}`];
+  delete copy[`privacy.${name}`];
+
+  return copy;
+});
 };
   
 

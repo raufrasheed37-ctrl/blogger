@@ -382,12 +382,9 @@ const handleNestedChange = (e, parent) => {
         const newErrors = {};
 
         result.error.issues.forEach((issue) => {
-          const fieldName = issue.path[0];
-
-          if (fieldName) {
-            newErrors[fieldName] = issue.message;
-          }
-        });
+  const fieldPath = issue.path.join(".");
+  newErrors[fieldPath] = issue.message;
+});
 
         setErrors(newErrors);
         setIsSubmitting(false);

@@ -161,6 +161,27 @@ export default function ContactPage() {
   address: "",
   bio: "",
   website: "",
+
+  occupation: "",
+  company: "",
+
+  socialLinks: {
+    twitter: "",
+    instagram: "",
+    facebook: "",
+    linkedin: "",
+    github: "",
+    youtube: "",
+  },
+
+  privacy: {
+    phoneNo: "only_me",
+    email: "only_me",
+    address: "subscribers",
+    website: "everyone",
+    followersList: "everyone",
+    subscriptionsList: "everyone",
+  },
 });
 
   const [selectedPhoto, setSelectedPhoto] = useState(null);
@@ -222,13 +243,36 @@ export default function ContactPage() {
           useAuthStore.getState().setUser(currentUser);
 
           setFormData({
-            name: currentUser.name || "",
-            phoneNo: currentUser.phoneNo || currentUser.phone || "",
-            email: currentUser.email || "",
-            address: currentUser.address || "",
-            bio: currentUser.bio || "",
-            website: currentUser.website || "",
-          });
+  name: currentUser.name || "",
+  phoneNo: currentUser.phoneNo || "",
+  email: currentUser.email || "",
+  address: currentUser.address || "",
+  bio: currentUser.bio || "",
+  website: currentUser.website || "",
+
+  occupation: currentUser.occupation || "",
+  company: currentUser.company || "",
+
+  socialLinks: {
+    twitter: currentUser.socialLinks?.twitter || "",
+    instagram: currentUser.socialLinks?.instagram || "",
+    facebook: currentUser.socialLinks?.facebook || "",
+    linkedin: currentUser.socialLinks?.linkedin || "",
+    github: currentUser.socialLinks?.github || "",
+    youtube: currentUser.socialLinks?.youtube || "",
+  },
+
+  privacy: {
+    phoneNo: currentUser.privacy?.phoneNo || "only_me",
+    email: currentUser.privacy?.email || "only_me",
+    address: currentUser.privacy?.address || "subscribers",
+    website: currentUser.privacy?.website || "everyone",
+    followersList:
+      currentUser.privacy?.followersList || "everyone",
+    subscriptionsList:
+      currentUser.privacy?.subscriptionsList || "everyone",
+  },
+});
         }
       } catch (error) {
         console.log("Profile load error:", error);
@@ -280,8 +324,9 @@ export default function ContactPage() {
       ...prev,
       [name]: value,
     }));
+};
 
-    const handleNestedChange = (e, parent) => {
+  const handleNestedChange = (e, parent) => {
   const { name, value } = e.target;
 
   setFormData((prev) => ({
@@ -291,7 +336,6 @@ export default function ContactPage() {
       [name]: value,
     },
   }));
-};
 
     // Clear error on typing
     if (errors[name]) {

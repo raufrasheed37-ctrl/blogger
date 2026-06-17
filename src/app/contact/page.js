@@ -75,6 +75,21 @@ privacy: z.object({
     "subscribers",
     "everyone",
   ]),
+
+  followersList: z.enum([
+  "only_me",
+  "mutuals",
+  "subscribers",
+  "everyone",
+]),
+
+subscriptionsList: z.enum([
+  "only_me",
+  "mutuals",
+  "subscribers",
+  "everyone",
+]),
+  
 }),
   
 });
@@ -344,15 +359,6 @@ const handleNestedChange = (e, parent) => {
     },
   }));
 };
-
-    // Clear error on typing
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: null,
-      }));
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();

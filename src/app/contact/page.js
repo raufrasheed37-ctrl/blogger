@@ -318,15 +318,22 @@ export default function ContactPage() {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+  const { name, value } = e.target;
 
-    setFormData((prev) => ({
+  setFormData((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+
+  if (errors[name]) {
+    setErrors((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: null,
     }));
+  }
 };
 
-  const handleNestedChange = (e, parent) => {
+const handleNestedChange = (e, parent) => {
   const { name, value } = e.target;
 
   setFormData((prev) => ({
@@ -336,6 +343,7 @@ export default function ContactPage() {
       [name]: value,
     },
   }));
+};
 
     // Clear error on typing
     if (errors[name]) {

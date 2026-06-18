@@ -867,6 +867,7 @@ const handleNestedChange = (e, parent) => {
                 
 
                 {/* WEBSITE */}
+                   <div className="col-span-2">
                 <Field label="Personal Website">
                   <Input
                     name="website"
@@ -875,6 +876,7 @@ const handleNestedChange = (e, parent) => {
                     placeholder="https://yoursite.com"
                   />
                 </Field>
+                      </div>
 
                      <SectionTitle
   icon={<IdCard size={15} />}

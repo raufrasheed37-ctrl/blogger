@@ -160,6 +160,16 @@ youtube: z.enum([
   website: "everyone",
   followersList: "everyone",
   subscriptionsList: "everyone",
+  bio: "everyone",
+occupation: "everyone",
+company: "everyone",
+
+twitter: "everyone",
+instagram: "everyone",
+facebook: "everyone",
+linkedin: "everyone",
+github: "everyone",
+youtube: "everyone",
 }),
   
 });
@@ -334,13 +344,24 @@ youtube: "everyone",
   },
 
   privacy: {
-    phoneNo: user.privacy?.phoneNo || "only_me",
-    email: user.privacy?.email || "only_me",
-    address: user.privacy?.address || "subscribers",
-    website: user.privacy?.website || "everyone",
-    followersList: user.privacy?.followersList || "everyone",
-    subscriptionsList: user.privacy?.subscriptionsList || "everyone",
-  },
+  phoneNo: user.privacy?.phoneNo || "only_me",
+  email: user.privacy?.email || "only_me",
+  address: user.privacy?.address || "subscribers",
+  website: user.privacy?.website || "everyone",
+  followersList: user.privacy?.followersList || "everyone",
+  subscriptionsList: user.privacy?.subscriptionsList || "everyone",
+
+  bio: user.privacy?.bio || "everyone",
+  occupation: user.privacy?.occupation || "everyone",
+  company: user.privacy?.company || "everyone",
+
+  twitter: user.privacy?.twitter || "everyone",
+  instagram: user.privacy?.instagram || "everyone",
+  facebook: user.privacy?.facebook || "everyone",
+  linkedin: user.privacy?.linkedin || "everyone",
+  github: user.privacy?.github || "everyone",
+  youtube: user.privacy?.youtube || "everyone",
+},
 };
 
           setFormData(userProfile);
@@ -389,15 +410,24 @@ youtube: "everyone",
   },
 
   privacy: {
-    phoneNo: currentUser.privacy?.phoneNo || "only_me",
-    email: currentUser.privacy?.email || "only_me",
-    address: currentUser.privacy?.address || "subscribers",
-    website: currentUser.privacy?.website || "everyone",
-    followersList:
-      currentUser.privacy?.followersList || "everyone",
-    subscriptionsList:
-      currentUser.privacy?.subscriptionsList || "everyone",
-  },
+  phoneNo: user.privacy?.phoneNo || "only_me",
+  email: user.privacy?.email || "only_me",
+  address: user.privacy?.address || "subscribers",
+  website: user.privacy?.website || "everyone",
+  followersList: user.privacy?.followersList || "everyone",
+  subscriptionsList: user.privacy?.subscriptionsList || "everyone",
+
+  bio: user.privacy?.bio || "everyone",
+  occupation: user.privacy?.occupation || "everyone",
+  company: user.privacy?.company || "everyone",
+
+  twitter: user.privacy?.twitter || "everyone",
+  instagram: user.privacy?.instagram || "everyone",
+  facebook: user.privacy?.facebook || "everyone",
+  linkedin: user.privacy?.linkedin || "everyone",
+  github: user.privacy?.github || "everyone",
+  youtube: user.privacy?.youtube || "everyone",
+},
 });
 
      setProfileData({
@@ -421,15 +451,24 @@ youtube: "everyone",
   },
 
   privacy: {
-    phoneNo: currentUser.privacy?.phoneNo || "only_me",
-    email: currentUser.privacy?.email || "only_me",
-    address: currentUser.privacy?.address || "subscribers",
-    website: currentUser.privacy?.website || "everyone",
-    followersList:
-      currentUser.privacy?.followersList || "everyone",
-    subscriptionsList:
-      currentUser.privacy?.subscriptionsList || "everyone",
-  },
+  phoneNo: user.privacy?.phoneNo || "only_me",
+  email: user.privacy?.email || "only_me",
+  address: user.privacy?.address || "subscribers",
+  website: user.privacy?.website || "everyone",
+  followersList: user.privacy?.followersList || "everyone",
+  subscriptionsList: user.privacy?.subscriptionsList || "everyone",
+
+  bio: user.privacy?.bio || "everyone",
+  occupation: user.privacy?.occupation || "everyone",
+  company: user.privacy?.company || "everyone",
+
+  twitter: user.privacy?.twitter || "everyone",
+  instagram: user.privacy?.instagram || "everyone",
+  facebook: user.privacy?.facebook || "everyone",
+  linkedin: user.privacy?.linkedin || "everyone",
+  github: user.privacy?.github || "everyone",
+  youtube: user.privacy?.youtube || "everyone",
+},
 });
 
         }
@@ -589,15 +628,24 @@ const handleNestedChange = (e, parent) => {
           },
 
   privacy: {
-    phoneNo: updatedUser.privacy?.phoneNo || "only_me",
-    email: updatedUser.privacy?.email || "only_me",
-    address: updatedUser.privacy?.address || "subscribers",
-    website: updatedUser.privacy?.website || "everyone",
-    followersList:
-      updatedUser.privacy?.followersList || "everyone",
-    subscriptionsList:
-      updatedUser.privacy?.subscriptionsList || "everyone",
-  },
+  phoneNo: user.privacy?.phoneNo || "only_me",
+  email: user.privacy?.email || "only_me",
+  address: user.privacy?.address || "subscribers",
+  website: user.privacy?.website || "everyone",
+  followersList: user.privacy?.followersList || "everyone",
+  subscriptionsList: user.privacy?.subscriptionsList || "everyone",
+
+  bio: user.privacy?.bio || "everyone",
+  occupation: user.privacy?.occupation || "everyone",
+  company: user.privacy?.company || "everyone",
+
+  twitter: user.privacy?.twitter || "everyone",
+  instagram: user.privacy?.instagram || "everyone",
+  facebook: user.privacy?.facebook || "everyone",
+  linkedin: user.privacy?.linkedin || "everyone",
+  github: user.privacy?.github || "everyone",
+  youtube: user.privacy?.youtube || "everyone",
+},
       });
 
       // UPDATE ZUSTAND STORE

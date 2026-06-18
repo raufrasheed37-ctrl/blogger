@@ -89,6 +89,17 @@ subscriptionsList: z.enum([
   "subscribers",
   "everyone",
 ]),
+
+  bio: "everyone",
+occupation: "everyone",
+company: "everyone",
+
+twitter: "everyone",
+instagram: "everyone",
+facebook: "everyone",
+linkedin: "everyone",
+github: "everyone",
+youtube: "everyone",
   
 }).default({
   phoneNo: "only_me",
@@ -738,6 +749,12 @@ const handleNestedChange = (e, parent) => {
                       {errors.phoneNo}
                     </p>
                   )}
+                      <VisibilitySelect
+  name="phoneNo"
+  value={formData.privacy.phoneNo}
+  onChange={(e) => handleNestedChange(e, "privacy")}
+/>
+                 
                 </Field>
 
                 {/* BIO */}
@@ -785,6 +802,12 @@ const handleNestedChange = (e, parent) => {
                       {errors.email}
                     </p>
                   )}
+                
+                   <VisibilitySelect
+  name="email"
+  value={formData.privacy.email}
+  onChange={(e) => handleNestedChange(e, "privacy")}
+/>
                 </Field>
 
                 {/* ADDRESS */}
@@ -862,6 +885,11 @@ const handleNestedChange = (e, parent) => {
                     </p>
                   )}
 
+                  <VisibilitySelect
+  name="address"
+  value={formData.privacy.address}
+  onChange={(e) => handleNestedChange(e, "privacy")}
+/>
                 </Field>
                   </div>
                 
@@ -875,6 +903,12 @@ const handleNestedChange = (e, parent) => {
                     onChange={handleChange}
                     placeholder="https://yoursite.com"
                   />
+
+                      <VisibilitySelect
+  name="website"
+  value={formData.privacy.website}
+  onChange={(e) => handleNestedChange(e, "privacy")}
+/>
                 </Field>
                       </div>
 
@@ -892,6 +926,12 @@ const handleNestedChange = (e, parent) => {
     onChange={handleChange}
     placeholder="Software Engineer"
 />
+<VisibilitySelect
+  name="occupation"
+  value={formData.privacy.occupation}
+  onChange={(e) => handleNestedChange(e, "privacy")}
+/>
+      
 </Field>
 
 <Field label="Company">
@@ -901,6 +941,12 @@ const handleNestedChange = (e, parent) => {
     onChange={handleChange}
     placeholder="OpenAI"
 />
+<VisibilitySelect
+  name="company"
+  value={formData.privacy.company}
+  onChange={(e) => handleNestedChange(e, "privacy")}
+/>
+      
 </Field>
 
 </div>
@@ -1067,5 +1113,19 @@ function Input(props) {
       {...props}
       className="w-full rounded-lg border border-[#2a2740] bg-[#1c1c2e] px-3 py-2 text-sm outline-none focus:border-[#7c6ff7]"
     />
+  );
+}
+
+function VisibilitySelect(props) {
+  return (
+    <select
+      {...props}
+      className="mt-2 w-full rounded-lg border border-[#2a2740] bg-[#1c1c2e] px-3 py-2 text-sm outline-none focus:border-[#7c6ff7]"
+    >
+      <option value="only_me">Only me</option>
+      <option value="mutuals">Mutuals</option>
+      <option value="subscribers">Subscribers</option>
+      <option value="everyone">Everyone</option>
+    </select>
   );
 }

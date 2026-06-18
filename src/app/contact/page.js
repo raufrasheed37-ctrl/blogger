@@ -90,16 +90,68 @@ subscriptionsList: z.enum([
   "everyone",
 ]),
 
-  bio: "everyone",
-occupation: "everyone",
-company: "everyone",
+  bio: z.enum([
+  "only_me",
+  "mutuals",
+  "subscribers",
+  "everyone",
+]),
 
-twitter: "everyone",
-instagram: "everyone",
-facebook: "everyone",
-linkedin: "everyone",
-github: "everyone",
-youtube: "everyone",
+occupation: z.enum([
+  "only_me",
+  "mutuals",
+  "subscribers",
+  "everyone",
+]),
+
+company: z.enum([
+  "only_me",
+  "mutuals",
+  "subscribers",
+  "everyone",
+]),
+
+twitter: z.enum([
+  "only_me",
+  "mutuals",
+  "subscribers",
+  "everyone",
+]),
+
+instagram: z.enum([
+  "only_me",
+  "mutuals",
+  "subscribers",
+  "everyone",
+]),
+
+facebook: z.enum([
+  "only_me",
+  "mutuals",
+  "subscribers",
+  "everyone",
+]),
+
+linkedin: z.enum([
+  "only_me",
+  "mutuals",
+  "subscribers",
+  "everyone",
+]),
+
+github: z.enum([
+  "only_me",
+  "mutuals",
+  "subscribers",
+  "everyone",
+]),
+
+youtube: z.enum([
+  "only_me",
+  "mutuals",
+  "subscribers",
+  "everyone",
+]),
   
 }).default({
   phoneNo: "only_me",

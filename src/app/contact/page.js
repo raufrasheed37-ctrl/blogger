@@ -236,6 +236,16 @@ export default function ContactPage() {
     website: "everyone",
     followersList: "everyone",
     subscriptionsList: "everyone",
+    bio: "everyone",
+occupation: "everyone",
+company: "everyone",
+
+twitter: "everyone",
+instagram: "everyone",
+facebook: "everyone",
+linkedin: "everyone",
+github: "everyone",
+youtube: "everyone",
   },
 });
 
@@ -266,6 +276,16 @@ export default function ContactPage() {
     website: "everyone",
     followersList: "everyone",
     subscriptionsList: "everyone",
+    bio: "everyone",
+occupation: "everyone",
+company: "everyone",
+
+twitter: "everyone",
+instagram: "everyone",
+facebook: "everyone",
+linkedin: "everyone",
+github: "everyone",
+youtube: "everyone",
   },
 });
 
@@ -836,6 +856,11 @@ const handleNestedChange = (e, parent) => {
                       </p>
                     )}
 
+                    <VisibilitySelect
+  name="bio"
+  value={formData.privacy.bio}
+  onChange={(e) => handleNestedChange(e, "privacy")}
+/>
                   </Field>
                 </div>
 
@@ -1023,6 +1048,12 @@ const handleNestedChange = (e, parent) => {
             {errors["socialLinks.twitter"]}
             </p>
         )}
+
+   <VisibilitySelect
+  name="twitter"
+  value={formData.privacy.twitter}
+  onChange={(e) => handleNestedChange(e, "privacy")}
+/>
   </Field>
 
   <Field label="Instagram">
@@ -1039,6 +1070,11 @@ const handleNestedChange = (e, parent) => {
             </p>
         )}
 
+      <VisibilitySelect
+  name="instagram"
+  value={formData.privacy.instagram}
+  onChange={(e) => handleNestedChange(e, "privacy")}
+/>
   </Field>
 
   <Field label="Facebook">
@@ -1055,6 +1091,11 @@ const handleNestedChange = (e, parent) => {
             </p>
         )}
 
+     <VisibilitySelect
+  name="facebook"
+  value={formData.privacy.facebook}
+  onChange={(e) => handleNestedChange(e, "privacy")}
+/>
   </Field>
 
   <Field label="LinkedIn">
@@ -1071,6 +1112,11 @@ const handleNestedChange = (e, parent) => {
             </p>
         )}
 
+    <VisibilitySelect
+  name="linkedin"
+  value={formData.privacy.linkedin}
+  onChange={(e) => handleNestedChange(e, "privacy")}
+/>
   </Field>
 
   <Field label="Github">
@@ -1087,6 +1133,11 @@ const handleNestedChange = (e, parent) => {
             </p>
         )}
 
+     <VisibilitySelect
+  name="github"
+  value={formData.privacy.github}
+  onChange={(e) => handleNestedChange(e, "privacy")}
+/>
   </Field>
 
   <Field label="YouTube">
@@ -1103,6 +1154,11 @@ const handleNestedChange = (e, parent) => {
             </p>
         )}
 
+     <VisibilitySelect
+  name="youtube"
+  value={formData.privacy.youtube}
+  onChange={(e) => handleNestedChange(e, "privacy")}
+/>
   </Field>
 
 </div>

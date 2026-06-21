@@ -590,6 +590,20 @@ const filteredActivityItems =
                     <p className="text-[#9490b8] text-sm mb-1">Phone</p>
                     <p className="text-[#f0eeff]">{user?.phoneNo || user?.phone || "Not provided"}</p>
                   </div>
+                  <div>
+  <p className="text-[#9490b8] text-sm mb-1">Occupation</p>
+  <p className="text-[#f0eeff]">
+    {user?.occupation || "Not provided"}
+  </p>
+</div>
+
+    <div>
+  <p className="text-[#9490b8] text-sm mb-1">Company</p>
+  <p className="text-[#f0eeff]">
+    {user?.company || "Not provided"}
+  </p>
+</div>
+                 
                 </div>
               </section>
             )}

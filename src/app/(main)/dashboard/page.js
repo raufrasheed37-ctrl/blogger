@@ -603,7 +603,104 @@ const filteredActivityItems =
     {user?.company || "Not provided"}
   </p>
 </div>
-                 
+
+     <div>
+  <p className="text-[#9490b8] text-sm mb-3">
+    Social Links
+  </p>
+
+  <div className="space-y-2">
+
+    {user?.socialLinks?.twitter && (
+      <a
+        href={user.socialLinks.twitter}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block text-[#7c6ff7] hover:underline"
+      >
+        Twitter
+      </a>
+    )}
+
+    {user?.socialLinks?.instagram && (
+      <a
+        href={user.socialLinks.instagram}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block text-[#7c6ff7] hover:underline"
+      >
+        Instagram
+      </a>
+    )}
+
+    {user?.socialLinks?.facebook && (
+      <a
+        href={user.socialLinks.facebook}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block text-[#7c6ff7] hover:underline"
+      >
+        Facebook
+      </a>
+    )}
+
+    {user?.socialLinks?.linkedin && (
+      <a
+        href={user.socialLinks.linkedin}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block text-[#7c6ff7] hover:underline"
+      >
+        LinkedIn
+      </a>
+    )}
+
+    {user?.socialLinks?.github && (
+      <a
+        href={user.socialLinks.github}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block text-[#7c6ff7] hover:underline"
+      >
+        GitHub
+      </a>
+    )}
+
+    {user?.socialLinks?.youtube && (
+      <a
+        href={user.socialLinks.youtube}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block text-[#7c6ff7] hover:underline"
+      >
+        YouTube
+      </a>
+    )}
+
+    {user?.socialLinks?.telegram && (
+      <a
+        href={user.socialLinks.telegram}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block text-[#7c6ff7] hover:underline"
+      >
+        Telegram
+      </a>
+    )}
+
+    {user?.socialLinks?.whatsapp && (
+      <a
+        href={user.socialLinks.whatsapp}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block text-[#7c6ff7] hover:underline"
+      >
+        WhatsApp
+      </a>
+    )}
+
+  </div>
+</div>
                 </div>
               </section>
             )}

@@ -11,6 +11,7 @@ export default function ResetPasswordPage() {
   const token = params?.token;
 
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -22,9 +23,21 @@ export default function ResetPasswordPage() {
     setError("");
     setMessage("");
 
+    if (password.length < 6) {
+  setLoading(false);
+  return setError("Password must be at least 6 characters.");
+}
+
+if (password !== confirmPassword) {
+  setLoading(false);
+  return setError("Passwords do not match.");
+}
+
     try {
+      
       const res = await axios.post(
-        `https://blog-backend-3p8r.onrender.com/api/auth/reset-password/${token}`,
+  `${process.env.NEXT_PUBLIC_API_URL}/api/auth/reset-password/${token}`,
+        
         { password }
       );
 
@@ -67,15 +80,30 @@ export default function ResetPasswordPage() {
               New Password
             </label>
 
-            <input
-              
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your new password"
-              className="w-full rounded-2xl border border-[#2f2f46] bg-[#1b1b2d] px-4 py-3 text-white outline-none transition focus:border-[#7c3aed]"
-              required
-            />
+          <input
+  type="password"
+  value={password}
+  onChange={(e) => setPassword(e.target.value)}
+  placeholder="Enter your new password"
+  className="w-full rounded-2xl border border-[#2f2f46] bg-[#1b1b2d] px-4 py-3 text-white outline-none transition focus:border-[#7c3aed]"
+  required
+/>
           </div>
+
+  <div>
+  <label className="mb-2 block text-sm font-medium text-gray-300">
+    Confirm Password
+  </label>
+
+  <input
+    type="password"
+    value={confirmPassword}
+    onChange={(e) => setConfirmPassword(e.target.value)}
+    placeholder="Confirm your new password"
+    className="w-full rounded-2xl border border-[#2f2f46] bg-[#1b1b2d] px-4 py-3 text-white outline-none transition focus:border-[#7c3aed]"
+    required
+  />
+</div>
 
           {message && (
             <div className="rounded-xl border border-green-500/20 bg-green-500/10 p-3 text-sm text-green-400">

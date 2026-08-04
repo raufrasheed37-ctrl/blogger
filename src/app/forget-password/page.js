@@ -20,10 +20,9 @@ export default function ForgetPasswordPage() {
 
     try {
       const res = await axios.post(
-        // "http://localhost:5000/api/auth/forgot-password", 
-        "https://blog-backend-3p8r.onrender.com/api/auth/forgot-password",
-        { email }
-      );
+  `${process.env.NEXT_PUBLIC_API_URL}/api/auth/forgot-password`,
+  { email }
+);
 
       setMessage(res.data?.message || "Password reset link sent to your email.");
     } catch (err) {

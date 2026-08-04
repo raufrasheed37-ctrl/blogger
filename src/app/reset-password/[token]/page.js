@@ -82,6 +82,7 @@ if (password !== confirmPassword) {
 
           <input
   type="password"
+  disabled={loading}
   value={password}
   onChange={(e) => setPassword(e.target.value)}
   placeholder="Enter your new password"
@@ -97,6 +98,7 @@ if (password !== confirmPassword) {
 
   <input
     type="password"
+    disabled={loading}
     value={confirmPassword}
     onChange={(e) => setConfirmPassword(e.target.value)}
     placeholder="Confirm your new password"

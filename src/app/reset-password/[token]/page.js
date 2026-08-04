@@ -15,6 +15,7 @@ export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [countdown, setCountdown] = useState(5);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -44,9 +45,22 @@ if (password !== confirmPassword) {
       setMessage(res.data?.message || "Password reset successful");
 
       // Redirect after 2 seconds
-      setTimeout(() => {
-        router.push("/login");
-      }, 2000);
+      setPassword("");
+setConfirmPassword("");
+
+let seconds = 5;
+setCountdown(seconds);
+
+const timer = setInterval(() => {
+  seconds--;
+
+  setCountdown(seconds);
+
+  if (seconds === 0) {
+    clearInterval(timer);
+    router.push("/login");
+  }
+}, 1000);
 
     } catch (err) {
       const msg =

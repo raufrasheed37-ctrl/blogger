@@ -122,10 +122,14 @@ const timer = setInterval(() => {
 </div>
 
           {message && (
-            <div className="rounded-xl border border-green-500/20 bg-green-500/10 p-3 text-sm text-green-400">
-              {message}
-            </div>
-          )}
+  <div className="rounded-xl border border-green-500/20 bg-green-500/10 p-3 text-sm text-green-400">
+    <p>{message}</p>
+
+    <p className="mt-2 text-xs text-green-300">
+      Redirecting to login in {countdown} seconds...
+    </p>
+  </div>
+)}
 
           {error && (
             <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">

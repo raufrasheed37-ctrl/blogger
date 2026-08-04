@@ -212,7 +212,7 @@ function LoginFormContent() {
           {/* LINKS */}
           <div className="mt-6 flex items-center justify-between text-sm">
             <Link
-              href="/forget-password"
+              href="/forgot-password"
               className="text-[#9490b8] transition hover:text-white"
             >
               Forgot password?

@@ -407,7 +407,7 @@ const filteredActivityItems =
                     <Link href="/blog/create" className="px-6 py-2 bg-linear-to-r from-[#7c6ff7] to-[#a89cf7] text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-[#7c6ff7]/30 transition">
                       Create Post
                     </Link>
-                    <Link href="/contact" className="px-6 py-2 border border-[#2a2740] text-[#9490b8] rounded-lg font-semibold hover:border-[#7c6ff7]/50 hover:text-[#f0eeff] hover:bg-[#1c1c2e] transition">
+                    <Link href="/dashboard/edit-profile" className="px-6 py-2 border border-[#2a2740] text-[#9490b8] rounded-lg font-semibold hover:border-[#7c6ff7]/50 hover:text-[#f0eeff] hover:bg-[#1c1c2e] transition">
                       Edit Profile
                     </Link>
                   </div>

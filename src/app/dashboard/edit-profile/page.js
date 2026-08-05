@@ -591,6 +591,16 @@ form.append("website", formData.website);
 form.append("occupation", formData.occupation);
 form.append("company", formData.company);
 
+form.append(
+  "socialLinks",
+  JSON.stringify(formData.socialLinks)
+);
+
+form.append(
+  "privacy",
+  JSON.stringify(formData.privacy)
+);
+
 if (selectedPhoto) {
   form.append("profileImage", selectedPhoto);
 }

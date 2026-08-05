@@ -370,11 +370,21 @@ const filteredActivityItems =
               <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
                 {/* Avatar */}
                 <div className="relative group">
-                  <div className="w-32 h-32 rounded-full bg-linear-to-br from-[#7c6ff7] to-[#a89cf7] p-1">
-                    <div className="w-full h-full rounded-full bg-[#0d0d14] flex items-center justify-center text-4xl font-bold text-[#7c6ff7] group-hover:text-[#a89cf7] transition">
-                      {initial}
-                    </div>
-                  </div>
+                  <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#7c6ff7] to-[#a89cf7] p-1">
+  <div className="w-full h-full rounded-full bg-[#0d0d14] overflow-hidden flex items-center justify-center">
+    {user?.profileImage ? (
+      <img
+        src={user.profileImage}
+        alt={displayName}
+        className="w-full h-full object-cover"
+      />
+    ) : (
+      <span className="text-4xl font-bold text-[#7c6ff7]">
+        {initial}
+      </span>
+    )}
+  </div>
+</div>
                 </div>
 
                 {/* Profile Info */}

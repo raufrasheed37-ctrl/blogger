@@ -584,6 +584,7 @@ const handleNestedChange = (e, parent) => {
       const form = new FormData();
 
 form.append("name", formData.name);
+form.append("email", formData.email);    
 form.append("bio", formData.bio);
 form.append("phoneNo", formData.phoneNo);
 form.append("address", formData.address);

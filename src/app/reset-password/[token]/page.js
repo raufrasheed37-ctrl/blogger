@@ -3,10 +3,12 @@
 import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
+import useAuthStore from "@/store/authstore"; 
 
 export default function ResetPasswordPage() {
   const params = useParams();
   const router = useRouter();
+  const logout = useAuthStore((state) => state.logout);
 
   const token = params?.token;
 
@@ -57,9 +59,12 @@ const timer = setInterval(() => {
   setCountdown(seconds);
 
   if (seconds === 0) {
-    clearInterval(timer);
-    router.push("/login");
-  }
+  clearInterval(timer);
+
+  logout();
+
+  window.location.replace("/login");
+}
 }, 1000);
 
     } catch (err) {

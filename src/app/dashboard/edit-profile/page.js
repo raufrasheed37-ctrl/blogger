@@ -581,7 +581,19 @@ const handleNestedChange = (e, parent) => {
         return;
       }
 
-      const payload = result.data;
+      const form = new FormData();
+
+form.append("name", formData.name);
+form.append("bio", formData.bio);
+form.append("phoneNo", formData.phoneNo);
+form.append("address", formData.address);
+form.append("website", formData.website);
+form.append("occupation", formData.occupation);
+form.append("company", formData.company);
+
+if (selectedPhoto) {
+  form.append("profileImage", selectedPhoto);
+}
 
       const token = localStorage.getItem("token");
 
@@ -600,8 +612,9 @@ const handleNestedChange = (e, parent) => {
         payload,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
-          },
+  Authorization: `Bearer ${token}`,
+  "Content-Type": "multipart/form-data",
+},
         }
       );
 

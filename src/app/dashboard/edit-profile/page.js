@@ -609,7 +609,7 @@ if (selectedPhoto) {
       // UPDATE USER PROFILE
       const response = await axios.put(
         "https://blog-backend-3p8r.onrender.com/api/contact/profile",
-        payload,
+        form,
         {
           headers: {
   Authorization: `Bearer ${token}`,

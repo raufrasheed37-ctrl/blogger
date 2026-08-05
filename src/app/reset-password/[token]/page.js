@@ -36,7 +36,7 @@ if (password !== confirmPassword) {
 
     try {
       
-      const res = await axios.post(
+      const res = await axios.put(
   `${process.env.NEXT_PUBLIC_API_URL}/api/auth/reset-password/${token}`,
         
         { password }

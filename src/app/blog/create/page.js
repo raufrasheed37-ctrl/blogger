@@ -461,18 +461,20 @@ export default function CreatePostPage() {
               </div>
 
               {/* Visibility */}
-              {/* <div className="bg-[#141420] border border-[#2a2740] rounded-xl p-4">
-                <p className="text-xs uppercase tracking-wider text-[#9490b8] font-semibold mb-3">Visibility</p>
-                <select
-                  value={visibility}
-                  onChange={(e) => setVisibility(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#0d0d14] border border-[#2a2740] text-[#f0eeff] rounded-lg outline-none focus:border-[#7c6ff7] text-sm"
-                >
-                  <option value="public">Public</option>
-                  <option value="private">Private</option>
-                  <option value="draft">Draft</option>
-                </select>
-              </div> */}
+            <div className="bg-[#141420] border border-[#2a2740] rounded-xl p-4">
+  <p className="text-xs uppercase tracking-wider text-[#9490b8] font-semibold mb-3">
+    Visibility
+  </p>
+
+  <select
+    value={visibility}
+    onChange={(e) => setVisibility(e.target.value)}
+    className="w-full px-3 py-2 bg-[#0d0d14] border border-[#2a2740] text-[#f0eeff] rounded-lg outline-none focus:border-[#7c6ff7] text-sm"
+  >
+    <option value="public">Public</option>
+    <option value="private">Private (Draft)</option>
+  </select>
+</div>
 
               {/* Toggles */}
               {/* <div className="bg-[#141420] border border-[#2a2740] rounded-xl p-4 space-y-4">

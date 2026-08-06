@@ -78,7 +78,7 @@ export const blogAPI = {
 
   getByAuthor: (authorId) => api.get(`/posts/author/${authorId}`),
 
-  getMyDrafts: () => api.get("/posts/my-drafts"),
+  getMyDrafts: () => api.get("/posts/drafts/me"),
 
   create: (payload) =>
     api.post("/posts", payload),
@@ -88,7 +88,7 @@ export const blogAPI = {
 
   publish: (id) =>
     api.put(`/posts/${id}`, {
-      isPublished: true,
+      published: true,
     }),
 
   delete: (id) =>

@@ -171,7 +171,7 @@ export default function CreatePostPage() {
         author: user._id,
         tags: tags.length > 0 ? tags : ["general"],
         category: category || "general",
-        isPublished: true,
+        published: visibility === "public",
         enableComments: allowComments,
         coverImage: coverImage,
       };

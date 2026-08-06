@@ -78,7 +78,7 @@ export const blogAPI = {
 
   getByAuthor: (authorId) => api.get(`/posts/author/${authorId}`),
 
-  getMyDrafts: () => api.get("/posts/drafts/me"),
+  getMyDrafts: () => api.get("/posts/my-drafts"),
 
   create: (payload) =>
     api.post("/posts", payload),

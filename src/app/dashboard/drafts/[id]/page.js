@@ -33,13 +33,12 @@ export default function DraftPage() {
     try {
       setPublishing(true);
 
-      await blogAPI.update(
-        draft._id,
-        draft.title,
-        draft.content,
-        draft.excerpt,
-        true
-      );
+      await blogAPI.update(draft._id, {
+  title: draft.title,
+  content: draft.content,
+  excerpt: draft.excerpt,
+  published: true,
+});
 
       router.push("/dashboard");
     } catch (err) {

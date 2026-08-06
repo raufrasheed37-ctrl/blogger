@@ -98,6 +98,8 @@ export default function DashboardPage() {
   const [activityItems, setActivityItems] = useState([]);
   const [activityLoading, setActivityLoading] = useState(false);
   const [authorPosts, setAuthorPosts] = useState([]);
+  const [draftPosts, setDraftPosts] = useState([]);
+  const [draftLoading, setDraftLoading] = useState(false);
   const [postsLoading, setPostsLoading] = useState(false);
   const [subscriberCount, setSubscriberCount] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -228,6 +230,38 @@ export default function DashboardPage() {
     };
   }, [user?._id, user?.id]);
 
+useEffect(() => {
+  if (!token) return;
+
+  let cancelled = false;
+
+  (async () => {
+    setDraftLoading(true);
+
+    try {
+      const drafts = await blogAPI.getMyDrafts();
+
+      if (!cancelled) {
+        setDraftPosts(Array.isArray(drafts) ? drafts : []);
+      }
+    } catch (err) {
+      if (!cancelled) {
+        console.log(err);
+        setDraftPosts([]);
+      }
+    } finally {
+      if (!cancelled) {
+        setDraftLoading(false);
+      }
+    }
+  })();
+
+  return () => {
+    cancelled = true;
+  };
+}, [token]);
+  
+
   const getDisplayName = (u) => {
     const name = u?.name;
     if (name && typeof name === 'string' && name.trim()) return name.trim();
@@ -265,10 +299,11 @@ export default function DashboardPage() {
   const initial = (displayName?.[0] || 'U').toUpperCase();
 
   const tabs = [
-    { label: "Posts", icon: PenSquare, count: authorPosts.length },
-    { label: "Activity", icon: BarChart3 },
-    { label: "About", icon: Info },
-  ];
+  { label: "Posts", icon: PenSquare, count: authorPosts.length },
+  { label: "Drafts", icon: FileText, count: draftPosts.length },
+  { label: "Activity", icon: BarChart3 },
+  { label: "About", icon: Info },
+];
 
   const personalActivityTypes = [
   "my_like",
@@ -573,6 +608,55 @@ const filteredActivityItems =
                 )}
               </section>
             )}
+
+         {activeTab === "Drafts" && (
+  <section className="space-y-4">
+    {draftLoading ? (
+      <div className="text-center py-12 text-[#9490b8]">
+        Loading drafts...
+      </div>
+    ) : draftPosts.length > 0 ? (
+      <div className="space-y-4">
+        {draftPosts.map((draft) => (
+          <div
+            key={draft._id}
+            className="rounded-xl bg-[#141420] border border-[#2a2740] p-6 hover:border-[#7c6ff7]/50 transition"
+          >
+            <div className="flex items-start justify-between">
+              <div>
+                <span className="inline-block px-2 py-1 text-xs rounded bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
+                  Draft
+                </span>
+
+                <h3 className="mt-3 text-xl font-bold">
+                  {draft.title}
+                </h3>
+
+                <p className="mt-2 text-sm text-[#9490b8]">
+                  {new Date(draft.updatedAt || draft.createdAt).toLocaleString()}
+                </p>
+              </div>
+
+              <Link
+                href={`/dashboard/drafts/${draft._id}`}
+                className="px-5 py-2 rounded-lg bg-[#7c6ff7] hover:bg-[#6958f0] text-white font-medium"
+              >
+                View
+              </Link>
+            </div>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div className="rounded-xl bg-[#141420] border border-[#2a2740] p-12 text-center">
+        <h3 className="text-xl font-bold">No Drafts</h3>
+        <p className="mt-2 text-[#9490b8]">
+          Your unpublished drafts will appear here.
+        </p>
+      </div>
+    )}
+  </section>
+)}
 
 
             {/* About Section */}

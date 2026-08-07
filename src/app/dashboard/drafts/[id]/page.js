@@ -155,7 +155,12 @@ export default function DraftPage() {
 
           <div className="flex flex-wrap gap-4 mt-10">
 
-            href={`/editor-dashboard?slug=${draft.slug}`}
+            <Link
+  href={`/editor-dashboard?slug=${draft.slug}`}
+  className="px-6 py-3 rounded-xl bg-[#7c6ff7]"
+>
+  Edit Draft
+</Link>
 
             <button
               onClick={publishDraft}

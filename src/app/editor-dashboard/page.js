@@ -304,6 +304,7 @@ if (isDraft) {
 } finally {
   setIsSaving(false);
 }
+  }, [draft, postId, router, slugParam, isDraft]);
 
   const canEdit = !previewMode && !loading
   const statusText = isDirty ? 'Unsaved changes' : 'Saved'

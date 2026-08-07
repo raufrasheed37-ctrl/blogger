@@ -108,7 +108,6 @@ function EditorDashboardContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const slugParam = searchParams?.get?.('slug') || ''
- const isDraft = searchParams?.get("draft") === "true";
 
   const editorRef = useRef(null)
   const originalDraftRef = useRef(createDefaultDraft())

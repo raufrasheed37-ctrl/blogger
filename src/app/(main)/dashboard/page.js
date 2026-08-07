@@ -638,11 +638,11 @@ const filteredActivityItems =
               </div>
 
               <Link
-                href={`/dashboard/drafts/${draft._id}`}
-                className="px-5 py-2 rounded-lg bg-[#7c6ff7] hover:bg-[#6958f0] text-white font-medium"
-              >
-                View
-              </Link>
+  href={`/dashboard/drafts/${draft._id}?tab=Drafts`}
+  className="px-5 py-2 rounded-lg bg-[#7c6ff7] hover:bg-[#6958f0] text-white font-medium"
+>
+  View
+</Link>
             </div>
           </div>
         ))}

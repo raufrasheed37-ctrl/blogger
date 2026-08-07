@@ -622,7 +622,7 @@ const filteredActivityItems =
             key={draft._id}
             className="rounded-xl bg-[#141420] border border-[#2a2740] p-6 hover:border-[#7c6ff7]/50 transition"
           >
-            <div className="flex items-start justify-between">
+            <div className="flex items-center gap-4">
               <div>
                 <span className="inline-block px-2 py-1 text-xs rounded bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
                   Draft

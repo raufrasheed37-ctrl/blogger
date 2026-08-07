@@ -108,6 +108,7 @@ function EditorDashboardContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const slugParam = searchParams?.get?.('slug') || ''
+  const isDraft = searchParams?.get("draft") === "true";
 
   const editorRef = useRef(null)
   const originalDraftRef = useRef(createDefaultDraft())
@@ -284,7 +285,9 @@ function EditorDashboardContent() {
       setDraft(savedDraft)
       setIsDirty(false)
       setStatusMessage('Changes saved')
-      router.push(`/blog/${slugParam || postId}`)
+      setStatusMessage("Saved")
+      setIsDirty(false)
+      router.push("/dashboard/drafts")
     } catch (saveError) {
       setError(saveError?.message || 'Failed to save changes')
     } finally {

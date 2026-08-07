@@ -272,7 +272,12 @@ function EditorDashboardContent() {
     setError('')
 
     try {
-      await blogAPI.update(postId, draft.title.trim() || 'Untitled', contentHtml, draft.subtitle.trim())
+      await blogAPI.update(postId, {
+  title: draft.title.trim(),
+  content: contentHtml,
+  excerpt: draft.subtitle.trim(),
+  category: draft.category,
+});
       const savedDraft = { ...draft, contentHtml }
       originalDraftRef.current = savedDraft
       lastSyncedHtmlRef.current = contentHtml
@@ -307,7 +312,11 @@ function EditorDashboardContent() {
           <button type="button" className={styles.ghost} onClick={handlePreview}>{previewMode ? 'Exit preview' : 'Preview'}</button>
           <button type="button" className={styles.warn} onClick={handleDiscard}>Discard</button>
           <button type="button" className={styles.primary} onClick={handleSave} disabled={isSaving}>
-            {isSaving ? 'Saving...' : 'Save changes'}
+            {isSaving
+  ? "Saving..."
+  : isDirty
+  ? "Save Changes"
+  : "Saved"}
           </button>
         </div>
       </header>

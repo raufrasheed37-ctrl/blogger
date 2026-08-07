@@ -168,7 +168,6 @@ function EditorDashboardContent() {
 
         originalDraftRef.current = loadedDraft
         setDraft(loadedDraft)
-        setPostId(loadedDraft._id || resolvedPost?._id || resolvedPos
         setIsDirty(false)
         setPreviewMode(false)
         setStatusMessage('Loaded post')
@@ -293,8 +292,9 @@ setDraft(savedDraft);
 setStatusMessage("Saved");
 setIsDirty(false);
 
-if (isDraft) {
-  router.push("/dashboard/drafts");
+
+  if (isDraft) {
+  router.push(`/dashboard/drafts/${postId}`);
 } else {
   router.push(`/blog/${postId}`);
 }
@@ -315,7 +315,7 @@ if (isDraft) {
         <div className={styles.leftGroup}>
           <div>
             <div className={styles.logo}>Pulse.</div>
-            {slugParam && <div className={styles.small}>Editing post: {slugParam}</div>}
+            {queryId && <div className={styles.small}>Editing post: {queryId}</div>}
           </div>
           <div className={styles.statusPill}>
             <span className={styles.pulseGlow} />Editing

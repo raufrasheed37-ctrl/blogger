@@ -115,6 +115,7 @@ function EditorDashboardContent() {
   const lastSyncedHtmlRef = useRef('')
 
   const [draft, setDraft] = useState(() => createDefaultDraft())
+  const [isDraft, setIsDraft] = useState(false);
   const [postId, setPostId] = useState('')
   const [loading, setLoading] = useState(true)
   const [previewMode, setPreviewMode] = useState(false)
@@ -162,6 +163,7 @@ function EditorDashboardContent() {
         const response = await blogAPI.getById(slugParam)
         const resolvedPost = response?.post || response
         const loadedDraft = buildDraft(resolvedPost)
+        setIsDraft(!resolvedPost.published);
 
         if (cancelled) return
 
@@ -278,7 +280,9 @@ function EditorDashboardContent() {
   content: contentHtml,
   excerpt: draft.subtitle.trim(),
   category: draft.category,
-});const savedDraft = {
+});
+
+const savedDraft = {
   ...draft,
   contentHtml,
 };
@@ -294,13 +298,13 @@ if (isDraft) {
   router.push("/dashboard/drafts");
 } else {
   router.push(`/blog/${slugParam || postId}`);
-} 
-    catch (saveError) {
-      setError(saveError?.message || 'Failed to save changes')
-    } finally {
-      setIsSaving(false)
-    }
-  }, [draft, postId, router, slugParam, isDraft])
+}
+
+} catch (saveError) {
+  setError(saveError?.message || "Failed to save changes");
+} finally {
+  setIsSaving(false);
+}
 
   const canEdit = !previewMode && !loading
   const statusText = isDirty ? 'Unsaved changes' : 'Saved'

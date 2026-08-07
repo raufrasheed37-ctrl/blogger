@@ -107,7 +107,7 @@ function getMetrics(draft) {
 function EditorDashboardContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const slugParam = searchParams?.get?.('slug') || ''
+  const queryId = searchParams?.get?.("id") || "";
 
   const editorRef = useRef(null)
   const originalDraftRef = useRef(createDefaultDraft())
@@ -148,7 +148,7 @@ function EditorDashboardContent() {
       setLoading(true)
       setError('')
 
-      if (!slugParam) {
+       if (!queryId) {
         const fallbackDraft = createDefaultDraft()
         originalDraftRef.current = fallbackDraft
         setDraft(fallbackDraft)
@@ -159,16 +159,16 @@ function EditorDashboardContent() {
       }
 
       try {
-        const response = await blogAPI.getById(slugParam)
+        const response = await blogAPI.getById(queryId)
         const resolvedPost = response?.post || response
         const loadedDraft = buildDraft(resolvedPost)
         setIsDraft(!resolvedPost.published);
-
+         setPostId(loadedDraft._id || resolvedPost?._id || resolvedPost?.id || queryId)
         if (cancelled) return
 
         originalDraftRef.current = loadedDraft
         setDraft(loadedDraft)
-        setPostId(loadedDraft._id || resolvedPost?._id || resolvedPost?.id || slugParam)
+        setPostId(loadedDraft._id || resolvedPost?._id || resolvedPos
         setIsDirty(false)
         setPreviewMode(false)
         setStatusMessage('Loaded post')
@@ -190,7 +190,7 @@ function EditorDashboardContent() {
     return () => {
       cancelled = true
     }
-  }, [slugParam])
+  }, [queryId])
   useEffect(() => {
     if (!previewMode && editorRef.current && draft.contentHtml !== lastSyncedHtmlRef.current) {
       editorRef.current.innerHTML = draft.contentHtml
@@ -296,7 +296,7 @@ setIsDirty(false);
 if (isDraft) {
   router.push("/dashboard/drafts");
 } else {
-  router.push(`/blog/${slugParam || postId}`);
+  router.push(`/blog/${postId}`);
 }
 
 } catch (saveError) {
@@ -304,7 +304,7 @@ if (isDraft) {
 } finally {
   setIsSaving(false);
 }
-  }, [draft, postId, router, slugParam, isDraft]);
+  }, [draft, postId, router, isDraft]);
 
   const canEdit = !previewMode && !loading
   const statusText = isDirty ? 'Unsaved changes' : 'Saved'

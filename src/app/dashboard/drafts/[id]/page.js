@@ -154,11 +154,11 @@ export default function DraftPage() {
             ).toLocaleString()}
           </p>
 
-          <div className="flex flex-wrap gap-4 mt-10">
+     <div className="mt-10 flex flex-wrap gap-3">
 
   <Link
     href={`/editor-dashboard?id=${draft._id}`}
-    className="px-6 py-3 rounded-xl bg-[#7c6ff7]"
+    className="rounded-full border border-[#7c6ff7]/40 bg-[#141420] px-5 py-2.5 text-sm font-medium text-[#a89cf7] transition hover:border-[#7c6ff7]/70 hover:bg-[#1c1c2e]"
   >
     Edit Draft
   </Link>
@@ -166,7 +166,7 @@ export default function DraftPage() {
   <button
     onClick={publishDraft}
     disabled={publishing}
-    className="px-6 py-3 rounded-xl bg-green-600"
+    className="rounded-full border border-[#7c6ff7]/40 bg-[#141420] px-5 py-2.5 text-sm font-medium text-[#a89cf7] transition hover:border-[#7c6ff7]/70 hover:bg-[#1c1c2e] disabled:opacity-60"
   >
     {publishing ? "Publishing..." : "Publish"}
   </button>
@@ -174,7 +174,7 @@ export default function DraftPage() {
   <button
     onClick={deleteDraft}
     disabled={deleting}
-    className="px-6 py-3 rounded-xl bg-red-600"
+    className="rounded-full border border-rose-500/30 bg-[#141420] px-5 py-2.5 text-sm font-medium text-rose-300 transition hover:border-rose-500/60 hover:bg-[#1c1c2e] disabled:opacity-60"
   >
     {deleting ? "Deleting..." : "Delete"}
   </button>

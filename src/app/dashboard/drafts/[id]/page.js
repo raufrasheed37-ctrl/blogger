@@ -87,11 +87,11 @@ export default function DraftPage() {
       <div className="max-w-5xl mx-auto p-8">
 
         <Link
-          href="/dashboard"
-          className="text-[#8b7cff]"
-        >
-          ← Back
-        </Link>
+  href="/dashboard/drafts"
+  className="inline-flex items-center rounded-full border border-white/10 px-4 py-2 text-sm hover:bg-white/5 transition"
+>
+  ← Back to Drafts
+</Link>
 
         <div className="mt-8 rounded-3xl border border-[#2a2740] bg-[#141420] p-8">
 
@@ -142,9 +142,10 @@ export default function DraftPage() {
             </div>
           )}
 
-          <div className="mt-10 whitespace-pre-wrap leading-8 text-gray-300">
-            {draft.content}
-          </div>
+      <div
+  className="prose prose-invert max-w-none mt-10"
+  dangerouslySetInnerHTML={{ __html: draft.content }}
+/>
 
           <p className="mt-10 text-sm text-gray-500">
             Last Updated{" "}

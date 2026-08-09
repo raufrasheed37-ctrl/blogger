@@ -96,8 +96,10 @@ export default function DashboardPage() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState("Posts");
   useEffect(() => {
-  if (searchParams.get("tab") === "Drafts") {
-    setActiveTab("Drafts");
+  const tab = searchParams.get("tab");
+
+  if (tab && tabs.some((item) => item.label === tab)) {
+    setActiveTab(tab);
   }
 }, [searchParams]);
   const [activeFilter, setActiveFilter] = useState("All");

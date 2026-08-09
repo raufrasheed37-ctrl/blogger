@@ -87,7 +87,7 @@ export default function DraftPage() {
       <div className="max-w-5xl mx-auto p-8">
 
         <Link
-  href="/dashboard/drafts"
+  href="/dashboard?tab=Drafts"
   className="inline-flex items-center rounded-full border border-white/10 px-4 py-2 text-sm hover:bg-white/5 transition"
 >
   ← Back to Drafts

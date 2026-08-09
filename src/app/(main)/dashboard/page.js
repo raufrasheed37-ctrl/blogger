@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import useAuthStore from '@/store/authstore';
 import { authorsAPI, blogAPI } from '@/utils/api';
 import { useEffect } from 'react';
@@ -93,7 +93,13 @@ function ActivityItem({ item }) {
 
 export default function DashboardPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState("Posts");
+  useEffect(() => {
+  if (searchParams.get("tab") === "Drafts") {
+    setActiveTab("Drafts");
+  }
+}, [searchParams]);
   const [activeFilter, setActiveFilter] = useState("All");
   const [activityItems, setActivityItems] = useState([]);
   const [activityLoading, setActivityLoading] = useState(false);

@@ -133,43 +133,6 @@ export default function CreatePostPage() {
     }
   };
 
-  const handleSaveDraft = async () => {
-  if (!title.trim()) {
-    setError("Please enter a title.");
-    return;
-  }
-
-  setIsPublishing(true);
-  setError("");
-
-  try {
-    const plainText =
-      editorRef.current?.innerText ||
-      content.replace(/<[^>]*>/g, "");
-
-    const payload = {
-      title: title.trim(),
-      subtitle: subtitle.trim() || plainText.slice(0, 180),
-      excerpt: subtitle.trim() || plainText.slice(0, 180),
-      description: subtitle.trim() || plainText.slice(0, 180),
-      content,
-      tags,
-      category,
-      published: false,
-      enableComments: allowComments,
-      coverImage,
-    };
-
-    await blogAPI.create(payload);
-
-    router.push("/dashboard");
-  } catch (err) {
-    setError(err.message || "Failed to save draft");
-  } finally {
-    setIsPublishing(false);
-  }
-};
-
   const handlePublish = async () => {
     if (!title.trim()) {
       setError("Title is required");
@@ -578,14 +541,6 @@ export default function CreatePostPage() {
                 >
                   {isPublishing ? "Publishing..." : "Publish now"}
                 </button>
-
-                 <button
-  onClick={handleSaveDraft}
-  disabled={isPublishing}
-  className="w-full py-2 border border-[#2a2740] text-[#9490b8] hover:text-[#f0eeff] hover:bg-[#141420] font-medium rounded-lg transition"
->
-  Save as Draft
-</button>
                   
               </div>
             </div>

@@ -180,6 +180,11 @@ export default function CreatePostPage() {
 
       const response = await blogAPI.create(payload);
 
+      if (visibility === "private") {
+  router.push("/dashboard?tab=drafts");
+  return;
+}
+
       console.log("Backend response:", response);
 
       const slug = response?.slug || response?._id;
@@ -256,7 +261,13 @@ export default function CreatePostPage() {
               disabled={isPublishing}
               className="px-6 py-2 text-sm font-semibold text-white bg-linear-to-r from-[#7c6ff7] to-[#a89cf7] rounded-lg hover:shadow-lg hover:shadow-[#7c6ff7]/30 transition disabled:opacity-50"
             >
-              {isPublishing ? "Publishing..." : "Publish now"}
+              {isPublishing
+  ? visibility === "public"
+    ? "Publishing..."
+    : "Saving..."
+  : visibility === "public"
+    ? "Publish now"
+    : "Save as Draft"}
             </button>
           </div>
         </div>

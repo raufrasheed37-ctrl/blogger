@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
 :root {
-  --background: #090909;
-  --foreground: #f4f4f5;
+  /* Default: light mode colors */
+  --background: #ffffff;
+  --foreground: #0d0d14;
 }
 
 @theme inline {
@@ -12,17 +13,44 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Dark mode via media query */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #090909;
-    --foreground: #f4f4f5;
+    --background: #0d0d14;
+    --foreground: #f0eeff;
   }
+}
+
+/* Also support manual toggle via .dark on html/body */
+.dark {
+  --background: #0d0d14;
+  --foreground: #f0eeff;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), "Space Grotesk", "Avenir Next", sans-serif;
+}
+
+/* Show subtle radial gradients only in dark mode */
+.dark body, body.dark {
   background-image: radial-gradient(circle at 12% -10%, rgba(249, 115, 22, 0.12), transparent 48%),
     radial-gradient(circle at 88% 0%, rgba(16, 185, 129, 0.14), transparent 45%);
+}
+
+/* Override hardcoded Tailwind hex utility classes so theme variables win */
+.bg-\[\#0d0d14\], .bg-\[\#141420\], .bg-\[\#1c1c2e\] {
+  background-color: var(--tt-bg-color) !important;
+}
+.text-\[\#f0eeff\] {
+  color: var(--tt-color-text-gray) !important;
+}
+.placeholder-\[\#9490b8\]::placeholder, .placeholder-\[\#9490b8\]\/30::placeholder {
+  color: var(--tt-color-text-gray-contrast) !important;
+}
+
+/* Ensure cards and panels use card bg variable when authors used hex classes */
+.bg-\[\#141420\] {
+  background-color: var(--tt-card-bg-color) !important;
 }

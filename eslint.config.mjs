@@ -10,7 +10,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+
+    // TipTap CLI generated template: not compatible with this repo's strict lint rules
+    "src/components/tiptap-templates/**",
   ]),
+
 ]);
 
 export default eslintConfig;

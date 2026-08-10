@@ -95,6 +95,32 @@ function normalizeCounter(post, keys) {
   return 0;
 }
 
+function coerceBoolean(value, fallback = true) {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") {
+    if (value.toLowerCase() === "true") return true;
+    if (value.toLowerCase() === "false") return false;
+  }
+  if (typeof value === "number") {
+    if (value === 1) return true;
+    if (value === 0) return false;
+  }
+  return fallback;
+}
+
+function readStoredPostSettings(postKey) {
+  if (typeof window === "undefined" || !postKey) {
+    return null;
+  }
+
+  try {
+    const raw = window.localStorage.getItem(`post-settings:${postKey}`);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 async function fetchPostFromBackend(slug) {
   const response = await fetch(`${API_ROOT}/posts/${encodeURIComponent(slug)}`, {
     cache: "no-store",
@@ -177,6 +203,29 @@ export default function PostDetailPage() {
         }
 
         if (!cancelled) {
+          // Block private/draft from public entirely (even if user is logged-in but NOT the author).
+          // Also treat missing/false `isPublished` as not public.
+          const postVisibility = resolvedPost?.visibility;
+          const isDraft = Boolean(resolvedPost?.isDraft) || postVisibility === "draft";
+          const isPrivate = Boolean(resolvedPost?.isPrivate) || postVisibility === "private";
+          const isPublished = Boolean(resolvedPost?.isPublished);
+
+          const isNotPublic = isPrivate || isDraft || isPublished === false;
+
+          const postAuthorId = resolvedPost?.author?._id || resolvedPost?.author?.id || resolvedPost?.authorId || null;
+          const currentUserId = user?._id || user?.id || null;
+          const isAuthor = Boolean(currentUserId && postAuthorId && currentUserId === postAuthorId);
+
+          if (isNotPublic && !isAuthor) {
+            // Completely hide private/draft post from public.
+            // Return null so UI renders the generic "Article not found" state.
+            setPost(null);
+            setError("");
+            return;
+
+          }
+
+
           setPost(resolvedPost || buildFallbackPost(slug));
         }
       } catch (fetchError) {
@@ -196,7 +245,8 @@ export default function PostDetailPage() {
     return () => {
       cancelled = true;
     };
-  }, [slug]);
+  }, [slug, user?._id, user?.id]);
+
 
   // Increment views and reads when post is loaded
   useEffect(() => {
@@ -207,20 +257,30 @@ export default function PostDetailPage() {
     const incrementViews = async () => {
       try {
         viewsIncrementedRef.current = true;
-        const response = await fetch(`${API_ROOT}/posts/${post._id || post.id}/view`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        const url = `${API_ROOT}/posts/${post._id || post.id}/view`;
+        console.debug('Increment views request URL:', url);
+        // Only call the view-increment endpoint when the API host is local or matches the current origin.
+        const isLocalHost = API_BASE_URL.includes('localhost') || API_BASE_URL.includes('127.0.0.1');
+        const matchesOrigin = typeof window !== 'undefined' && (API_ROOT.includes(window.location.origin) || API_ROOT.includes(window.location.hostname));
 
-        if (response.ok) {
-          const data = await response.json();
-          setPost((prev) => ({
-            ...prev,
-            views: data.views ?? data.viewCount ?? data.totalViews ?? prev.views,
-            reads: data.reads ?? data.readCount ?? data.totalReads ?? prev.reads,
-          }));
+        if (!isLocalHost && !matchesOrigin) {
+          console.warn('Skipping increment views: API host differs from current origin and is not localhost', { API_ROOT, origin: typeof window !== 'undefined' ? window.location.origin : undefined });
+        } else {
+          const response = await fetch(url, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            setPost((prev) => ({
+              ...prev,
+              views: data.views ?? data.viewCount ?? data.totalViews ?? prev.views,
+              reads: data.reads ?? data.readCount ?? data.totalReads ?? prev.reads,
+            }));
+          }
         }
       } catch (err) {
         console.error("Error incrementing views:", err);
@@ -243,6 +303,14 @@ export default function PostDetailPage() {
     const likes = Number(post.likes ?? 0);
     const comments = Number(post.comments ?? 0);
     const restacks = Number(post.restacks ?? 0);
+    const storedAllowComments =
+      typeof window !== "undefined"
+        ? readStoredPostSettings(post._id || post.id || slug)?.allowComments
+        : undefined;
+    const allowComments = coerceBoolean(
+      post.allowComments ?? post.enableComments ?? storedAllowComments,
+      true
+    );
     const createdAt = post.createdAt ? new Date(post.createdAt) : new Date();
     const readTime = Math.max(1, Math.ceil(Math.max(content.split(/\s+/).filter(Boolean).length, 1) / 200));
 
@@ -279,7 +347,8 @@ originalPostSlug:
       likes,
       comments,
       restacks,
-        quote: paragraphs[1] || paragraphs[0] || post.excerpt || "Write a strong editorial hook to anchor the reading experience.",
+      allowComments,
+      quote: paragraphs[1] || paragraphs[0] || post.excerpt || "Write a strong editorial hook to anchor the reading experience.",
     };
   }, [post, slug]);
 
@@ -579,6 +648,8 @@ originalPostSlug:
 
                     <button
                       type="button"
+                      disabled={!normalizedPost.allowComments}
+                      title={normalizedPost.allowComments ? "Comments" : "Comments are disabled for this post"}
                       className="flex items-center gap-2 rounded-full border border-[#2a2740] bg-[#141420] px-4 py-2 text-sm font-medium text-[#f0eeff] transition hover:border-[#7c6ff7]/60 hover:text-[#a89cf7]"
                     >
                       <MessageCircle size={18} />
@@ -641,6 +712,7 @@ originalPostSlug:
               <div className="mt-10">
                 <CommentSection
                   postId={post._id}
+                  allowComments={normalizedPost.allowComments}
                   onCommentAdded={() => {
                     setPost((prev) => ({
                       ...prev,

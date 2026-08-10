@@ -3,6 +3,8 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { blogAPI } from "@/utils/api";
+import { uploadCoverToBackend } from "@/utils/cloudinary";
+import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
 
 function Icon({ name, className = "h-4 w-4" }) {
   const icons = {
@@ -101,6 +103,7 @@ function splitContentAndTags(html, fallbackTags = []) {
 
 export default function EditPostPage() {
   const router = useRouter();
+
   const routeParams = useParams();
   const slugParam = Array.isArray(routeParams?.slug) ? routeParams.slug[0] : routeParams?.slug;
 
@@ -119,8 +122,13 @@ export default function EditPostPage() {
   const [isBoldActive, setIsBoldActive] = useState(false);
   const [isItalicActive, setIsItalicActive] = useState(false);
   const [isUnderlineActive, setIsUnderlineActive] = useState(false);
+  // TipTap-only editor state is driven by `contentHtml`.
+  // Keeping this ref unused to avoid touching larger legacy code paths.
   const editorRef = useRef(null);
+
   const fileInputRef = useRef(null);
+  const coverInputRef = useRef(null);
+  const [coverImage, setCoverImage] = useState(null);
   const selectedImageRef = useRef(null);
   const [selectedImageVisible, setSelectedImageVisible] = useState(false);
   const [overlayPos, setOverlayPos] = useState({ top: 0, left: 0 });
@@ -210,6 +218,32 @@ export default function EditPostPage() {
       setContentHtml(editorRef.current?.innerHTML || "");
     });
     e.target.value = null;
+  };
+
+  const handleCoverUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setSubmitError("");
+
+      const apiRoot = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      const normalizedApiRoot = `${apiRoot}${apiRoot.endsWith("/api") ? "" : "/api"}`;
+
+      // Edit page doesn't currently have access to authstore user/token.
+      // uploadCoverToBackend accepts token optionally, so we'll send without token.
+      const url = await uploadCoverToBackend({
+        file,
+        apiRoot: normalizedApiRoot,
+        token: null,
+      });
+
+      setCoverImage(url);
+    } catch (err) {
+      setSubmitError(err?.message || "Failed to upload cover image");
+    } finally {
+      e.target.value = null;
+    }
   };
 
   const selectImage = (img) => {
@@ -325,6 +359,7 @@ export default function EditPostPage() {
         setSubtitle(resolvedPost?.excerpt || "");
         setTags(resolvedTags);
         setContentHtml(bodyHtml || "");
+        setCoverImage(resolvedPost?.coverImage || null);
         setHasBodyContent(Boolean(bodyHtml?.trim()));
       } catch (error) {
         if (!cancelled) {
@@ -373,8 +408,8 @@ export default function EditPostPage() {
       return;
     }
 
-    const editorEl = editorRef.current;
-    const contentHtmlVal = editorEl?.innerHTML ?? contentHtml ?? "";
+    const contentHtmlVal = contentHtml ?? "";
+
 
     const tmp = document.createElement("div");
     tmp.innerHTML = contentHtmlVal;
@@ -384,8 +419,8 @@ export default function EditPostPage() {
     const isPlaceholderOnly =
       !contentText ||
       contentText.length < 20 ||
-      /start writing\.+/i.test(contentText) ||
-      /^start writing\.*$/i.test(contentText);
+      false;
+
 
     const normalizedTitle = title.trim();
     const fallbackTitle = normalizedTitle || "Untitled";
@@ -401,8 +436,14 @@ export default function EditPostPage() {
     try {
       const payloadTitle = fallbackTitle;
       const payloadExcerpt = subtitle.trim() || contentText.slice(0, 180);
+      // Prepend cover image HTML if provided so updates include the cover visually
+      const coverHtml = coverImage
+        ? `<figure><img src="${coverImage}" alt="cover" style="max-width:100%;height:auto;border-radius:8px;"/></figure><p><br></p>`
+        : "";
+
       const payloadContent = [
         `<p><strong>Tags:</strong> ${tags.filter(Boolean).join(", ") || "none"}</p>`,
+        coverHtml,
         contentHtmlVal,
       ].join("");
 
@@ -447,69 +488,7 @@ export default function EditPostPage() {
 
         {submitError && <p className="mb-4 text-sm text-red-600">{submitError}</p>}
 
-        {!isPreview && (
-          <div className="mb-6 flex items-center gap-3 p-3">
-            <div className="flex gap-2">
-              <button
-                onClick={() => {
-                  exec("bold");
-                  requestAnimationFrame(updateFormatStates);
-                }}
-                className={`rounded px-2 py-1 ${isBoldActive ? "bg-slate-800 text-white" : "hover:bg-slate-100"}`}
-                aria-pressed={isBoldActive}
-              >
-                <Icon name="bold" />
-              </button>
-              <button
-                onClick={() => {
-                  exec("italic");
-                  requestAnimationFrame(updateFormatStates);
-                }}
-                className={`rounded px-2 py-1 ${isItalicActive ? "bg-slate-800 text-white" : "hover:bg-slate-100"}`}
-                aria-pressed={isItalicActive}
-              >
-                <Icon name="italic" />
-              </button>
-              <button
-                onClick={() => {
-                  exec("underline");
-                  requestAnimationFrame(updateFormatStates);
-                }}
-                className={`rounded px-2 py-1 ${isUnderlineActive ? "bg-slate-800 text-white" : "hover:bg-slate-100"}`}
-                aria-pressed={isUnderlineActive}
-              >
-                <Icon name="underline" />
-              </button>
 
-              <button
-                onClick={() => {
-                  const url = prompt("Insert link URL");
-                  if (url) exec("createLink", url);
-                }}
-                className="rounded px-2 py-1 hover:bg-slate-100"
-              >
-                <Icon name="link" />
-              </button>
-
-              <button onClick={() => fileInputRef.current?.click()} className="rounded px-2 py-1 hover:bg-slate-100">
-                <Icon name="image" />
-              </button>
-              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
-            </div>
-
-            <div className="ml-auto flex gap-2">
-              <button onClick={() => exec("justifyLeft")} className="rounded px-2 py-1 hover:bg-slate-100">
-                <Icon name="left" />
-              </button>
-              <button onClick={() => exec("justifyCenter")} className="rounded px-2 py-1 hover:bg-slate-100">
-                <Icon name="center" />
-              </button>
-              <button onClick={() => exec("justifyRight")} className="rounded px-2 py-1 hover:bg-slate-100">
-                <Icon name="right" />
-              </button>
-            </div>
-          </div>
-        )}
 
         <div className="w-full p-8">
           <div className="mb-4 flex items-center justify-between">
@@ -520,6 +499,28 @@ export default function EditPostPage() {
           <div className="space-y-4">
             <div className="p-10">
               <div className="prose min-h-90 max-w-none" style={{ whiteSpace: "pre-wrap" }}>
+                {/* Cover Image Upload */}
+                <div
+                  onClick={() => coverInputRef.current?.click()}
+                  className="relative w-full h-48 rounded-xl border-2 border-dashed border-slate-200 hover:border-slate-400 bg-slate-50 flex items-center justify-center cursor-pointer group transition shrink-0 mb-6"
+                >
+                  {coverImage ? (
+                    <img src={coverImage} alt="Cover" className="object-cover w-full h-full rounded-lg" />
+                  ) : (
+                    <div className="text-center text-slate-400">
+                      <div className="text-3xl mb-2">📸</div>
+                      <p className="text-sm">Click to upload cover image</p>
+                    </div>
+                  )}
+                  <input
+                    ref={coverInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleCoverUpload}
+                    className="hidden"
+                  />
+                </div>
+
                 {isPreview ? (
                   <>
                     <h1 className="mb-3 text-4xl font-bold">{title.trim() || "Title"}</h1>
@@ -575,21 +576,13 @@ export default function EditPostPage() {
                 </div>
 
                 <div className="relative min-h-45 text-slate-700">
-                  {!isPreview && !hasBodyContent && (
-                    <p className="pointer-events-none absolute left-0 top-0 text-base text-slate-400">Start writing...</p>
-                  )}
-                  <div
-                    ref={editorRef}
-                    contentEditable={!isPreview}
-                    suppressContentEditableWarning
-                    onInput={(e) => {
-                      setHasBodyContent(Boolean(e.currentTarget.textContent?.trim()));
-                      setContentHtml(e.currentTarget.innerHTML || "");
-                      requestAnimationFrame(updateFormatStates);
-                    }}
-                    className="min-h-45 outline-none"
+                  <SimpleEditor
+                    value={contentHtml}
+                    onChange={(html) => setContentHtml(html || "")}
                   />
                 </div>
+
+
 
                 {selectedImageVisible && (
                   <div style={{ position: "fixed", top: overlayPos.top, left: overlayPos.left, zIndex: 60 }}>

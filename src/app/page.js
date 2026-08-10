@@ -25,8 +25,9 @@ export default function Home() {
 
   const start = (currentPage - 1) * postsPerPage;
   const visiblePosts = posts.slice(start, start + postsPerPage);
-  const featuredPost = posts[0];
-  const recentPosts = posts.slice(1, 4);
+  const featuredPost = visiblePosts?.[0];
+  const recentPosts = visiblePosts?.slice(1, 4);
+
 
   const heroContent = [
     {
@@ -63,7 +64,34 @@ export default function Home() {
 
         if (cancelled) return;
 
-        const mappedPosts = livePosts.map((post) => {
+        // Only show publicly published posts on the landing page.
+        // Private/Draft posts should never appear.
+        // Filter posts BEFORE mapping so private/draft posts don't even create placeholders.
+        // Landing page must show: public only.
+        const publicPosts = livePosts.filter((post) => {
+          const visibility = post?.visibility;
+          const isDraft = Boolean(post?.isDraft) || visibility === "draft";
+          const isPrivate = Boolean(post?.isPrivate) || visibility === "private";
+
+          if (isDraft || isPrivate) return false;
+
+          // Backend uses only `isPublished`/`published` (per your confirmation).
+          // So landing page should show only records where it is truly published.
+          const hasPublishedField = post?.isPublished !== undefined || post?.published !== undefined;
+          if (hasPublishedField) {
+            return post?.isPublished === true || post?.published === true;
+          }
+
+          // If backend doesn't provide publish fields at all, treat as NOT public.
+          return false;
+
+
+        });
+
+
+
+        const mappedPosts = publicPosts.map((post) => {
+
   const subscribersList =
     post.author?.subscribersList || [];
 

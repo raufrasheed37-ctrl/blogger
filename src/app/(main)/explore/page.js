@@ -52,6 +52,19 @@ export default function ExplorePage() {
     router.push("/login");
   };
 
+  const coerceBoolean = (value, fallback = true) => {
+    if (typeof value === "boolean") return value;
+    if (typeof value === "string") {
+      if (value.toLowerCase() === "true") return true;
+      if (value.toLowerCase() === "false") return false;
+    }
+    if (typeof value === "number") {
+      if (value === 1) return true;
+      if (value === 0) return false;
+    }
+    return fallback;
+  };
+
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -155,6 +168,8 @@ const [subscribed, setSubscribed] =
   useState(false);
 
     const [showComments, setShowComments] = useState(false);
+
+    const allowComments = coerceBoolean(localPost.allowComments, true);
 
     const postAuthorId = post?.author?._id || post?.author?.id || post?.authorId || null;
     const postAuthorEmail = post?.author?.email || null;
@@ -354,13 +369,17 @@ const [subscribed, setSubscribed] =
           <button
   type="button"
   onClick={() => {
+    if (!allowComments) return;
+
     if (!requireAuth()) return;
 
     setShowComments(
       (prev) => !prev
     );
   }}
-  className="flex items-center gap-2 rounded-full border border-[#2a2740] px-4 py-2 transition hover:border-[#7c6ff7]/40 hover:text-[#a89cf7]"
+  disabled={!allowComments}
+  title={allowComments ? "Comments" : "Comments are disabled for this post"}
+  className="flex items-center gap-2 rounded-full border border-[#2a2740] px-4 py-2 transition hover:border-[#7c6ff7]/40 hover:text-[#a89cf7] disabled:cursor-not-allowed disabled:opacity-50"
 >
   <MessageCircle size={18} />
 
@@ -439,6 +458,7 @@ const [subscribed, setSubscribed] =
   <CommentSection
     postId={postId}
     requireAuth={requireAuth}
+    allowComments={allowComments}
     onCommentAdded={() => {
   setLocalPost((prev) => ({
     ...prev,

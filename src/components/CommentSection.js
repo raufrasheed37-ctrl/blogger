@@ -43,6 +43,7 @@ function updateNestedComment(comments, targetId, updater) {
 function ReplyItem({
   reply,
   requireAuth,
+  allowComments,
   replyText,
   setReplyText,
   replyingTo,
@@ -115,6 +116,8 @@ function ReplyItem({
         <button
           onClick={() => {
 
+            if (!allowComments) return;
+
             if (!requireAuth()) return;
 
             setReplyingTo(
@@ -147,6 +150,7 @@ function ReplyItem({
           <div className="mt-3 flex justify-end">
 
             <button
+              disabled={!allowComments}
               onClick={() =>
                 handleReply(reply._id)
               }
@@ -173,6 +177,7 @@ function ReplyItem({
           key={nestedReply._id}
           reply={nestedReply}
           requireAuth={requireAuth}
+          allowComments={allowComments}
           replyText={replyText}
           setReplyText={setReplyText}
           replyingTo={replyingTo}
@@ -193,6 +198,7 @@ export default function CommentSection({
   postId,
   requireAuth: requireAuthProp, onCommentAdded,
   onCommentCountUpdated,
+  allowComments = true,
 }) {
   const currentUser = useAuthStore((state) => state.user);
   const [comments, setComments] = useState([]);
@@ -250,6 +256,7 @@ export default function CommentSection({
 
   // Create comment
   const handleComment = async () => {
+    if (!allowComments) return;
     if (!requireAuth()) return;
     if (!commentText.trim()) return;
 
@@ -292,6 +299,7 @@ export default function CommentSection({
   };
 
   const handleReply = async (parentCommentId) => {
+  if (!allowComments) return;
   if (!requireAuth()) return;
 
   if (!replyText.trim()) return;
@@ -413,6 +421,12 @@ setReplyingTo(null);
   return (
     <div className="mt-8 border-t border-white/10 pt-8">
 
+      {!allowComments && (
+        <div className="mb-5 rounded-3xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+          Comments are turned off for this post.
+        </div>
+      )}
+
       {/* INPUT */}
       <div className="rounded-[28px] border border-white/10 bg-[#151515] p-4">
 
@@ -423,7 +437,7 @@ setReplyingTo(null);
           }
           placeholder="Share your thoughts..."
           rows={4}
-          disabled={loading}
+          disabled={loading || !allowComments}
           className="w-full resize-none bg-transparent text-[15px] leading-7 text-white outline-none placeholder:text-zinc-500"
         />
 
@@ -435,17 +449,17 @@ setReplyingTo(null);
 
           <button
             onClick={handleComment}
-            disabled={loading}
+            disabled={loading || !allowComments}
             className="rounded-full bg-orange-500 px-5 py-2 text-sm font-semibold text-black transition hover:bg-orange-400 disabled:opacity-50"
           >
-            {loading ? "Posting..." : "Reply"}
+            {loading ? "Posting..." : allowComments ? "Reply" : "Comments off"}
           </button>
 
         </div>
       </div>
 
       {/* LOADING */}
-      <div className="mt-5 relative min-h-[24px]">
+      <div className="mt-5 relative min-h-6">
       {fetching && !hasLoadedOnce && (
   <div className="mt-5 space-y-2">
     <div className="h-4 w-32 bg-zinc-800 rounded animate-pulse" />

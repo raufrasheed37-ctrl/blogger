@@ -92,6 +92,7 @@ export default function CreatePostPage() {
   const [visibility, setVisibility] = useState("public");
   const [allowComments, setAllowComments] = useState(true);
   const [coverImage, setCoverImage] = useState(null);
+const [coverImageFile, setCoverImageFile] = useState(null);
   const [isPublishing, setIsPublishing] = useState(false);
   const [error, setError] = useState("");
   const [showPreview, setShowPreview] = useState(false);
@@ -242,18 +243,31 @@ export default function CreatePostPage() {
    * Cover image
    */
   const handleCoverUpload = (e) => {
-    const file = e.target.files?.[0];
+  const file = e.target.files?.[0];
 
-    if (!file) return;
+  if (!file) return;
 
-    const reader = new FileReader();
+  // Only allow image files.
+  if (!file.type.startsWith("image/")) {
+    setError("Please select a valid image file.");
+    e.target.value = "";
+    return;
+  }
 
-    reader.onload = (event) => {
-      setCoverImage(event.target?.result || null);
-    };
+  // Limit image size to 5 MB.
+  if (file.size > 5 * 1024 * 1024) {
+    setError("Cover image must be smaller than 5 MB.");
+    e.target.value = "";
+    return;
+  }
 
-    reader.readAsDataURL(file);
-  };
+  setError("");
+  setCoverImageFile(file);
+
+  // Create a local preview without converting the image to Base64.
+  const previewUrl = URL.createObjectURL(file);
+  setCoverImage(previewUrl);
+};
 
   /*
    * Publish / Save Draft

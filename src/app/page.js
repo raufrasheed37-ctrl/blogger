@@ -26,20 +26,7 @@ function getPostSlug(post) {
 }
 
 function getPostImage(post) {
-  return (
-    post?.coverImage ||
-    post?.featuredImage ||
-    post?.thumbnail ||
-    post?.image ||
-    post?.imageUrl ||
-    post?.cover ||
-    post?.featuredImageUrl ||
-    post?.thumbnailUrl ||
-    post?.images?.[0]?.url ||
-    post?.images?.[0] ||
-    post?.content?.coverImage ||
-    null
-  );
+  return post?.coverImage || null;
 }
 
 function getAuthor(post) {
@@ -164,27 +151,8 @@ function getReadingTime(post) {
 }
 
 function isPublicPost(post) {
-  const visibility = String(
-    post?.visibility || ""
-  ).toLowerCase();
-
-  if (
-    post?.isDraft === true ||
-    post?.isPrivate === true ||
-    post?.isPublished === false ||
-    post?.published === false ||
-    post?.publishedAt === null && post?.isPublished === false ||
-    ["draft", "private", "unlisted"].includes(visibility)
-  ) {
-    return false;
-  }
-
-  if (
-    post?.isPublished === true ||
-    post?.published === true
-  ) {
-    return true;
-  }
+  return post?.published === true;
+}
 
   /*
    * Fail closed when the API does not identify
@@ -383,14 +351,14 @@ export default function Home() {
    * isFeatured field to the backend post model.
    */
   const featuredPost = useMemo(() => {
-    return (
-      filteredPosts.find(
-        (post) => post?.isFeatured === true
-      ) ||
-      filteredPosts[0] ||
-      null
-    );
-  }, [filteredPosts]);
+  return (
+    filteredPosts.find(
+      (post) => post.featured === true
+    ) ||
+    filteredPosts[0] ||
+    null
+  );
+}, [filteredPosts]);
 
   const discoveryPosts = useMemo(() => {
     return filteredPosts

@@ -326,50 +326,42 @@ const [coverImageFile, setCoverImageFile] = useState(null);
             : "@pulse";
 
       const payload = {
-        title: title.trim(),
+  title: title.trim(),
+  subtitle: subtitle.trim() || plainText.slice(0, 180),
+  excerpt,
+  content: htmlContent,
 
-        subtitle:
-          subtitle.trim() ||
-          plainText.slice(0, 180),
+  tags: tags.length > 0 ? tags : ["general"],
 
-        excerpt,
-
-        description: excerpt,
-
-        /*
-         * IMPORTANT:
-         * Tiptap HTML is saved directly
-         * into your existing content field.
-         */
-        content: htmlContent,
-
-        author: user._id,
-
-        tags:
-          tags.length > 0
-            ? tags
-            : ["general"],
-
-        category:
-          category || "general",
-
-        published:
-          visibility === "public",
-
-        enableComments:
-          allowComments,
-
-        coverImage,
-      };
+  published: visibility === "public",
+  featured: false,
+};
 
       console.log(
         "Publishing payload:",
         payload
       );
 
-      const response =
-        await blogAPI.create(payload);
+      let response;
 
+if (coverImageFile) {
+  const formData = new FormData();
+
+  Object.entries(payload).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      formData.append(key, JSON.stringify(value));
+    } else {
+      formData.append(key, String(value));
+    }
+  });
+
+  formData.append("coverImage", coverImageFile);
+
+  response = await blogAPI.create(formData);
+} else {
+  response = await blogAPI.create(payload);
+}
+      
       /*
        * Draft
        */

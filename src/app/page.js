@@ -151,17 +151,13 @@ function getReadingTime(post) {
 }
 
 function isPublicPost(post) {
-  return post?.published === true;
-}
-
   /*
    * Fail closed when the API does not identify
    * whether a post is published.
    *
-   * If your backend uses another publication field,
-   * update this helper to match the real schema.
+   * Only explicitly published posts are public.
    */
-  return false;
+  return post?.published === true;
 }
 
 function getCoverAlt(post) {

@@ -199,96 +199,123 @@ function NotificationItem({ item, onMarkRead, busy }) {
   const profileHref = getProfileHref(item.actor);
   const postHref = getPostHref(item.post);
 
-  const content = (
-    <div className="flex min-w-0 items-start gap-3">
-      <ActorAvatar actor={item.actor} />
+  return (
+    <article
+      className={`group relative rounded-2xl border p-4 transition duration-200 sm:p-5 ${
+        item.read
+          ? "border-[#27253a] bg-[#141420]/80 hover:border-[#393451]"
+          : "border-[#51438d]/60 bg-gradient-to-br from-[#201b37] to-[#151522] shadow-[0_12px_45px_-30px_rgba(124,111,247,0.5)] hover:border-[#7c6ff7]/60"
+      }`}
+    >
+      {!item.read && (
+        <span
+          className="absolute right-4 top-4 h-2 w-2 rounded-full bg-[#a89cf7] shadow-[0_0_12px_rgba(168,156,247,0.7)] sm:right-5 sm:top-5"
+          aria-label="Unread notification"
+          title="Unread"
+        />
+      )}
 
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-1">
-          {profileHref ? (
-            <Link
-              href={profileHref}
-              onClick={(event) => event.stopPropagation()}
-              className="font-semibold text-white transition hover:text-[#b5aaff]"
-            >
-              {getActorName(item.actor)}
-            </Link>
-          ) : (
-            <span className="font-semibold text-white">
-              {getActorName(item.actor)}
-            </span>
-          )}
+      <div className="flex items-start gap-3 sm:gap-4">
+        <ActivityIcon type={item.type} />
 
-          <span className="text-sm leading-6 text-[#aaa6c5]">
-            {meta.label}
-          </span>
-        </div>
+        <div className="min-w-0 flex-1 pr-2">
+          <div className="flex min-w-0 items-start gap-3">
+            <ActorAvatar actor={item.actor} />
 
-        <p className="mt-1 text-xs text-[#77738f]">
-          {getRelativeTime(item.createdAt)}
-          {item.createdAt && (
-            <>
-              {" · "}
-              <span>{new Date(item.createdAt).toLocaleString()}</span>
-            </>
-          )}
-        </p>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-1">
+                {profileHref ? (
+                  <Link
+                    href={profileHref}
+                    className="font-semibold text-white transition hover:text-[#b5aaff]"
+                  >
+                    {getActorName(item.actor)}
+                  </Link>
+                ) : (
+                  <span className="font-semibold text-white">
+                    {getActorName(item.actor)}
+                  </span>
+                )}
 
-        {item.content && (
-          <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-[#c5c1dc]">
-            {item.content}
-          </p>
-        )}
-
-        {item.post && (
-          <div
-            className={`mt-4 rounded-2xl border border-[#302d48] bg-[#10101a] p-4 transition ${
-              postHref ? "hover:border-[#7c6ff7]/50" : ""
-            }`}
-          >
-            <div className="flex items-start gap-3">
-              {item.post.coverImage && (
-                <img
-                  src={item.post.coverImage}
-                  alt=""
-                  className="h-14 w-14 shrink-0 rounded-xl border border-white/5 object-cover"
-                />
-              )}
-
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#77738f]">
-                  Related post
-                </p>
-
-                <p className="mt-1 break-words text-sm font-semibold leading-6 text-[#f0eeff]">
-                  {item.post.title || "Untitled post"}
-                </p>
+                <span className="text-sm leading-6 text-[#aaa6c5]">
+                  {meta.label}
+                </span>
               </div>
 
-              {postHref && (
-                <ArrowUpRight
-                  size={16}
-                  className="mt-1 shrink-0 text-[#77738f]"
-                />
+              <p className="mt-1 text-xs text-[#77738f]">
+                {getRelativeTime(item.createdAt)}
+                {item.createdAt && (
+                  <>
+                    {" · "}
+                    {new Date(item.createdAt).toLocaleString()}
+                  </>
+                )}
+              </p>
+
+              {item.content && (
+                <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-[#c5c1dc]">
+                  {item.content}
+                </p>
+              )}
+
+              {item.post && (
+                <Link
+                  href={postHref || "#"}
+                  onClick={(event) => {
+                    if (!postHref) event.preventDefault();
+                  }}
+                  className="mt-4 block rounded-2xl border border-[#302d48] bg-[#10101a] p-4 transition hover:border-[#7c6ff7]/50"
+                >
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#77738f]">
+                    Related post
+                  </p>
+
+                  <div className="mt-1 flex items-center gap-3">
+                    {item.post.coverImage && (
+                      <img
+                        src={item.post.coverImage}
+                        alt=""
+                        className="h-14 w-14 shrink-0 rounded-xl object-cover"
+                      />
+                    )}
+
+                    <p className="min-w-0 flex-1 break-words text-sm font-semibold leading-6 text-[#f0eeff]">
+                      {item.post.title || "Untitled post"}
+                    </p>
+
+                    <ArrowUpRight
+                      size={16}
+                      className="shrink-0 text-[#77738f]"
+                    />
+                  </div>
+                </Link>
+              )}
+
+              {item.comment?.content && (
+                <div className="mt-3 rounded-xl border border-[#302d48] bg-[#10101a] px-4 py-3 text-sm leading-6 text-[#aaa6c5]">
+                  {item.comment.content}
+                </div>
+              )}
+
+              {!item.read && (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => onMarkRead(item._id)}
+                  className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-[#51438d]/60 px-3 py-2 text-xs font-semibold text-[#b5aaff] transition hover:bg-[#7c6ff7]/10 disabled:cursor-wait disabled:opacity-50"
+                >
+                  {busy ? (
+                    <LoaderCircle size={14} className="animate-spin" />
+                  ) : (
+                    <Check size={14} />
+                  )}
+                  Mark as read
+                </button>
               )}
             </div>
           </div>
-        )}
-
-        {item.comment?.content && (
-          <div className="mt-3 rounded-xl border border-[#302d48] bg-[#10101a] px-4 py-3 text-sm leading-6 text-[#aaa6c5]">
-            {item.comment.content}
-          </div>
-        )}
+        </div>
       </div>
-    </div>
+    </article>
   );
-
-  return (
-  <article
-    className={`group relative rounded-2xl border p-4 transition duration-200 sm:p-5 ${
-      item.read
-        ? "border-[#27253a] bg-[#141420]/80 hover:border-[#393451]"
-        : "border-[#51438d]/60 bg-gradient-to-br from-[#201b37] to-[#151522] shadow-[0_12px_45px_-30px_rgba(124,111,247,0.5)] hover:border-[#7c6ff7]/60"
-    }`}
-  >
+}

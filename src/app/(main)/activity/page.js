@@ -427,17 +427,32 @@ export default function ActivityPage() {
           }
         );
 
-        const result = await res.json().catch(() => ({}));
+        const responseText = await res.text();
 
-        if (!res.ok) {
-          throw new Error(
-            result.message || "Unable to load your activity."
-          );
-        }
+console.log("Activity API status:", res.status);
+console.log("Activity API raw response:", responseText);
 
-        if (!Array.isArray(result.activities)) {
-          throw new Error("The activity API returned an unexpected response.");
-        }
+let result;
+
+try {
+  result = JSON.parse(responseText);
+} catch {
+  throw new Error(
+    `The backend returned a non-JSON response (HTTP ${res.status}).`
+  );
+}
+
+if (!res.ok) {
+  throw new Error(
+    result.message || `API request failed: ${res.status}`
+  );
+}
+
+if (!Array.isArray(result.activities)) {
+  throw new Error(
+    `Unexpected API response: ${JSON.stringify(result)}`
+  );
+}
 
         setActivities((previous) => {
           if (!append) return result.activities;

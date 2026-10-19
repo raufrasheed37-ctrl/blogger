@@ -285,9 +285,10 @@ function NotificationItem({ item, onMarkRead, busy }) {
   );
 
   return (
-    <article
-      className={`group relative rounded-2xl border p-4 transition duration-200 sm:p-5 ${
-  item.read
-    ? "border-[#27253a] bg-[#141420]/80 hover:border-[#393451]"
-    : "border-[#51438d]/60 bg-gradient-to-br from-[#201b37] to-[#151522] shadow-[0_12px_45px_-30px_rgba(124,111,247,0.5)] hover:border-[#7c6ff7]/60"
-}`}
+  <article
+    className={`group relative rounded-2xl border p-4 transition duration-200 sm:p-5 ${
+      item.read
+        ? "border-[#27253a] bg-[#141420]/80 hover:border-[#393451]"
+        : "border-[#51438d]/60 bg-gradient-to-br from-[#201b37] to-[#151522] shadow-[0_12px_45px_-30px_rgba(124,111,247,0.5)] hover:border-[#7c6ff7]/60"
+    }`}
+  >
